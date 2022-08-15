@@ -23,4 +23,10 @@ class SDL_exception : public base_exception {
 	
 };
 
+class Game_exception : public base_exception {
+	public:
+		Game_exception(std::string msg) : base_exception(msg) {};
+	
+};
+
 #endif

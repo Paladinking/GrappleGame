@@ -30,6 +30,14 @@ void Texture::render(const int x, const int y) {
 	SDL_RenderCopy(gRenderer, texture, NULL, &rect); 
 }
 
+int Texture::getHeight() {
+	return height;
+}
+
+int Texture::getWidth() {
+	return width;
+}
+
 Texture::~Texture() {
 	free();
 }

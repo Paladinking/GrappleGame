@@ -1,28 +1,41 @@
 #include "game.h"
 #include "exceptions.h"
+#define NO_EVENT_INPUT
 
+SDL_Renderer* gRenderer;
+SDL_Window* gWindow;
 
 void Game::create() {
-	if (SDL_Init( SDL_INIT_VIDEO ) < 0)
+	if (SDL_WasInit(SDL_INIT_VIDEO) == 0)
     {
-		throw SDL_exception("Failed to initialize STL, " + std::string(SDL_GetError()));
+		throw SDL_exception("STL is not initialized!");
     }
+	if (gWindow != NULL || gRenderer != NULL) {
+		throw Game_exception("Previous game still alive!");
+	}
 	
-	window = SDL_CreateWindow(title.c_str(), SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, window_width, window_height, SDL_WINDOW_SHOWN );
-    if (window == NULL )
+	gWindow = SDL_CreateWindow(title.c_str(), SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, window_width, window_height, SDL_WINDOW_SHOWN );
+    if (gWindow == NULL )
     {
 		throw SDL_exception("Window could not be created, " + std::string(SDL_GetError()));
     }
-	renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
-	if (renderer == NULL) 
+	gRenderer = SDL_CreateRenderer(gWindow, -1, SDL_RENDERER_ACCELERATED);
+	if (gRenderer == NULL) 
 	{
 		throw SDL_exception("Renderer could not be created, " + std::string(SDL_GetError()));
 	}
 	
-	SDL_SetRenderDrawColor(renderer, 0xFF, 0xFF, 0xFF, 0xFF);
+	SDL_SetRenderDrawColor(gRenderer, 0xFF, 0xFF, 0xFF, 0xFF);
+	
+	init();
+	destroyed = false;
 }
 
 void Game::run() {
+	if (destroyed)
+	{
+		return;
+	}
 	running = true;
 	Uint64 last_time = SDL_GetTicks64();
 	
@@ -32,9 +45,16 @@ void Game::run() {
 		{
 			if (e.type == SDL_QUIT) {
 				running = false;
+
+			} 
+#ifndef NO_EVENT_INPUT
+			else if (e.type == SDL_KEYDOWN) {
+				handle_keydown(e.key);
+			} else if (e.type == SDL_KEYUP) {
+				handle_keyup(e.key);
 			}
+#endif
 		}
-		this->handle_input();
 		Uint64 cur_time = SDL_GetTicks64();
 		this->tick(cur_time - last_time);
 		last_time = cur_time;
@@ -43,20 +63,19 @@ void Game::run() {
 	}
 }
 
-void Game::exit_game() {
-	if (!exited) {
-		exited = true;
-		SDL_DestroyRenderer(renderer);
-		renderer = NULL;
+void Game::destroy_game() {
+	if (!destroyed) {
+		destroyed = true;
+		SDL_DestroyRenderer(gRenderer);
+		gRenderer = NULL;
 	
-		SDL_DestroyWindow(window);
-		window = NULL;
-	
-		IMG_Quit();
-    
-		SDL_Quit();
+		SDL_DestroyWindow(gWindow);
+		gWindow = NULL;
 	}
-	
+}
+
+void Game::exit_game() {
+	running = false;
 }
 
 Game::~Game() {

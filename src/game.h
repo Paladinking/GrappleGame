@@ -15,28 +15,32 @@ class Game {
 		
 		void run();
 		
+		void exit_game();
+		
+		void destroy_game();
+		
+	protected:
+	
+		const unsigned window_width = 100, window_height = 100;
+		
 		virtual void render() {};
+		
+		virtual void init() {};
 		
 		virtual void tick(Uint64 delta) {};
 		
-		virtual void handle_input() {};
+		virtual void handle_keydown(SDL_KeyboardEvent e) {};
 		
-		void exit_game();
+		virtual void handle_keyup(SDL_KeyboardEvent e) {};
+		
+		
 	
 		
 	private:
 		bool running = false;
-		bool exited = false;
+		bool destroyed = true;
 		
-		const unsigned window_width = 100, window_height = 100;
-		
-		const std::string title;
-		
-		SDL_Window* window;
-		
-		SDL_Renderer* renderer;
-	
-	
+		const std::string title = "Title";
 };
 
 
