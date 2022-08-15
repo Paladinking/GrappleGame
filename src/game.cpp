@@ -1,6 +1,5 @@
 #include "game.h"
 #include "exceptions.h"
-#define NO_EVENT_INPUT
 
 SDL_Renderer* gRenderer;
 SDL_Window* gWindow;

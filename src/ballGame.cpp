@@ -27,6 +27,7 @@ void BallGame::tick(Uint64 delta) {
 	vel.decreace(dDelta * FRICTION_FACTOR);
 }
 
+
 void BallGame::handle_input(double delta) {
 	const Uint8* currentKeyStates = SDL_GetKeyboardState( NULL );
 	Vector2D acc(0.0, 0.0);

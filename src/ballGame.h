@@ -14,12 +14,10 @@ class BallGame : public Game {
 		
 		virtual void render() override;
 		
-		//virtual void handle_keydown(SDL_KeyboardEvent e) override;
-		
 		void handle_input(double delta);
 		
 	private:
-	
+
 		const double MAX_VEL = 600.0;
 		const double MAX_VEL_SQUARED = MAX_VEL * MAX_VEL;
 		const double FRICTION_FACTOR = 800.0;
