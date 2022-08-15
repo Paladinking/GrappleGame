@@ -22,6 +22,8 @@ class ClimbGame : public Game {
 		const double MAX_VEL_SQUARED = MAX_VEL * MAX_VEL;
 		const double FRICTION_FACTOR = 800.0;
 		const double ACC_FACTOR = 2400.0;
+		
+		TileMap tilemap;
 };
 
 

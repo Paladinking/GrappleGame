@@ -28,7 +28,6 @@ void cleanup()
 	
 	printf("Shutting down...\n");
 	IMG_Quit();
-    //Quit SDL subsystems
     SDL_Quit();
 }
 

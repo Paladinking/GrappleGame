@@ -14,12 +14,12 @@ void ClimbGame::handle_input(double delta) {
 
 void ClimbGame::render() {
 	SDL_RenderClear(gRenderer);
-	
+	tilemap.render();
 	
 	
 	SDL_RenderPresent(gRenderer);
 }
 
 void ClimbGame::init() {
-	
+	tilemap.load_from_image("assets/map.png");
 }
