@@ -1,39 +1,23 @@
 #include <stdio.h>
-#include <stdlib.h>
-#include <stdarg.h>
-#include <stdbool.h>
+#include <vector>
 #include <SDL.h>
 #include <SDL_image.h>
-#include "list.h"
+#include "globals.h"
+#include "texture.h"
+#include "exceptions.h"
 
-//Screen dimension constants
-const int SCREEN_WIDTH = 640;
-const int SCREEN_HEIGHT = 480;
 
 bool init(SDL_Window**);
 
-void loadData(SDL_Texture* surface[]);
+void loadData(std::vector<Texture>&);
 
 void close();
 
 //The window we'll be rendering to
-SDL_Window* window;
-SDL_Renderer* renderer;
+SDL_Window* gWindow;
+SDL_Renderer* gRenderer;
 
-List textures;
-
-void output_error (bool do_exit, const char * format, ...)
-{
-	va_list args;
-	va_start (args, format);
-	vprintf(format, args);
-	va_end (args);
-	
-	if (do_exit) {
-		close();
-		exit(-1);
-	}
-}
+std::vector<Texture> textures;
 
 enum Direction
 {
@@ -48,22 +32,27 @@ enum Direction
 
 int main( int argc, char* args[] )
 {
-	
-	list_init(&textures);
 
 	//The image we will load and show on the screen
 	
-	if (!init(&window)) {
+	if (!init(&gWindow)) {
 		return 1;
 	}
 	
-	SDL_Texture* directionTextures[DIR_TOTAL];
-	
-	loadData(directionTextures);
+	loadData(textures);
 
 	bool running = true;
 	
-	SDL_Texture* currentTexture = directionTextures[DIR_NONE];
+	int currentTexture = DIR_NONE;
+	
+	Texture ballTexture;
+	
+	try {
+		ballTexture.load_from_file("assets/ball.png");
+	} catch(image_load_exception &e) {
+		close();
+		exit(-1);
+	}
 	
 	while (running) 
 	{
@@ -78,22 +67,22 @@ int main( int argc, char* args[] )
 				case SDL_KEYDOWN:
 					switch (e.key.keysym.sym) {
 						case SDLK_UP:
-							currentTexture = directionTextures[DIR_UP];
+							currentTexture = DIR_UP;
 							break;
 						case SDLK_DOWN:
-							currentTexture = directionTextures[DIR_DOWN];
+							currentTexture = DIR_DOWN;
 							break;
 						case SDLK_LEFT:
-							currentTexture = directionTextures[DIR_LEFT];
+							currentTexture = DIR_LEFT;
 							break;
 						case SDLK_RIGHT:
-							currentTexture = directionTextures[DIR_RIGHT];
+							currentTexture = DIR_RIGHT;
 							break;
 						case SDLK_ESCAPE:
 							running = false;
 							break;
 						default:
-							currentTexture = directionTextures[DIR_NONE];
+							currentTexture = DIR_NONE;
 							break;
 						
 					}
@@ -101,11 +90,13 @@ int main( int argc, char* args[] )
 			}
 		}
 		
-		SDL_RenderClear(renderer);
+		SDL_RenderClear(gRenderer);
 		
-		SDL_RenderCopy(renderer, currentTexture, NULL, NULL);
+		textures[currentTexture].render(0, 0);
 		
-		SDL_RenderPresent(renderer);
+		ballTexture.render(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2 );
+		
+		SDL_RenderPresent(gRenderer);
 		
 	}
 	
@@ -131,18 +122,18 @@ bool init(SDL_Window** window)
 		return false;
     }
 	
-	renderer = SDL_CreateRenderer(*window, -1, SDL_RENDERER_ACCELERATED);
-	if (renderer == NULL) {
+	gRenderer = SDL_CreateRenderer(*window, -1, SDL_RENDERER_ACCELERATED);
+	if (gRenderer == NULL) {
 		printf("Could not create Renderer: %s\n", SDL_GetError());
 		SDL_DestroyWindow(*window);
 		return false;
 	}
 	
-	SDL_SetRenderDrawColor(renderer, 0xFF, 0xFF, 0xFF, 0xFF);
+	SDL_SetRenderDrawColor(gRenderer, 0xFF, 0xFF, 0xFF, 0xFF);
   
 	return true;
 }
-
+/*
 void loadImage(SDL_Texture* dest_array[], const unsigned index, const char* path) {	
 	SDL_Texture* texture = IMG_LoadTexture(renderer, path);
 	if (texture == NULL) {
@@ -150,28 +141,41 @@ void loadImage(SDL_Texture* dest_array[], const unsigned index, const char* path
 	}
 	dest_array[index] = texture;
 	list_add(&textures, texture);
+}*/
+
+void loadData(std::vector<Texture> &textures)   
+{
+	textures.push_back(Texture());
+	textures.push_back(Texture());
+	textures.push_back(Texture());
+	textures.push_back(Texture());
+	textures.push_back(Texture());
+	
+	try {
+		textures[DIR_UP].load_from_file("assets/up.png");
+		textures[DIR_DOWN].load_from_file("assets/down.png");
+		textures[DIR_LEFT].load_from_file("assets/left.png");
+		textures[DIR_RIGHT].load_from_file("assets/right.png");
+		textures[DIR_NONE].load_from_file("assets/center.png");
+	} catch (image_load_exception &e) {
+		printf("Failed to load assets: ");
+		printf("%s\n", e.msg.c_str());
+		close();
+		exit(-1);
+	}
 }
 
-void loadData(SDL_Texture* dir_textures[]) 
-{
-	loadImage(dir_textures, DIR_UP, "assets/up.png");
-	loadImage(dir_textures, DIR_DOWN, "assets/down.png");
-	loadImage(dir_textures, DIR_LEFT, "assets/left.png");
-	loadImage(dir_textures, DIR_RIGHT, "assets/right.png");
-	loadImage(dir_textures, DIR_NONE, "assets/center.png");
-}
 
 void close() 
 {
-	for (unsigned i = 0; i < textures.size; i++) {
-		SDL_Texture* texture = list_get(&textures, i);
-		SDL_DestroyTexture(texture);
-	}
+	textures.clear();
 	
-	list_free(&textures);
+	SDL_DestroyRenderer(gRenderer);
+	gRenderer = NULL;
 	
-	SDL_DestroyRenderer(renderer);
-	SDL_DestroyWindow( window );
+	SDL_DestroyWindow( gWindow );
+	gWindow = NULL;
+	
 	IMG_Quit();
     //Quit SDL subsystems
     SDL_Quit();
