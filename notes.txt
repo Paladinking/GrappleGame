@@ -1,0 +1,13 @@
+
+RENDER SURFACE AT RECT
+
+SDL_Rect rect;
+rect.x = 10;
+rect.y = 10;
+rect.w = SCREEN_WIDTH - 20;
+rect.h = SCREEN_HEIGHT - 20;
+
+// Blit (stamp on) surface
+SDL_BlitScaled(currentSurface, NULL, screenSurface, &rect);
+
+SDL_UpdateWindowSurface(window);
