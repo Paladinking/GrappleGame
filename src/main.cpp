@@ -7,9 +7,14 @@
 #include "texture.h"
 #include "exceptions.h"
 #include "game.h"
-#include "ballGame.h"
+#include "climbGame.h"
 
-void cleanup() {
+/**
+ * Frees still used global resources and quits SDL and SDL_image.
+ * Called atexit.
+ **/
+void cleanup()
+{
 	if (gRenderer != NULL) 
 	{
 		printf("Destroying renderer\n");
@@ -28,7 +33,7 @@ void cleanup() {
 }
 
 
-int main( int argc, char* args[] )
+int main(int argc, char* args[])
 {
 	atexit(cleanup);
 	at_quick_exit(cleanup);
@@ -37,25 +42,17 @@ int main( int argc, char* args[] )
 		printf("Could not initialize SDL, %s\n", SDL_GetError());
 		exit(-1);
 	}
+	int exit_status = 0;
 	
-	BallGame game;
+	ClimbGame game;
 	try {
 		game.create();
-	} catch (SDL_exception &e) {
+		game.run();
+	} catch (base_exception &e) {
 		printf("%s\n", e.msg.c_str());
+		exit_status = -1;
 	}
-	game.run();
 	game.destroy_game();
 	
-	return 0;
-		/*
-		SDL_RenderClear(gRenderer);
-		
-		textures[currentTexture].render(0, 0);
-		
-		ballTexture.render(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2 );
-		
-		SDL_RenderPresent(gRenderer);
-	*/
-
+	return exit_status;
 }

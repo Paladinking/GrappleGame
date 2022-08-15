@@ -43,7 +43,7 @@ void Game::run() {
 		while (SDL_PollEvent(&e)) 
 		{
 			if (e.type == SDL_QUIT) {
-				running = false;
+				exit_game();
 
 			} 
 #ifndef NO_EVENT_INPUT

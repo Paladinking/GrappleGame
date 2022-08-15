@@ -10,7 +10,7 @@ void Texture::load_from_file(std::string path) {
 	if (new_texture == NULL) {
 		throw image_load_exception(std::string(IMG_GetError()));
 	}
-
+	// Use QueryTexture to set width and height.
 	SDL_QueryTexture(new_texture, NULL, NULL, &width, &height);
 	texture = new_texture;
 }
