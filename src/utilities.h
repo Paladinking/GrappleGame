@@ -127,6 +127,12 @@ class Vector2D {
 		double x, y;
 };
 
+class Corner {
+	public:
+		int x, y;
+	
+};
+
 /**
  * A tilemap for collisions.
  */

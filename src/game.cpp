@@ -51,6 +51,8 @@ void Game::run() {
 				handle_keydown(e.key);
 			} else if (e.type == SDL_KEYUP) {
 				handle_keyup(e.key);
+			} else if (e.type == SDL_MOUSEBUTTONDOWN) {
+				handle_mousepress(e.button);
 			}
 #endif		
 			else if (e.type == SDL_MOUSEMOTION) 

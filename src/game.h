@@ -69,6 +69,10 @@ class Game {
 		 */
 		virtual void handle_keyup(SDL_KeyboardEvent e) {};
 		
+		/**
+		 * Called every time a MOUSEPRESS-event happens.
+		 */
+		virtual void handle_mousepress(SDL_MouseButtonEvent e) {};
 		
 	
 		

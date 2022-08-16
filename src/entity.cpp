@@ -130,6 +130,30 @@ void Player::render(const int cameraY)
 void Player::tick(const double delta, const TileMap &tilemap)
 {
 	Entity::tick(delta, tilemap);
+	printf("%f\n", delta);
+	
+	if (grappling_mode == TRAVELING || grappling_mode == PLACED) 
+	{
+	/*	Vector2D p2g = {grapple_points[grapple_points.size() -1].x - pos.x, grapple_points[grapple_points.size() -1].y - pos.y};
+		double len = p2g.length();
+		double x_pos = pos.x + width / 2, y_pos = pos.y + height / 2;
+		Vector2D step = {p2g.x / len, p2g.y / len};
+		for (int steps = (int)len; steps > 0; steps--)
+		{
+			x_pos += step.x;
+			y_pos += step.y;
+			if (tilemap.is_blocked_pixel(x_pos, y_pos)) 
+			{
+				int prev_tile_x  = (x_ - dx) / tilesize;
+				int prev_tile_y  = (y - dy) / tilesize;
+				int tile_x = x / tilesize;
+				int tile_y = y / tilesize;
+				grapple_points.push_back(x_pos, y)
+			}
+		}
+			*/
+	}
+
 	if (grappling_mode == TRAVELING)
 	{
 		if (grapple_length >= GRAPPLE_LENGTH)
@@ -142,8 +166,8 @@ void Player::tick(const double delta, const TileMap &tilemap)
 		double new_x = grapple_points[0].x, new_y = grapple_points[0].y;
 		Vector2D to_move = {grapple_vel.x * delta, grapple_vel.y * delta};
 		double len = to_move.length();
-		Vector2D move_step = {(to_move.x / len) * tilesize, (to_move.y / len) * tilesize};
-		int steps = len / tilesize;
+		Vector2D move_step = {(to_move.x / len), (to_move.y / len)};
+		int steps = (int)len;
 		to_move.x -= steps * move_step.x;
 		to_move.y -= steps * move_step.y;
 		for (; steps > 0; steps--) 
