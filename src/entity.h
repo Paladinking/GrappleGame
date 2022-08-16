@@ -40,6 +40,9 @@ class Entity {
 		bool on_ground(const TileMap &tilemap) const;
 		
 
+		Vector2D &get_velocity();
+		
+
 	protected:
 		/**
 		 * Protected constructor for subclasses.

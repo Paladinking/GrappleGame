@@ -27,10 +27,16 @@ class ClimbGame : public Game {
 		long camera_y;
 		int visible_tiles_x, visible_tiles_y;
 
-		const double MAX_VEL = 600.0;
-		const double MAX_VEL_SQUARED = MAX_VEL * MAX_VEL;
-		const double FRICTION_FACTOR = 800.0;
-		const double ACC_FACTOR = 2400.0;
+		const double MAX_GRAVITY_VEL = 700.0;
+		const double GRAVITY_ACCELERATION = 2500.0;
+		const double MAX_MOVEMENT_VEL = 550.0;
+		const double MOVEMENT_ACCELERATION = 2200.0;
+		const double FRICTION_FACTOR = 1200.0;
+		const double JUMP_VEL = 700;
+		
+		const int PLAYER_FULL_WIDTH = 40;
+		const int PLAYER_FULL_HEIGHT = 56;
+		
 		
 		const int TILE_SIZE = 8;
 		const int FULL_TILE_HEIGHT = 160;

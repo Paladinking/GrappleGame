@@ -7,6 +7,7 @@ void Entity::load_texture(std::string texture_path) {
 }
 
 void Entity::tick(const double delta, const TileMap &tilemap) {
+	printf("dx: %f, dy: %f\n", vel.x, vel.y);
 	int tilesize = tilemap.get_tilesize();
 	Vector2D to_move = {vel.x * delta, vel.y * delta};
 	double len = to_move.length();
@@ -62,6 +63,10 @@ void Entity::try_move(const double dx, const double dy, int tilesize, const Tile
 void Entity::add_velocity(const double dx, const double dy) {
 	vel.x += dx;
 	vel.y += dy;
+}
+
+Vector2D &Entity::get_velocity() {
+	return vel;
 }
 
 bool Entity::on_ground(const TileMap &tilemap) const {

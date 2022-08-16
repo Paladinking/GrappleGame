@@ -5,7 +5,21 @@ void ClimbGame::tick(Uint64 delta) {
 	double dDelta = delta / 1000.0;
 	handle_input(dDelta);
 	for (auto e : entities) {
-		e->add_velocity(0, 1500.0 * dDelta); // Apply gravity
+		Vector2D &vel = e->get_velocity();
+		if (vel.y < MAX_GRAVITY_VEL && !e->on_ground(tilemap)) {
+			
+			e->add_velocity(0, GRAVITY_ACCELERATION * dDelta); // Apply gravity
+		}
+		double factor = FRICTION_FACTOR * dDelta;
+		if (vel.x > 0)
+		{
+			vel.x -= factor > vel.x ? vel.x : factor;
+		}	
+		else 
+		{
+			vel.x -= factor > -vel.x ? vel.x : -factor;
+		}
+		
 		e->tick(dDelta, tilemap);
 	}
 }
@@ -13,7 +27,22 @@ void ClimbGame::tick(Uint64 delta) {
 
 void ClimbGame::handle_input(double delta) {
 	const Uint8* currentKeyStates = SDL_GetKeyboardState(NULL);
-	
+	Vector2D &vel = player->get_velocity();
+	if (currentKeyStates[SDL_SCANCODE_SPACE]) 
+	{
+		if (player->on_ground(tilemap)) 
+		{
+			player->add_velocity(0, -JUMP_VEL);
+		}
+	} 
+	if (currentKeyStates[SDL_SCANCODE_LEFT] && vel.x > -MAX_MOVEMENT_VEL) 
+	{
+		player->add_velocity(-MOVEMENT_ACCELERATION * delta, 0);
+	} 
+	if (currentKeyStates[SDL_SCANCODE_RIGHT] && vel.x < MAX_MOVEMENT_VEL) 
+	{
+		player->add_velocity(MOVEMENT_ACCELERATION * delta, 0);
+	}
 }
 
 void ClimbGame::render() {
@@ -54,7 +83,7 @@ void ClimbGame::init() {
 	Player* p = new Player();
 	
 	player.reset(p);
-	player->init(window_width / 2, window_height / 2 + camera_y, 40, 60);
+	player->init(window_width / 2, window_height / 2 + camera_y, PLAYER_FULL_WIDTH, PLAYER_FULL_HEIGHT);
 	
 	entities.push_back(player);
 }
