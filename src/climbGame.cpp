@@ -1,7 +1,7 @@
 #include <stdlib.h>
 #include "climbGame.h"
 
-void ClimbGame::tick(Uint64 delta) {
+void ClimbGame::tick(Uint64 delta) {	
 	double dDelta = delta / 1000.0;
 	handle_input(dDelta);
 	for (auto e : entities) {
@@ -32,7 +32,7 @@ void ClimbGame::handle_input(double delta) {
 	{
 		if (player->on_ground(tilemap)) 
 		{
-			player->add_velocity(0, -JUMP_VEL);
+			vel.y = -JUMP_VEL;
 		}
 	} 
 	if (currentKeyStates[SDL_SCANCODE_LEFT] && vel.x > -MAX_MOVEMENT_VEL) 
@@ -42,6 +42,15 @@ void ClimbGame::handle_input(double delta) {
 	if (currentKeyStates[SDL_SCANCODE_RIGHT] && vel.x < MAX_MOVEMENT_VEL) 
 	{
 		player->add_velocity(MOVEMENT_ACCELERATION * delta, 0);
+	}
+	if (currentKeyStates[SDL_SCANCODE_E]) {
+		if (!grapple_pressed) {
+			int world_mouseX = mouseX, world_mouseY = mouseY + camera_y;
+			player->fire_grapple(world_mouseX, world_mouseY);
+			grapple_pressed = true;
+		}
+	} else {
+		grapple_pressed = false;
 	}
 	if (currentKeyStates[SDL_SCANCODE_ESCAPE]) {
 		exit_game();

@@ -40,6 +40,9 @@ class Game {
 		// Window dimensions
 		const unsigned window_width = 100, window_height = 100;
 		
+		// Mouse position, updated on mouse movement.
+		int mouseX, mouseY;
+		
 		/**
 		 * Called once per frame, after tick has been called. 
 		 * In the future the renderer might be given as a parameter here instead of being global.

@@ -52,7 +52,12 @@ void Game::run() {
 			} else if (e.type == SDL_KEYUP) {
 				handle_keyup(e.key);
 			}
-#endif
+#endif		
+			else if (e.type == SDL_MOUSEMOTION) 
+			{
+				mouseX = e.motion.x;
+				mouseY = e.motion.y;
+			}
 		}
 		Uint64 cur_time = SDL_GetTicks64();
 		this->tick(cur_time - last_time);
