@@ -1,9 +1,11 @@
 #ifndef BALL_GAME_00_H
 #define BALL_GAME_00_H
+#include <vector>
+#include <memory>
 #include "game.h"
 #include "globals.h"
 #include "utilities.h"
-#include "player.h"
+#include "entity.h"
 
 class ClimbGame : public Game {
 	public:
@@ -36,7 +38,10 @@ class ClimbGame : public Game {
 		
 		
 		TileMap tilemap;
-		Player player;
+		std::shared_ptr<Player> player;
+		
+		std::vector<std::shared_ptr<Entity>> entities;
+		
 };
 
 

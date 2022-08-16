@@ -42,7 +42,6 @@ int main(int argc, char* args[])
 		exit(-1);
 	}
 	int exit_status = 0;
-	
 	ClimbGame game;
 	try {
 		game.create();
