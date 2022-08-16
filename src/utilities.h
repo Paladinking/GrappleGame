@@ -209,6 +209,36 @@ class TileMap {
 		}
 		
 		/**
+		 * Returns true if some point at a vertical line is blocked.
+		 */
+		bool is_blocked_line_v(int x_tile, double y_start, double length) const
+		{
+			for (int i = y_start / tile_size; i <= (y_start + length - 1) / tile_size; ++i) 
+			{
+				if (is_blocked(x_tile, i)) 
+				{
+					return true;
+				}
+			}
+			return false;
+		}
+		
+		/**
+		 * Returns true if some point at a horizontal line is blocked.
+		 */
+		bool is_blocked_line_h(int y_tile, double x_start, double length) const
+		{
+			for (int i = x_start / tile_size; i <= (x_start + length - 1) / tile_size; ++i)
+			{
+				if (is_blocked(i, y_tile))
+				{
+					return true;
+				}
+			}
+			return false;
+		}
+		
+		/**
 		 * Returns true if the pixel (x, y) is blocked or not, returning true if the pixel is out of bounds.
 		 */
 		bool is_blocked_pixel(int x, int y) const {

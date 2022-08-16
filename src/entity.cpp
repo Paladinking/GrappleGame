@@ -7,7 +7,6 @@ void Entity::load_texture(std::string texture_path) {
 }
 
 void Entity::tick(const double delta, const TileMap &tilemap) {
-	printf("dx: %f, dy: %f\n", vel.x, vel.y);
 	int tilesize = tilemap.get_tilesize();
 	Vector2D to_move = {vel.x * delta, vel.y * delta};
 	double len = to_move.length();
@@ -32,30 +31,23 @@ void Entity::render(const int cameraY) {
 }
 
 
+
+
 void Entity::try_move(const double dx, const double dy, int tilesize, const TileMap &tilemap) {
 	double new_x = pos.x, new_y = pos.y;
 	new_x += dx;
 	int x_tile = (dx > 0 ? (new_x + width - 1) : new_x) / tilesize;
-	for (int i = new_y / tilesize; i <= (new_y + height - 1) / tilesize; i++) {
-		if (tilemap.is_blocked(x_tile, i))
-		{
-			vel.x = 0;
-			new_x = dx > 0 ? (x_tile * tilesize - width) : (x_tile + 1) * tilesize;
-			break;
-		}
+	if (tilemap.is_blocked_line_v(x_tile, new_y, height)) {
+		vel.x = 0;
+		new_x = dx > 0 ? (x_tile * tilesize - width) : (x_tile + 1) * tilesize;
 	}
 
 	new_y += dy;
 	int y_tile = (dy > 0 ? (new_y + height - 1) : new_y) / tilesize;
-	for (int i = new_x / tilesize; i <= (new_x + width - 1) / tilesize; i++) {
-		if (tilemap.is_blocked(i, y_tile))
-		{
-			vel.y = 0;
-			new_y = dy > 0 ? (y_tile * tilesize - height) : (y_tile + 1) * tilesize; 
-			break;
-		}
+	if (tilemap.is_blocked_line_h(y_tile, new_x, width)) {
+		vel.y = 0;
+		new_y = dy > 0 ? y_tile * tilesize - height : (y_tile + 1) * tilesize;
 	}
-	
 	pos.x = new_x;
 	pos.y = new_y;
 }

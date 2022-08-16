@@ -29,13 +29,13 @@ class ClimbGame : public Game {
 
 		const double MAX_GRAVITY_VEL = 700.0;
 		const double GRAVITY_ACCELERATION = 2500.0;
-		const double MAX_MOVEMENT_VEL = 550.0;
+		const double MAX_MOVEMENT_VEL = 350.0;
 		const double MOVEMENT_ACCELERATION = 2200.0;
 		const double FRICTION_FACTOR = 1200.0;
 		const double JUMP_VEL = 700;
 		
-		const int PLAYER_FULL_WIDTH = 40;
-		const int PLAYER_FULL_HEIGHT = 56;
+		const int PLAYER_FULL_WIDTH = 24;
+		const int PLAYER_FULL_HEIGHT = 40;
 		
 		
 		const int TILE_SIZE = 8;

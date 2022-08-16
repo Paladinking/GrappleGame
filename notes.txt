@@ -11,3 +11,40 @@ rect.h = SCREEN_HEIGHT - 20;
 SDL_BlitScaled(currentSurface, NULL, screenSurface, &rect);
 
 SDL_UpdateWindowSurface(window);
+
+
+
+
+Ajust position when colliding at corner...
+	for (int i = new_x / tilesize; i <= (new_x + width - 1) / tilesize; i++) {
+		if (tilemap.is_blocked(i, y_tile))
+		{
+			if (!adjust && dy < 0) 
+			{
+				if (i * tilesize - pos.x < tilesize * 0.75) {
+					adjust = true;
+					printf("1\n");
+					adj_x = (i + 1) * tilesize;
+					continue;
+				} 
+				else if (pos.x + width - i * tilesize < tilesize * 0.75) 
+				{
+					adjust = true;
+					printf("2\n");
+					adj_x = i * tilesize - width;
+					continue;
+				}
+			}
+			adjust = false;
+			vel.y = 0;
+			new_y = dy > 0 ? y_tile * tilesize - height : (y_tile + 1) * tilesize;
+			break;
+		}
+	}
+	if (adjust) 
+	{
+		pos.x = adj_x;
+	} else 
+	{
+		pos.x = new_x;
+	}

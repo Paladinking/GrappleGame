@@ -43,6 +43,9 @@ void ClimbGame::handle_input(double delta) {
 	{
 		player->add_velocity(MOVEMENT_ACCELERATION * delta, 0);
 	}
+	if (currentKeyStates[SDL_SCANCODE_ESCAPE]) {
+		exit_game();
+	}
 }
 
 void ClimbGame::render() {
