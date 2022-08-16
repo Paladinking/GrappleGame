@@ -12,9 +12,12 @@
  */
 class Vector2D {
 	public:
+	
+		
 		/**
 		 * Creates a new vector.
 		 */
+		Vector2D() : x(0.0), y(0.0) {}
 		Vector2D(double x, double y) : x(x), y(y) {}
 		
 		/**
@@ -187,26 +190,79 @@ class TileMap {
 			SDL_FreeSurface(converted);
 		}
 		
-		void render() {
-			int tileSize = SCREEN_WIDTH / width;
-			for (int i = 0; i < width; i++) {
-				for (int j = 0; j < height; j++) {
-					if (map[i + width * j]) {
-						SDL_SetRenderDrawColor( gRenderer, 0x00, 0x00, 0x00, 0xFF );     
-					} else {
-						SDL_SetRenderDrawColor( gRenderer, 0xFF, 0xFF, 0xFF, 0xFF );  
-					}				
-					SDL_Rect fillRect = {i * tileSize, j * tileSize, tileSize, tileSize};
-					SDL_RenderFillRect( gRenderer, &fillRect );
-				}
+		/**
+		 * Returns true if a tile contained in the pixel rectangle (x, y, w, h) contains a blocked tile.
+		 */
+		bool is_blocked_rect(int x, int y, int w, int h) const
+		{
+			for (int i = x / tile_size; i <= (x + w - 1) / tile_size; i++) 
+			{
+				for (int j = y / tile_size; j <= (y + h - 1) / tile_size; j++)
+				{
+					if (is_blocked(i, j))
+					{
+						return true;
+					}
+				}					
 			}
-			
+			return false;
 		}
 		
+		/**
+		 * Returns true if the pixel (x, y) is blocked or not, returning true if the pixel is out of bounds.
+		 */
+		bool is_blocked_pixel(int x, int y) const {
+			return is_blocked(x / tile_size, y / tile_size);
+		}
+		
+		/**
+		 * Returns true if the tile (x, y) is blocked or not, returning true if tile is out of bounds.
+		 */
+		bool is_blocked(int x, int y) const {
+			if (x < 0 || x >= width || y < 0 || y >= height)
+			{
+				return true;
+			}
+			return map[x + width * y];
+		}
+		
+		/**
+		 * Returns the value of the tile at (x, y) same as is_blocked without bounds check.
+		 */
+		bool get_tile(int x, int y) const {
+			return map[x + width * y];
+		}
+		
+		/**
+		 * Returns the height of the tilemap.
+		 */
+		int get_width() const {
+			return width;
+		}
+		 
+		/**
+		 * Returns the width of the tilemap.
+		 */
+		int get_height() const {
+			return height;
+		}
+		
+		/**
+		 * Returns the tile_size.
+		 */
+		 int get_tilesize() const {
+			 return tile_size;
+		 }
+		 
+		 void set_tilesize(unsigned tilesize) {
+			 tile_size = tilesize;
+		 }
 	
 	
 	private:
 		unsigned width = 0, height = 0;
+		
+		unsigned tile_size = 1;
 		
 		bool *map = NULL;
 };

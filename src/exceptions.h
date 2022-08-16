@@ -33,7 +33,7 @@ class SDL_exception : public base_exception {
 };
 
 /**
- * Game_exception, when creating a game fails (for example when one is already runnign).
+ * Game_exception, when creating a game fails (for example when one is already runnning).
  */
 class Game_exception : public base_exception {
 	public:

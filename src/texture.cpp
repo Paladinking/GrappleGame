@@ -30,12 +30,21 @@ void Texture::render(const int x, const int y) {
 	SDL_RenderCopy(gRenderer, texture, NULL, &rect); 
 }
 
-int Texture::getHeight() {
+int Texture::getHeight() const {
 	return height;
 }
 
-int Texture::getWidth() {
+int Texture::getWidth() const {
 	return width;
+}
+
+void Texture::set_dimensions(const int w, const int h) {
+	this->width = w;
+	this->height = h;
+}
+
+void Texture::set_color_mod(Uint8 r, Uint8 g, Uint8 b) {
+	SDL_SetTextureColorMod(texture, r, g, b);
 }
 
 Texture::~Texture() {

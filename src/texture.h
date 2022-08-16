@@ -32,12 +32,22 @@ class Texture {
 		/**
 		 * Returns the width of this texture.
 		 */
-		int getWidth();
+		int getWidth() const;
 		
 		/**
 		 * Returns the height of this texture.
 		 */
-		int getHeight();
+		int getHeight() const;
+		
+		/**
+		 * Sets the width and height.
+		 */
+		void set_dimensions(const int w, const int h);
+		
+		/** 
+		 * Sets the color modulation.
+		 */
+		void set_color_mod(Uint8 r, Uint8 g, Uint8 b);
 		
 	private:
 		SDL_Texture* texture = NULL;
