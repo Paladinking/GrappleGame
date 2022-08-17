@@ -2,6 +2,7 @@
 #define ENTITY_00_H
 #include <string>
 #include <vector>
+#include <memory>
 #include <stdio.h>
 #include "utilities.h"
 #include "texture.h"
@@ -25,7 +26,7 @@ class Entity {
 		 * Tick for the entity called every frame. The default implementation moves the entity by
 		 * the velocity.
 		 */
-		virtual void tick(const double delta, const TileMap &tilemap);
+		virtual void tick(const double delta, const TileMap &tilemap, std::vector<std::shared_ptr<Corner>> &corners);
 		
 		
 		/**
@@ -89,13 +90,17 @@ class Player : public Entity {
 		
 		virtual void render(const int cameraY) override;
 		
-		virtual void tick(const double delta, const TileMap &tilemap) override;
+		virtual void tick(const double delta, const TileMap &tilemap, std::vector<std::shared_ptr<Corner>> &corners) override;
 		
 		void fire_grapple(const int target_x, const int target_y);
 		
 	private:
 		
+		typedef std::vector<std::shared_ptr<Corner>> CornerList;
+		
 		void place_grapple(const double x, const double y, const double dx, const double dy, const int tilesize);
+		
+		void update_grapple(CornerList &allCorners, CornerList &corners, CornerList &countained, Vector2D cur, Vector2D prev);
 	
 		enum GrapplingMode
 		{
@@ -109,8 +114,10 @@ class Player : public Entity {
 		double grapple_length;
 
 		Vector2D grapple_vel;
+		
+		std::shared_ptr<Corner> grapple_point;
 
-		std::vector<Vector2D> grapple_points;
+		std::vector<std::shared_ptr<Corner>> grapple_points;
 		
 };
 #endif

@@ -28,11 +28,13 @@ class ClimbGame : public Game {
 		int visible_tiles_x, visible_tiles_y;
 
 		TileMap tilemap;
+		Texture ball;
+		
 		std::shared_ptr<Player> player;
 		bool grapple_pressed = false;
 		
 		std::vector<std::shared_ptr<Entity>> entities;
-		
+		std::vector<std::shared_ptr<Corner>> corners;
 };
 
 

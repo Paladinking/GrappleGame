@@ -1,6 +1,6 @@
 #ifndef UTILITIES_00_H
 #define UTILITIES_00_H
-#include <math.h>
+#include <cmath>
 #include <SDL.h>
 #include <SDL_image.h>
 #include <string>
@@ -25,7 +25,7 @@ class Vector2D {
 		 */
 		double length() const
 		{
-			return sqrt(x * x + y * y);
+			return std::sqrt(x * x + y * y);
 		}
 		
 		
@@ -42,7 +42,7 @@ class Vector2D {
 		 */
 		double distance(const Vector2D &other) const 
 		{
-			return sqrt((other.x - x) * (other.x - x) + (other.y - y) * (other.y - y));
+			return std::sqrt((other.x - x) * (other.x - x) + (other.y - y) * (other.y - y));
 		}
 		
 		/**
@@ -129,7 +129,13 @@ class Vector2D {
 
 class Corner {
 	public:
-		int x, y;
+		double x, y;
+		int orientation = -1;
+		bool ignored = false;
+		
+		Corner(double x, double y) : x(x), y(y) {}
+		
+		Corner() {}
 	
 };
 

@@ -1,5 +1,5 @@
 #include "entity.h"
-
+#include "geometry.h"
 
 Entity::~Entity() {}
 
@@ -9,7 +9,7 @@ void Entity::load_texture(std::string texture_path)
 	texture.set_dimensions(width, height);
 }
 
-void Entity::tick(const double delta, const TileMap &tilemap) 
+void Entity::tick(const double delta, const TileMap &tilemap, std::vector<std::shared_ptr<Corner>> &corners) 
 {
 	int tilesize = tilemap.get_tilesize();
 	Vector2D to_move = {vel.x * delta, vel.y * delta};
@@ -112,46 +112,29 @@ void Player::render(const int cameraY)
 	Entity::render(cameraY);
 	if (grappling_mode == UNUSED) return;
 	
-	Vector2D center_point = {pos.x + width / 2, pos.y + height / 2};
-	Vector2D const *prev_pos = &center_point;
+	Corner prev_pos = {(pos.x + width / 2), (pos.y + height / 2)};
 	SDL_SetRenderDrawColor(gRenderer, 0x00, 0x00, 0xFF, 0xFF);
-	for (const auto &point : grapple_points) 
+	for (auto it = grapple_points.rbegin(); it != grapple_points.rend(); it++) 
 	{
-		SDL_RenderDrawLine(gRenderer, prev_pos->x, prev_pos->y - cameraY, point.x, point.y - cameraY);
-		prev_pos = &point;
+		SDL_RenderDrawLine(gRenderer, prev_pos.x, prev_pos.y - cameraY, (*it)->x, (*it)->y - cameraY);
+		prev_pos = *(*it);
 	}
 
-	grapple_hook.render(grapple_points[0].x - 2, grapple_points[0].y - cameraY - 2);
+	grapple_hook.render(grapple_point->x - 2, grapple_point->y - cameraY - 2);
 }
 
 
 
 
-void Player::tick(const double delta, const TileMap &tilemap)
+void Player::tick(const double delta, const TileMap &tilemap, CornerList &corners)
 {
-	Entity::tick(delta, tilemap);
-	printf("%f\n", delta);
+	Vector2D old_pos = {pos.x + width / 2, pos.y + height / 2};
+	Entity::tick(delta, tilemap, corners);
 	
-	if (grappling_mode == TRAVELING || grappling_mode == PLACED) 
+	if (grappling_mode == TRAVELING || grappling_mode == PLACED && (vel.x != 0 || vel.y != 0)) 
 	{
-	/*	Vector2D p2g = {grapple_points[grapple_points.size() -1].x - pos.x, grapple_points[grapple_points.size() -1].y - pos.y};
-		double len = p2g.length();
-		double x_pos = pos.x + width / 2, y_pos = pos.y + height / 2;
-		Vector2D step = {p2g.x / len, p2g.y / len};
-		for (int steps = (int)len; steps > 0; steps--)
-		{
-			x_pos += step.x;
-			y_pos += step.y;
-			if (tilemap.is_blocked_pixel(x_pos, y_pos)) 
-			{
-				int prev_tile_x  = (x_ - dx) / tilesize;
-				int prev_tile_y  = (y - dy) / tilesize;
-				int tile_x = x / tilesize;
-				int tile_y = y / tilesize;
-				grapple_points.push_back(x_pos, y)
-			}
-		}
-			*/
+		CornerList contained;
+		update_grapple(corners, corners, contained, {pos.x + width / 2, pos.y + height / 2}, old_pos);
 	}
 
 	if (grappling_mode == TRAVELING)
@@ -163,7 +146,7 @@ void Player::tick(const double delta, const TileMap &tilemap)
 			return;
 		}
 		int tilesize = tilemap.get_tilesize();
-		double new_x = grapple_points[0].x, new_y = grapple_points[0].y;
+		double new_x = grapple_point->x, new_y = grapple_point->y;
 		Vector2D to_move = {grapple_vel.x * delta, grapple_vel.y * delta};
 		double len = to_move.length();
 		Vector2D move_step = {(to_move.x / len), (to_move.y / len)};
@@ -187,8 +170,8 @@ void Player::tick(const double delta, const TileMap &tilemap)
 			return;
 		}
 		grapple_length += len;
-		grapple_points[0].x = new_x;
-		grapple_points[0].y = new_y;
+		grapple_point->x = new_x;
+		grapple_point->y = new_y;
 	} 
 }
 
@@ -199,8 +182,8 @@ void Player::place_grapple(const double x, const double y, const double dx, cons
 	int prev_tile_y  = (y - dy) / tilesize;
 	int tile_x = x / tilesize;
 	int tile_y = y / tilesize;
-	grapple_points[0].x = (((int)x) / tilesize + 0.5 + prev_tile_x - tile_x) * tilesize;
-	grapple_points[0].y = (((int)y) / tilesize + 0.5 + prev_tile_y - tile_y) * tilesize;
+	grapple_point->x = (((int)x) / tilesize + 0.5 + prev_tile_x - tile_x) * tilesize;
+	grapple_point->y = (((int)y) / tilesize + 0.5 + prev_tile_y - tile_y) * tilesize;
 }
 
 void Player::fire_grapple(const int targetX, const int targetY) 
@@ -213,13 +196,63 @@ void Player::fire_grapple(const int targetX, const int targetY)
 		grapple_vel.y = targetY - (pos.y + height / 2);
 		grapple_vel.normalize();
 		grapple_vel.scale(GRAPPLE_SPEED);
-		grapple_points.push_back({pos.x + width / 2, pos.y + height / 2});
+		grapple_point = std::shared_ptr<Corner>(new Corner(pos.x + width / 2, pos.y + height / 2));
+		grapple_points.push_back(grapple_point);
 	}
 	else if (grappling_mode != TRAVELING)
 	{
 		grapple_points.clear();
 		grappling_mode = UNUSED;
 	}
+}
+void Player::update_grapple(CornerList &allCorners, CornerList &corners, CornerList &contained, Vector2D cur, Vector2D prev)
+{
+	int anchor_index = grapple_points.size() - 1;
+	std::shared_ptr<Corner> anchor = grapple_points[anchor_index];
+	bool free_point = false, add_point = false;
+	double smallest_angle = 100.0; // Invalidly big angle
+	if (anchor_index > 0) {
+		std::shared_ptr<Corner> prev_anchor = grapple_points[anchor_index - 1];
+		bool orientation = is_clockwise(prev_anchor->x, prev_anchor->y, anchor->x, anchor->y, cur.x, cur.y);
+		if ((orientation && anchor->orientation == 0) || (!orientation && anchor->orientation == 1))
+		{
+			smallest_angle = get_angle(anchor->x - prev_anchor->x, anchor->y - prev_anchor->y, prev.x - anchor->x, prev.y - anchor->y);
+			free_point  = true;
+		}
+	}
+	Triangle t = {prev.x, prev.y, cur.x, cur.y, anchor->x, anchor->y};
+	anchor->ignored = true;
+	for (std::shared_ptr<Corner> &corner : corners) {
+		if (!corner->ignored && t.contains_point(corner->x, corner->y)) {
+			contained.push_back(corner);
+		}
+	}
 
-	
+	anchor->ignored = false;
+	std::shared_ptr<Corner> to_be_added;
+
+	for (std::shared_ptr<Corner> &corner : contained) {
+		double angle = get_angle(prev.x, prev.y, anchor->x, anchor->y, corner->x, corner->y);
+		if (angle < smallest_angle) {
+			smallest_angle = angle;
+			free_point = false;
+			add_point = true;
+			to_be_added = corner;
+		}
+	}
+	if (add_point) {
+		to_be_added->orientation = is_clockwise(anchor->x, anchor->y, to_be_added->x, to_be_added->y, cur.x, cur.y);
+		grapple_points.push_back(to_be_added);
+		CornerList new_points;
+		new_points.swap(contained);
+		update_grapple(allCorners, new_points, contained, cur, prev);
+	} else if (free_point) {
+		grapple_points.pop_back();
+		std::shared_ptr<Corner> &new_anchor = grapple_points[grapple_points.size() - 1];
+		Vector2D new_prev = get_line_intersection(prev.x, prev.y, cur.x, cur.y, anchor->x, anchor->y, new_anchor->x, new_anchor->y);
+		contained.clear();
+		anchor->ignored = true;
+		update_grapple(allCorners, allCorners, contained, cur, new_prev);
+		anchor->ignored = false;
+	}
 }
