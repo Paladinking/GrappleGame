@@ -130,7 +130,6 @@ class Vector2D {
 class Corner {
 	public:
 		double x, y;
-		int orientation = -1;
 		bool ignored = false;
 		
 		Corner(double x, double y) : x(x), y(y) {}

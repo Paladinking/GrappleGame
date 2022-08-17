@@ -79,6 +79,11 @@ class Entity {
 	
 };
 
+class GrapplePoint {
+	public:
+		std::shared_ptr<Corner> corner;
+		bool orientation;
+};
 
 
 class Player : public Entity {
@@ -117,7 +122,7 @@ class Player : public Entity {
 		
 		std::shared_ptr<Corner> grapple_point;
 
-		std::vector<std::shared_ptr<Corner>> grapple_points;
+		std::vector<GrapplePoint> grapple_points;
 		
 };
 #endif
