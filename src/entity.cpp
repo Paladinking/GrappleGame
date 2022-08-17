@@ -159,31 +159,39 @@ void Player::tick(const double delta, const TileMap &tilemap, CornerList &corner
 			new_y += move_step.y;
 			if (tilemap.is_blocked_pixel(new_x, new_y))
 			{
-				place_grapple(new_x, new_y, move_step.x, move_step.y, tilesize);
+				place_grapple(new_x, new_y, move_step.x, move_step.y, tilesize, corners);
 				return;
 			}
 		}
 		new_x += to_move.x;
 		new_y += to_move.y;
 		if (tilemap.is_blocked_pixel(new_x, new_y)) {
-			place_grapple(new_x, new_y, to_move.x, to_move.y, tilesize);
+			place_grapple(new_x, new_y, to_move.x, to_move.y, tilesize, corners);
 			return;
 		}
-		grapple_length += len;
+		Vector2D prev = {grapple_point->x, grapple_point->y};
 		grapple_point->x = new_x;
 		grapple_point->y = new_y;
-	} 
+		CornerList contained;
+		update_grapple2(corners, corners, contained, prev);
+	} else if (grappling_mode == PLACED)
+	{
+		
+	}
 }
 
-void Player::place_grapple(const double x, const double y, const double dx, const double dy, const int tilesize) 
+void Player::place_grapple(const double x, const double y, const double dx, const double dy, const int tilesize, CornerList &corners) 
 {
 	grappling_mode = PLACED;
 	int prev_tile_x  = (x - dx) / tilesize;
 	int prev_tile_y  = (y - dy) / tilesize;
 	int tile_x = x / tilesize;
 	int tile_y = y / tilesize;
+	Vector2D prev = {grapple_point->x, grapple_point->y};
 	grapple_point->x = (((int)x) / tilesize + 0.5 + prev_tile_x - tile_x) * tilesize;
 	grapple_point->y = (((int)y) / tilesize + 0.5 + prev_tile_y - tile_y) * tilesize;
+	CornerList contained;
+	update_grapple2(corners, corners, contained, prev);
 }
 
 void Player::fire_grapple(const int targetX, const int targetY) 
@@ -206,7 +214,60 @@ void Player::fire_grapple(const int targetX, const int targetY)
 	}
 }
 
+void Player::update_grapple(CornerList &allCorners, CornerList &corners, CornerList &contained, Vector2D cur, Vector2D prev)
+{
+	int anchor_index = grapple_points.size() - 1;
+	GrapplePoint &anchorPoint = grapple_points[anchor_index];
+	std::shared_ptr<Corner> anchor = anchorPoint.corner;
+	bool free_point = false, add_point = false;
+	double smallest_angle = 100.0; // Invalidly big angle
+	if (anchor_index > 0) {
+		std::shared_ptr<Corner> prev_anchor = grapple_points[anchor_index - 1].corner;
+		bool orientation = is_clockwise(prev_anchor->x, prev_anchor->y, anchor->x, anchor->y, cur.x, cur.y);
+		if ((orientation && !anchorPoint.orientation) || (!orientation && anchorPoint.orientation))
+		{
+			smallest_angle = get_angle(anchor->x - prev_anchor->x, anchor->y - prev_anchor->y, prev.x - anchor->x, prev.y - anchor->y);
+			free_point  = true;
+		}
+	}
+	Triangle t = {prev.x, prev.y, cur.x, cur.y, anchor->x, anchor->y};
+	anchor->ignored = true;
+	for (std::shared_ptr<Corner> &corner : corners) {
+		if (!corner->ignored && t.contains_point(corner->x, corner->y)) {
+			contained.push_back(corner);
+		}
+	}
 
+	anchor->ignored = false;
+	std::shared_ptr<Corner> to_be_added;
+
+	for (std::shared_ptr<Corner> &corner : contained) {
+		double angle = get_angle(prev.x, prev.y, anchor->x, anchor->y, corner->x, corner->y);
+		if (angle < smallest_angle) {
+			smallest_angle = angle;
+			free_point = false;
+			add_point = true;
+			to_be_added = corner;
+		}
+	}
+	if (add_point) {
+		bool orientation = is_clockwise(anchor->x, anchor->y, to_be_added->x, to_be_added->y, cur.x, cur.y);
+		grapple_points.push_back({to_be_added, orientation});
+		CornerList new_points;
+		new_points.swap(contained);
+		update_grapple(allCorners, new_points, contained, cur, prev);
+	} else if (free_point) {
+		grapple_points.pop_back();
+		std::shared_ptr<Corner> &new_anchor = grapple_points[grapple_points.size() - 1].corner;
+		Vector2D new_prev = get_line_intersection(prev.x, prev.y, cur.x, cur.y, anchor->x, anchor->y, new_anchor->x, new_anchor->y);
+		contained.clear();
+		anchor->ignored = true;
+		update_grapple(allCorners, allCorners, contained, cur, new_prev);
+		anchor->ignored = false;
+	}
+}
+
+// TODO: combine with update_grapple()...
 void Player::update_grapple2(CornerList &allCorners, CornerList &corners, CornerList &contained, Vector2D prev)
 {
 	

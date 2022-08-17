@@ -103,10 +103,16 @@ class Player : public Entity {
 		
 		typedef std::vector<std::shared_ptr<Corner>> CornerList;
 		
-		void place_grapple(const double x, const double y, const double dx, const double dy, const int tilesize);
+		void place_grapple(const double x, const double y, const double dx, const double dy, const int tilesize, CornerList &corners);
 		
+		/**
+		 * Updates grapple_points after the player has moved from prev to cur.
+		 */
 		void update_grapple(CornerList &allCorners, CornerList &corners, CornerList &countained, Vector2D cur, Vector2D prev);
 		
+		/**
+		 * Updates grapple_points after the hook has moved from prev to grapple_point.
+		 */
 		void update_grapple2(CornerList &allCorners, CornerList &corners, CornerList &contained, Vector2D prev);
 	
 		enum GrapplingMode
