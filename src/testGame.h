@@ -2,25 +2,12 @@
 #define TEST_GAME_00_H
 #include <cmath>
 #include <vector>
+#include <algorithm>
 
 struct Point {
 	int x, y;
 	int orientation = -1;
 };
-
-bool is_clockwise(int x0, int y0, int x1, int y1, int x2, int y2) {
-	return (-y1 * x2 + y0 * (-x1 + x2) + x0 * (y1 - y2) + x1 * y2) > 0;
-}
-
-double get_angle(double x0, double y0, double x1, double y1, double x2, double y2) {
-	double dx1 = x0 - x1;
-	double dy1 = y0 - y1;
-	double dx2 = x2 - x1;
-	double dy2 = y2 - y1;
-	double len1 = std::sqrt(dx1 * dx1 + dy1 * dy1);
-	double len2 = std::sqrt(dx2 * dx2 + dy2 * dy2);
-	return std::acos(dx1 / len1 * dx2 / len2 + dy1 / len1 * dy2 /len2);
-}
 
 class Triangle {
 	private:
@@ -60,32 +47,40 @@ class Triangle {
 		}
 };
 
-bool triangle_contains(Point p0, Point p1, Point p2, int x, int y) 
-{
-	double Area = 0.5 * (-p1.y * p2.x + p0.y * (-p1.x + p2.x) + p0.x * (p1.y - p2.y) + p1.x * p2.y);
-	double s = 1 / (2 * Area) * (p0.y * p2.x - p0.x * p2.y + (p2.y - p0.y) * x + (p0.x - p2.x) * y);
-	double t = 1 / (2 *Area) * (p0.x * p1.y - p0.y * p1.x + (p0.y - p1.y) * x + (p1.x - p0.x) * y);
-	
-	return s>0 && t>0 && 1-s-t>0;
-} 
+bool is_clockwise(int x0, int y0, int x1, int y1, int x2, int y2) {
+	return (-y1 * x2 + y0 * (-x1 + x2) + x0 * (y1 - y2) + x1 * y2) > 0;
+}
 
-bool triangle_contains2(Point p0, Point p1, Point p2, int x, int y) 
-{
-	double Area = 0.5 * (-p1.y * p2.x + p0.y * (-p1.x + p2.x) + p0.x * (p1.y - p2.y) + p1.x * p2.y);
-	
-	double sp = ((p0.y * p2.x - p0.x * p2.y) + (p2.y - p0.y) * x + (p0.x - p2.x) * y);
-	double tp = (p0.x * p1.y - p0.y * p1.x + (p0.y - p1.y) * x + (p1.x - p0.x) * y);
-	if (Area < 0)  {
-		Area *= -1;
-		sp *= -1;
-		tp *= -1;
-	};
-	return sp > 0 && tp > 0 && Area > sp + tp;
-} 
+double get_angle(double x0, double y0, double x1, double y1, double x2, double y2) {
+	double dx1 = x0 - x1;
+	double dy1 = y0 - y1;
+	double dx2 = x2 - x1;
+	double dy2 = y2 - y1;
+	double len1 = std::sqrt(dx1 * dx1 + dy1 * dy1);
+	double len2 = std::sqrt(dx2 * dx2 + dy2 * dy2);
+	return std::acos(dx1 / len1 * dx2 / len2 + dy1 / len1 * dy2 /len2);
+}
+
+double get_angle(double v0x, double v0y, double v1x, double v1y) {
+	double len1 = std::sqrt(v0x * v0x + v0y * v0y);
+	double len2 = std::sqrt(v1x * v1x + v1y * v1y);
+	return std::acos(v0x / len1 * v1x / len2 + v0y / len1 * v1y /len2);
+}
+
+Point get_line_intersection(int x1, int y1, int x2, int y2, int x3, int y3, int x4, int y4) {
+	double denom = (double)((x1 - x2) * (y3 - y4) - (y1 - y2) * (x3 - x4));
+	if (denom == 0) {
+		printf("Warning: 0!");
+		return {x1, y1};
+	}
+	double x = ((x1 * y2 - y1 * x2) * (x3 - x4) - (x1 - x2) * (x3 * y4 - y3 * x4)) / denom;
+	double y = ((x1 * y2 - y1 * x2) * (y3 - y4) - (y1 - y2) * (x3 * y4 - y3 * x4)) / denom;
+	return {(int)x, (int)y};
+}
 
 
-void add_containing(Triangle &t, std::vector<Point> &source, std::vector<Point> &dest, Point &ignored) {
-	for (Point &p: source) {
+void add_containing(Triangle &t, const std::vector<Point> &source, std::vector<Point> &dest, Point &ignored) {
+	for (const Point &p: source) {
 		if ((p.x != ignored.x || p.y != ignored.y) && t.contains_point(p.x, p.y)) dest.push_back({p.x, p.y});
 	}
 }
@@ -102,6 +97,56 @@ bool free_anchor_point(Point &next, int anchor_index, std::vector<Point> &points
 	}
 	return false;
 }
+
+void update_rope(std::vector<Point> &rope_points, const std::vector<Point> &points, std::vector<Point> &contained, Point cur, Point prev)
+{
+	int anchor_index = rope_points.size() - 1;
+	Point anchor = rope_points[anchor_index];
+	bool free_point = false, add_point = false;
+	double smallest_angle = 100.0; // Invalidly big angle
+	if (anchor_index > 0) {
+		Point &prev_anchor = rope_points[anchor_index - 1];
+		bool orientation = is_clockwise(prev_anchor.x, prev_anchor.y, anchor.x, anchor.y, cur.x, cur.y);
+		if ((orientation && anchor.orientation == 0) || (!orientation && anchor.orientation == 1))
+		{
+			smallest_angle = get_angle(anchor.x - prev_anchor.x, anchor.y - prev_anchor.y, prev.x - anchor.x, prev.y - anchor.y);
+			free_point  = true;
+		}
+	}
+	Triangle t = {prev.x, prev.y, cur.x, cur.y, anchor.x, anchor.y};
+	add_containing(t, points, contained, anchor);
+	Point to_be_added;
+	for (Point &p : contained) {
+		double angle = get_angle(prev.x, prev.y, anchor.x, anchor.y, p.x, p.y);
+		if (angle < smallest_angle) {
+			smallest_angle = angle;
+			free_point = false;
+			add_point = true;
+			to_be_added = p;
+		}
+	}
+	if (add_point) {
+		to_be_added.orientation = is_clockwise(anchor.x, anchor.y, to_be_added.x, to_be_added.y, cur.x, cur.y);
+		rope_points.push_back(to_be_added);
+		std::vector<Point> new_points;
+		new_points.swap(contained);
+		update_rope(rope_points, new_points, contained, cur, prev);
+	} else if (free_point) {
+		rope_points.pop_back();
+		Point &new_anchor = rope_points[rope_points.size() - 1];
+		Point new_prev = get_line_intersection(prev.x, prev.y, cur.x, cur.y, anchor.x, anchor.y, new_anchor.x, new_anchor.y);
+		contained.clear();
+		std::vector<Point> new_points;
+		for (const Point &p : points) {
+			if (p.x != anchor.x || p.y != anchor.y) {
+				new_points.push_back(p);
+			}
+		}
+		update_rope(rope_points, new_points, contained, cur, new_prev);
+	}
+	
+}
+
 
 
 class TestGame : public Game {
@@ -144,11 +189,17 @@ class TestGame : public Game {
 			}
 			prev = {cur.x, cur.y};
 			cur = {e.x, e.y};
+			std::vector<Point> con;
+			update_rope(rope_points, points, con, cur, prev);
+			printf(" --\n");
+			return;
 			int anchor_index = rope_points.size() - 1;
 			Point anchor = rope_points[anchor_index];
 			
 			Triangle t = {prev.x, prev.y, cur.x, cur.y, anchor.x, anchor.y};
 			std::vector<Point> contained;
+			
+			
 			
 			bool freed = false;
 			
