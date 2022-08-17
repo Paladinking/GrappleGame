@@ -106,6 +106,8 @@ class Player : public Entity {
 		void place_grapple(const double x, const double y, const double dx, const double dy, const int tilesize);
 		
 		void update_grapple(CornerList &allCorners, CornerList &corners, CornerList &countained, Vector2D cur, Vector2D prev);
+		
+		void update_grapple2(CornerList &allCorners, CornerList &corners, CornerList &contained, Vector2D prev);
 	
 		enum GrapplingMode
 		{
