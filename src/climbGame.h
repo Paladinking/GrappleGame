@@ -32,6 +32,7 @@ class ClimbGame : public Game {
 		
 		std::shared_ptr<Player> player;
 		bool grapple_pressed = false;
+		bool pull_pressed = false;
 		
 		std::vector<std::shared_ptr<Entity>> entities;
 		std::vector<std::shared_ptr<Corner>> corners;

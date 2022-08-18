@@ -36,10 +36,14 @@ class Entity {
 		
 		
 		/** 
+		 * Adds (dx, dy) to the acceleration of this entity.
+		 */
+		void add_acceleration(const double dx, const double dy);
+		
+		/**
 		 * Adds (dx, dy) to the velocity of this entity.
 		 */
 		void add_velocity(const double dx, const double dy);
-		
 		
 		/**
 		 * Returns true if this entity is standing on ground.
@@ -49,7 +53,7 @@ class Entity {
 		/**
 		 * Returns the velocity vector of this entity.
 		 */
-		Vector2D &get_velocity();
+		const Vector2D &get_velocity() const;
 		
 		/**
 		 * Returns the position of this entity, read only.
@@ -62,8 +66,11 @@ class Entity {
 		 */
 		Entity() {};
 		
+		virtual Vector2D get_dynamic_acc(double x, double y, double dx, double dy) {return {0.0, 0.0};};
+		
 		Vector2D pos;
 		Vector2D vel;
+		Vector2D acc;
 		
 		int width, height;
 	
@@ -99,6 +106,12 @@ class Player : public Entity {
 		
 		void fire_grapple(const int target_x, const int target_y);
 		
+		void toggle_pull();
+		
+	protected:
+	
+		virtual Vector2D get_dynamic_acc(double x, double y, double dx, double dy) override;
+		
 	private:
 		
 		typedef std::vector<std::shared_ptr<Corner>> CornerList;
@@ -108,7 +121,11 @@ class Player : public Entity {
 		/**
 		 * Updates the grapple_points vector after either the first or last element has moved.
 		 * The previous position is given as prev. Adds and removes points from grapple_points as needed.
-		 * This function calls itself recursivly if a change is made to grapple_points.
+		 */
+		void update_grapple(CornerList &corners, Vector2D prev, bool first);
+		 
+		/**
+		 * Recursive helper for updating grapple points.
 		 */
 		void update_grapple(CornerList &allCorners, CornerList &corners, CornerList &contained, Vector2D prev, bool first);
 	
@@ -122,6 +139,8 @@ class Player : public Entity {
 		GrapplingMode grappling_mode = UNUSED;
 
 		double grapple_length;
+		
+		bool pull;
 
 		Vector2D grapple_vel;
 		

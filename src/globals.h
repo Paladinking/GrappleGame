@@ -7,16 +7,19 @@ const int SCREEN_WIDTH = 640;
 const int SCREEN_HEIGHT = 640;
 
 const double MAX_GRAVITY_VEL = 700.0;
-const double GRAVITY_ACCELERATION = 2500.0;
+const double GRAVITY_ACCELERATION = 3000.0;
 const double MAX_MOVEMENT_VEL = 350.0;
 const double MOVEMENT_ACCELERATION = 2200.0;
 const double FRICTION_FACTOR = 1200.0;
-const double JUMP_VEL = 700;
+const double AIR_RES_FACTOR = 0.01;
+const double JUMP_VEL = 1100;
 
 const int PLAYER_FULL_WIDTH = 24;
 const int PLAYER_FULL_HEIGHT = 40;
-const int GRAPPLE_SPEED = 800.0;
-const int GRAPPLE_LENGTH = 500;
+const int GRAPPLE_LENGTH = 350;
+const double GRAPPLE_SPEED = 800.0;
+const double GRAPPLE_PULL = 6000.0;
+const double GRAPPLE_FORCE = 200.0;
 
 const int TILE_SIZE = 8;
 const int FULL_TILE_HEIGHT = 160;

@@ -1,25 +1,20 @@
 #include <stdlib.h>
+#include <cmath>
 #include "climbGame.h"
 
 void ClimbGame::tick(Uint64 delta) {	
 	double dDelta = delta / 1000.0;
-	printf("%f\n", 1 / dDelta);
+	//printf("%f\n", 1 / dDelta);
 	handle_input(dDelta);
 	for (auto e : entities) {
-		Vector2D &vel = e->get_velocity();
-		if (vel.y < MAX_GRAVITY_VEL && !e->on_ground(tilemap)) {
-			
-			e->add_velocity(0, GRAVITY_ACCELERATION * dDelta); // Apply gravity
+		const Vector2D &vel = e->get_velocity();
+		bool on_ground = e->on_ground(tilemap);
+		if (vel.y < MAX_GRAVITY_VEL && !on_ground) {
+			e->add_acceleration(0, GRAVITY_ACCELERATION); // Apply gravity
 		}
 		double factor = FRICTION_FACTOR * dDelta;
-		if (vel.x > 0)
-		{
-			vel.x -= factor > vel.x ? vel.x : factor;
-		}	
-		else 
-		{
-			vel.x -= factor > -vel.x ? vel.x : -factor;
-		}
+		double air_resistance = AIR_RES_FACTOR * vel.length();
+
 		
 		e->tick(dDelta, tilemap, corners);
 	}
@@ -28,21 +23,23 @@ void ClimbGame::tick(Uint64 delta) {
 
 void ClimbGame::handle_input(double delta) {
 	const Uint8* currentKeyStates = SDL_GetKeyboardState(NULL);
-	Vector2D &vel = player->get_velocity();
+	const Vector2D &vel = player->get_velocity();
 	if (currentKeyStates[SDL_SCANCODE_SPACE]) 
 	{
 		if (player->on_ground(tilemap)) 
 		{
-			vel.y = -JUMP_VEL;
+			printf("JUMP}");
+			player->add_velocity(0, -vel.y -JUMP_VEL);
+			//vel.y = -JUMP_VEL;
 		}
 	} 
-	if (currentKeyStates[SDL_SCANCODE_LEFT] && vel.x > -MAX_MOVEMENT_VEL) 
+	if (currentKeyStates[SDL_SCANCODE_A] && vel.x > -MAX_MOVEMENT_VEL) 
 	{
-		player->add_velocity(-MOVEMENT_ACCELERATION * delta, 0);
+		player->add_acceleration(-MOVEMENT_ACCELERATION, 0);
 	} 
-	if (currentKeyStates[SDL_SCANCODE_RIGHT] && vel.x < MAX_MOVEMENT_VEL) 
+	if (currentKeyStates[SDL_SCANCODE_D] && vel.x < MAX_MOVEMENT_VEL) 
 	{
-		player->add_velocity(MOVEMENT_ACCELERATION * delta, 0);
+		player->add_acceleration(MOVEMENT_ACCELERATION, 0);
 	}
 	if (currentKeyStates[SDL_SCANCODE_E]) {
 		if (!grapple_pressed) {
@@ -53,6 +50,15 @@ void ClimbGame::handle_input(double delta) {
 	} else {
 		grapple_pressed = false;
 	}
+	if (currentKeyStates[SDL_SCANCODE_Q]) {
+		if (!pull_pressed) {
+			player->toggle_pull();
+			pull_pressed = true;
+		}
+	} else {
+		pull_pressed = false;
+	}
+	
 	if (currentKeyStates[SDL_SCANCODE_ESCAPE]) {
 		exit_game();
 	}
@@ -133,7 +139,6 @@ void ClimbGame::init() {
 			if (bottom_right) {
 				corners.push_back(std::shared_ptr<Corner>(new Corner((x_pos + 1) * TILE_SIZE, (y_pos + 1) * TILE_SIZE)));
 			}
-			
 		}
 	}
 	

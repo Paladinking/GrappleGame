@@ -1,6 +1,7 @@
 #ifndef UTILITIES_00_H
 #define UTILITIES_00_H
 #include <cmath>
+#include <vector>
 #include <SDL.h>
 #include <SDL_image.h>
 #include <string>
@@ -307,7 +308,5 @@ class TileMap {
 		
 		bool *map = NULL;
 };
-
-
 
 #endif
