@@ -3,7 +3,7 @@
 
 void ClimbGame::tick(Uint64 delta) {	
 	double dDelta = delta / 1000.0;
-	//printf("%f\n", 1 / dDelta);
+	printf("%f\n", 1 / dDelta);
 	handle_input(dDelta);
 	for (auto e : entities) {
 		Vector2D &vel = e->get_velocity();
@@ -81,10 +81,9 @@ void ClimbGame::render_tilemap() {
 		}
 	}
 	
-	for (const std::shared_ptr<Corner> &corner : corners) {
+	/*for (const std::shared_ptr<Corner> &corner : corners) {
 		ball.render(corner->x - 2, corner->y -2 - camera_y);
-		
-	}
+	}*/
 }
 
 void ClimbGame::init() {

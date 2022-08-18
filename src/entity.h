@@ -106,14 +106,11 @@ class Player : public Entity {
 		void place_grapple(const double x, const double y, const double dx, const double dy, const int tilesize, CornerList &corners);
 		
 		/**
-		 * Updates grapple_points after the player has moved from prev to cur.
+		 * Updates the grapple_points vector after either the first or last element has moved.
+		 * The previous position is given as prev. Adds and removes points from grapple_points as needed.
+		 * This function calls itself recursivly if a change is made to grapple_points.
 		 */
-		void update_grapple(CornerList &allCorners, CornerList &corners, CornerList &countained, Vector2D cur, Vector2D prev);
-		
-		/**
-		 * Updates grapple_points after the hook has moved from prev to grapple_point.
-		 */
-		void update_grapple2(CornerList &allCorners, CornerList &corners, CornerList &contained, Vector2D prev);
+		void update_grapple(CornerList &allCorners, CornerList &corners, CornerList &contained, Vector2D prev, bool first);
 	
 		enum GrapplingMode
 		{
@@ -128,7 +125,8 @@ class Player : public Entity {
 
 		Vector2D grapple_vel;
 		
-		std::shared_ptr<Corner> grapple_point;
+		std::shared_ptr<Corner> hook;
+		std::shared_ptr<Corner> center_point;
 
 		std::vector<GrapplePoint> grapple_points;
 		

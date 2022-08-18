@@ -120,7 +120,7 @@ void Player::render(const int cameraY)
 		prev_pos = *(it->corner);
 	}
 
-	grapple_hook.render(grapple_point->x - 2, grapple_point->y - cameraY - 2);
+	grapple_hook.render(hook->x - 2, hook->y - cameraY - 2);
 }
 
 
@@ -130,11 +130,13 @@ void Player::tick(const double delta, const TileMap &tilemap, CornerList &corner
 {
 	Vector2D old_pos = {pos.x + width / 2, pos.y + height / 2};
 	Entity::tick(delta, tilemap, corners);
-	
+
 	if (grappling_mode == TRAVELING || (grappling_mode == PLACED && (vel.x != 0 || vel.y != 0))) 
 	{
+		grapple_points[grapple_points.size() - 1].corner->x = pos.x + width / 2;
+		grapple_points[grapple_points.size() - 1].corner->y = pos.y + height / 2;
 		CornerList contained;
-		update_grapple(corners, corners, contained, {pos.x + width / 2, pos.y + height / 2}, old_pos);
+		update_grapple(corners, corners, contained, old_pos, false);
 	}
 
 	if (grappling_mode == TRAVELING)
@@ -146,7 +148,7 @@ void Player::tick(const double delta, const TileMap &tilemap, CornerList &corner
 			return;
 		}
 		int tilesize = tilemap.get_tilesize();
-		double new_x = grapple_point->x, new_y = grapple_point->y;
+		double new_x = hook->x, new_y = hook->y;
 		Vector2D to_move = {grapple_vel.x * delta, grapple_vel.y * delta};
 		double len = to_move.length();
 		Vector2D move_step = {(to_move.x / len), (to_move.y / len)};
@@ -169,11 +171,11 @@ void Player::tick(const double delta, const TileMap &tilemap, CornerList &corner
 			place_grapple(new_x, new_y, to_move.x, to_move.y, tilesize, corners);
 			return;
 		}
-		Vector2D prev = {grapple_point->x, grapple_point->y};
-		grapple_point->x = new_x;
-		grapple_point->y = new_y;
+		Vector2D prev = {hook->x, hook->y};
+		hook->x = new_x;
+		hook->y = new_y;
 		CornerList contained;
-		update_grapple2(corners, corners, contained, prev);
+		update_grapple(corners, corners, contained, prev, true);
 	} else if (grappling_mode == PLACED)
 	{
 		
@@ -187,11 +189,11 @@ void Player::place_grapple(const double x, const double y, const double dx, cons
 	int prev_tile_y  = (y - dy) / tilesize;
 	int tile_x = x / tilesize;
 	int tile_y = y / tilesize;
-	Vector2D prev = {grapple_point->x, grapple_point->y};
-	grapple_point->x = (((int)x) / tilesize + 0.5 + prev_tile_x - tile_x) * tilesize;
-	grapple_point->y = (((int)y) / tilesize + 0.5 + prev_tile_y - tile_y) * tilesize;
+	Vector2D prev = {hook->x, hook->y};
+	hook->x = (((int)x) / tilesize + 0.5 + prev_tile_x - tile_x) * tilesize;
+	hook->y = (((int)y) / tilesize + 0.5 + prev_tile_y - tile_y) * tilesize;
 	CornerList contained;
-	update_grapple2(corners, corners, contained, prev);
+	update_grapple(corners, corners, contained, prev, true);
 }
 
 void Player::fire_grapple(const int targetX, const int targetY) 
@@ -204,8 +206,10 @@ void Player::fire_grapple(const int targetX, const int targetY)
 		grapple_vel.y = targetY - (pos.y + height / 2);
 		grapple_vel.normalize();
 		grapple_vel.scale(GRAPPLE_SPEED);
-		grapple_point = std::shared_ptr<Corner>(new Corner(pos.x + width / 2, pos.y + height / 2));
-		grapple_points.push_back({grapple_point, false});
+		hook = std::shared_ptr<Corner>(new Corner(pos.x + width / 2, pos.y + height / 2));
+		center_point = std::shared_ptr<Corner>(new Corner(pos.x + width / 2, pos.y + height / 2));
+		grapple_points.push_back({hook, false});
+		grapple_points.push_back({center_point, false});
 	}
 	else if (grappling_mode != TRAVELING)
 	{
@@ -214,125 +218,68 @@ void Player::fire_grapple(const int targetX, const int targetY)
 	}
 }
 
-void Player::update_grapple(CornerList &allCorners, CornerList &corners, CornerList &contained, Vector2D cur, Vector2D prev)
+void Player::update_grapple(CornerList &allCorners, CornerList &corners, CornerList &contained, Vector2D prev, bool first)
 {
-	int anchor_index = grapple_points.size() - 1;
-	GrapplePoint &anchorPoint = grapple_points[anchor_index];
-	std::shared_ptr<Corner> anchor = anchorPoint.corner;
-	bool free_point = false, add_point = false;
-	double smallest_angle = 100.0; // Invalidly big angle
-	if (anchor_index > 0) {
-		std::shared_ptr<Corner> prev_anchor = grapple_points[anchor_index - 1].corner;
-		bool orientation = is_clockwise(prev_anchor->x, prev_anchor->y, anchor->x, anchor->y, cur.x, cur.y);
-		if ((orientation && !anchorPoint.orientation) || (!orientation && anchorPoint.orientation))
-		{
-			smallest_angle = get_angle(anchor->x - prev_anchor->x, anchor->y - prev_anchor->y, prev.x - anchor->x, prev.y - anchor->y);
-			free_point  = true;
-		}
+	// Index of moved point, direction to go in vector.
+	int mp_index = 0, dir = 1;
+	if (!first) {
+		mp_index = grapple_points.size() - 1;
+		dir = -1;
 	}
-	Triangle t = {prev.x, prev.y, cur.x, cur.y, anchor->x, anchor->y};
-	anchor->ignored = true;
-	for (std::shared_ptr<Corner> &corner : corners) {
-		if (!corner->ignored && t.contains_point(corner->x, corner->y)) {
-			contained.push_back(corner);
-		}
-	}
-
-	anchor->ignored = false;
-	std::shared_ptr<Corner> to_be_added;
-
-	for (std::shared_ptr<Corner> &corner : contained) {
-		double angle = get_angle(prev.x, prev.y, anchor->x, anchor->y, corner->x, corner->y);
-		if (angle < smallest_angle) {
-			smallest_angle = angle;
-			free_point = false;
-			add_point = true;
-			to_be_added = corner;
-		}
-	}
-	if (add_point) {
-		bool orientation = is_clockwise(anchor->x, anchor->y, to_be_added->x, to_be_added->y, cur.x, cur.y);
-		grapple_points.push_back({to_be_added, orientation});
-		CornerList new_points;
-		new_points.swap(contained);
-		update_grapple(allCorners, new_points, contained, cur, prev);
-	} else if (free_point) {
-		grapple_points.pop_back();
-		std::shared_ptr<Corner> &new_anchor = grapple_points[grapple_points.size() - 1].corner;
-		Vector2D new_prev = get_line_intersection(prev.x, prev.y, cur.x, cur.y, anchor->x, anchor->y, new_anchor->x, new_anchor->y);
-		contained.clear();
-		anchor->ignored = true;
-		update_grapple(allCorners, allCorners, contained, cur, new_prev);
-		anchor->ignored = false;
-	}
-}
-
-// TODO: combine with update_grapple()...
-void Player::update_grapple2(CornerList &allCorners, CornerList &corners, CornerList &contained, Vector2D prev)
-{
+	std::shared_ptr<Corner> cur = grapple_points[mp_index].corner;
 	
-	Vector2D anchor;
-	double prev_anchor_x, prev_anchor_y;
+	// The fixed point connected to the moved point.
+	GrapplePoint &anchorPoint = grapple_points[mp_index + dir];
+	std::shared_ptr<Corner> anchor = anchorPoint.corner;
 	
 	bool free_point = false, add_point = false;
 	double smallest_angle = 100.0;
 	
-	if (grapple_points.size() > 1) {
-		GrapplePoint &anchorPoint = grapple_points[1];
-		anchorPoint.corner->ignored = true;
-		anchor.x = anchorPoint.corner->x;
-		anchor.y = anchorPoint.corner->y;
-		if (grapple_points.size() > 2) {
-			std::shared_ptr<Corner> prev_anchor = grapple_points[2].corner;
-			prev_anchor_x = prev_anchor->x;
-			prev_anchor_y = prev_anchor->y;
-		} else {
-			prev_anchor_x = pos.x + width / 2;
-			prev_anchor_y = pos.y + height / 2;
-		}
-		bool orientation = is_clockwise(grapple_point->x, grapple_point->y, anchor.x, anchor.y, prev_anchor_x, prev_anchor_y);
-		if (orientation != anchorPoint.orientation) {
-			smallest_angle = get_angle(anchor.x - prev_anchor_x, anchor.y - prev_anchor_y, prev.x - anchor.x, prev.y - anchor.y);
+	std::shared_ptr<Corner> prev_anchor;
+	
+	// Check if the anchor point is free, by seeing of the orientation has changed from when the point was created.
+	// Include first in boolean logic so that the orientation is the same from both sides.
+	// If the point is free, potentialy it should be removed from the vector.
+	if (grapple_points.size() > 2) {
+		prev_anchor = grapple_points[mp_index + 2 * dir].corner;
+		bool orientation = first != is_clockwise(prev_anchor->x, prev_anchor->y, anchor->x, anchor->y, cur->x, cur->y);
+		if (orientation != anchorPoint.orientation)
+		{
+			smallest_angle = get_angle(anchor->x - prev_anchor->x, anchor->y - prev_anchor->y, prev.x - anchor->x, prev.y - anchor->y);
 			free_point = true;
 		}
-	} else {
-		anchor.x = pos.x + width / 2;
-		anchor.y = pos.y + height / 2;
 	}
 	
-	Triangle t = {prev.x, prev.y, grapple_point->x, grapple_point->y, anchor.x, anchor.y};
-	for(std::shared_ptr<Corner> &corner : corners) {
+	// 
+	Triangle t = {prev.x, prev.y, cur->x, cur->y, anchor->x, anchor->y};
+	anchor->ignored = true;
+	std::shared_ptr<Corner> to_be_added;
+	for (std::shared_ptr<Corner> &corner : corners) {
 		if (!corner->ignored && t.contains_point(corner->x, corner->y)) {
 			contained.push_back(corner);
+			double angle = get_angle(prev.x, prev.y, anchor->x, anchor->y, corner->x, corner->y);
+			if (angle < smallest_angle) {
+				smallest_angle = angle;
+				free_point = false;
+				add_point = true;
+				to_be_added = corner;
+			}
 		}
 	}
-	
-	if (grapple_points.size() > 1) {
-		grapple_points[1].corner->ignored = false;
-	}
-	std::shared_ptr<Corner> to_be_added;
-	for (std::shared_ptr<Corner> &corner : contained) {
-		double angle = get_angle(prev.x, prev.y, anchor.x, anchor.y, corner->x, corner->y);
-		if (angle < smallest_angle) {
-			smallest_angle = angle;
-			free_point = false;
-			add_point = true;
-			to_be_added = corner;
-		}
-	}
+	anchor->ignored = false;
 	
 	if (add_point) {
-		bool orientation = is_clockwise(grapple_point->x, grapple_point->y, to_be_added->x, to_be_added->y, anchor.x, anchor.y);
-		grapple_points.insert(grapple_points.begin() + 1, {to_be_added, orientation});
+		bool orientation = first != is_clockwise(anchor->x, anchor->y, to_be_added->x, to_be_added->y, cur->x, cur->y);
+		grapple_points.insert(grapple_points.begin() + mp_index + first, {to_be_added, orientation});
 		CornerList new_points;
 		new_points.swap(contained);
-		update_grapple2(allCorners, new_points, contained, prev);
+		update_grapple(allCorners, new_points, contained, prev, first);
 	} else if (free_point) {
-		grapple_points.erase(grapple_points.begin() + 1);
-		Vector2D new_prev = get_line_intersection(prev.x, prev.y, grapple_point->x, grapple_point->y, anchor.x, anchor.y, prev_anchor_x, prev_anchor_y);
+		grapple_points.erase(grapple_points.begin() + mp_index + dir);
+		Vector2D new_prev = get_line_intersection(prev.x, prev.y, cur->x, cur->y, anchor->x, anchor->y, prev_anchor->x, prev_anchor->y);
 		contained.clear();
-		grapple_points[1].corner->ignored = true;
-		update_grapple2(allCorners, allCorners, contained, new_prev);
-		grapple_points[1].corner->ignored = false;
+		anchor->ignored = true;
+		update_grapple(allCorners, allCorners, contained, new_prev, first);
+		anchor->ignored = false;
 	}
 }
