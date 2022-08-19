@@ -18,7 +18,6 @@ void ClimbGame::handle_input(double delta) {
 	{
 		if (player->on_ground(tilemap)) 
 		{
-			printf("JUMP}");
 			player->add_velocity(0, -vel.y -JUMP_VEL);
 			//vel.y = -JUMP_VEL;
 		}

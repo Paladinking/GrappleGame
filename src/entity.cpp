@@ -167,9 +167,12 @@ void Player::tick(const double delta, const TileMap &tilemap, CornerList &corner
 	
 				to_move.x = -(center_point->x + (line_vector.x / new_len) * (grapple_max_len - (grapple_length - prev_len)) - anchor->x);
 				to_move.y = -(center_point->y + (line_vector.y / new_len) * (grapple_max_len - (grapple_length - prev_len)) - anchor->y);
+			} else {
+				printf("False \n");
 			}
 		}
 	}
+
 	int tilesize = tilemap.get_tilesize();
 	double len = to_move.length();
 	if (len > 0) 
@@ -303,7 +306,7 @@ void Player::update_grapple(CornerList &allCorners, CornerList &corners, CornerL
 	std::shared_ptr<Corner> anchor = anchorPoint.corner;
 	
 	bool free_point = false, add_point = false;
-	double smallest_angle = 100.0;
+	double smallest_angle = 100.0; //Largest possible angle is PI, so 100.0 will always be larger.
 	
 	std::shared_ptr<Corner> prev_anchor;
 	

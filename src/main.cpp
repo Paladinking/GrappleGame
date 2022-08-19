@@ -9,6 +9,7 @@
 #include "game.h"
 #include "climbGame.h"
 #include "testGame.h"
+#include "json.h"
 
 /**
  * Frees still used global resources and quits SDL and SDL_image.
@@ -42,6 +43,7 @@ int main(int argc, char* args[])
 		printf("Could not initialize SDL, %s\n", SDL_GetError());
 		exit(-1);
 	}
+	
 	int exit_status = 0;
 	ClimbGame game;
 	try {

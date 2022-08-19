@@ -18,7 +18,7 @@ const int PLAYER_FULL_WIDTH = 24;
 const int PLAYER_FULL_HEIGHT = 40;
 const int GRAPPLE_LENGTH = 350;
 const double GRAPPLE_SPEED = 800.0;
-const double GRAPPLE_PULL = 4000.0;
+const double GRAPPLE_PULL = 5000.0;
 
 const double PI = 3.141592654;
 const double PI_HALF = PI / 2;
