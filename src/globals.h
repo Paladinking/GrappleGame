@@ -11,8 +11,8 @@ const double GRAVITY_ACCELERATION = 3000.0;
 const double MAX_MOVEMENT_VEL = 350.0;
 const double MOVEMENT_ACCELERATION = 2200.0;
 const double FRICTION_FACTOR = 1200.0;
-const double AIR_RES_FACTOR = 0.01;
-const double JUMP_VEL = 1100;
+const double AIR_RES_FACTOR = 0.005;
+const double JUMP_VEL = 800;
 
 const int PLAYER_FULL_WIDTH = 24;
 const int PLAYER_FULL_HEIGHT = 40;

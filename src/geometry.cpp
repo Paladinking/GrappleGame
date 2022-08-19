@@ -29,6 +29,15 @@ bool Triangle::contains_point(double x, double y) const
 	return sp >= 0 && tp >= 0 && area2 >= sp + tp;
 }
 
+double distance(double x1, double y1, double x2, double y2) 
+{
+	return std::sqrt((x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2));
+}
+
+double length(double x1, double x2)
+{
+	return std::sqrt(x1 * x1 + x2 * x2);
+}
 
 bool is_clockwise(double x0, double y0, double x1, double y1, double x2, double y2) {
 	return (-y1 * x2 + y0 * (-x1 + x2) + x0 * (y1 - y2) + x1 * y2) > 0;

@@ -34,12 +34,6 @@ class Entity {
 		 */
 		virtual void render(const int cameraY);
 		
-		
-		/** 
-		 * Adds (dx, dy) to the acceleration of this entity.
-		 */
-		void add_acceleration(const double dx, const double dy);
-		
 		/**
 		 * Adds (dx, dy) to the velocity of this entity.
 		 */
@@ -65,22 +59,19 @@ class Entity {
 		 * Protected constructor for subclasses.
 		 */
 		Entity() {};
-		
-		virtual Vector2D get_dynamic_acc(double x, double y, double dx, double dy) {return {0.0, 0.0};};
-		
-		Vector2D pos;
-		Vector2D vel;
-		Vector2D acc;
-		
-		int width, height;
-	
-	private:
-		Texture texture;
 		/**
 		* Tries to move the entity by (dx, dy), stopping if a wall is in the way. 
 		* Requires that -tilesize < dx < tilesize and -tilesize < dy < tilesize
 		*/
 		void try_move(const double dx, const double dy, const int tilesize, const TileMap &tilemap);
+		
+		Vector2D pos;
+		Vector2D vel;
+		
+		int width, height;
+	
+	private:
+		Texture texture;
 		
 	
 	
@@ -107,11 +98,7 @@ class Player : public Entity {
 		void fire_grapple(const int target_x, const int target_y);
 		
 		void toggle_pull();
-		
-	protected:
-	
-		virtual Vector2D get_dynamic_acc(double x, double y, double dx, double dy) override;
-		
+
 	private:
 		
 		typedef std::vector<std::shared_ptr<Corner>> CornerList;

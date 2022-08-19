@@ -3,287 +3,140 @@
 #include <cmath>
 #include <vector>
 #include <algorithm>
+#include "geometry.h"
 
 struct Point {
-	int x, y;
-	int orientation = -1;
+	double x, y;
 };
-
-class Triangle {
-	private:
-		double area2;
-		double s1, s2, s3;
-		double t1, t2, t3;
-		
-	public:
-		Triangle(int x0, int y0, int x1, int y1, int x2, int y2) {
-			int d1 = std::abs(y0 - y1);
-			
-			
-			area2 = (-y1 * x2 + y0 * (-x1 + x2) + x0 * (y1 - y2) + x1 * y2);
-			if (area2 < 0) {
-				area2 *= -1;
-				s1 = x0 * y2 - y0 * x2;
-				s2 = y0 - y2;
-				s3 = x2 - x0;
-				t1 = y0 * x1 - x0 * y1;
-				t2 = y1 - y0;
-				t3 = x0 - x1;
-			} else {
-				s1 = y0 * x2 - x0 * y2;
-				s2 = y2 - y0;
-				s3 = x0 - x2;
-				t1 = x0 * y1 - y0 * x1;
-				t2 = y0 - y1;
-				t3 = x1 - x0;
-			}
-		}
-		
-		bool contains_point(int x, int y) 
-		{
-			double sp = s1 + s2 * x + s3 * y;
-			double tp = t1 + t2 * x + t3 * y;
-			return sp >= 0 && tp >= 0 && area2 >= sp + tp;
-		}
-};
-
-bool is_clockwise(int x0, int y0, int x1, int y1, int x2, int y2) {
-	return (-y1 * x2 + y0 * (-x1 + x2) + x0 * (y1 - y2) + x1 * y2) > 0;
-}
-
-double get_angle(double x0, double y0, double x1, double y1, double x2, double y2) {
-	double dx1 = x0 - x1;
-	double dy1 = y0 - y1;
-	double dx2 = x2 - x1;
-	double dy2 = y2 - y1;
-	double len1 = std::sqrt(dx1 * dx1 + dy1 * dy1);
-	double len2 = std::sqrt(dx2 * dx2 + dy2 * dy2);
-	return std::acos(dx1 / len1 * dx2 / len2 + dy1 / len1 * dy2 /len2);
-}
-
-double get_angle(double v0x, double v0y, double v1x, double v1y) {
-	double len1 = std::sqrt(v0x * v0x + v0y * v0y);
-	double len2 = std::sqrt(v1x * v1x + v1y * v1y);
-	return std::acos(v0x / len1 * v1x / len2 + v0y / len1 * v1y /len2);
-}
-
-Point get_line_intersection(int x1, int y1, int x2, int y2, int x3, int y3, int x4, int y4) {
-	double denom = (double)((x1 - x2) * (y3 - y4) - (y1 - y2) * (x3 - x4));
-	if (denom == 0) {
-		printf("Warning: 0!");
-		return {x1, y1};
-	}
-	double x = ((x1 * y2 - y1 * x2) * (x3 - x4) - (x1 - x2) * (x3 * y4 - y3 * x4)) / denom;
-	double y = ((x1 * y2 - y1 * x2) * (y3 - y4) - (y1 - y2) * (x3 * y4 - y3 * x4)) / denom;
-	return {(int)x, (int)y};
-}
-
-
-void add_containing(Triangle &t, const std::vector<Point> &source, std::vector<Point> &dest, Point &ignored) {
-	for (const Point &p: source) {
-		if ((p.x != ignored.x || p.y != ignored.y) && t.contains_point(p.x, p.y)) dest.push_back({p.x, p.y});
-	}
-}
-
-
-bool free_anchor_point(Point &next, int anchor_index, std::vector<Point> &points) {
-	if (anchor_index == 0) return false;
-	Point &anchor = points[anchor_index];
-	Point &prev_anchor = points[anchor_index - 1];
-	bool orientation = is_clockwise(prev_anchor.x, prev_anchor.y, anchor.x, anchor.y, next.x, next.y);
-	if ((!orientation && anchor.orientation == 1) || (orientation && anchor.orientation == 0)) {
-		points.erase(points.begin() + anchor_index);
-		return true;
-	}
-	return false;
-}
-
-void update_rope(std::vector<Point> &rope_points, const std::vector<Point> &points, std::vector<Point> &contained, Point cur, Point prev)
-{
-	int anchor_index = rope_points.size() - 1;
-	Point anchor = rope_points[anchor_index];
-	bool free_point = false, add_point = false;
-	double smallest_angle = 100.0; // Invalidly big angle
-	if (anchor_index > 0) {
-		Point &prev_anchor = rope_points[anchor_index - 1];
-		bool orientation = is_clockwise(prev_anchor.x, prev_anchor.y, anchor.x, anchor.y, cur.x, cur.y);
-		if ((orientation && anchor.orientation == 0) || (!orientation && anchor.orientation == 1))
-		{
-			smallest_angle = get_angle(anchor.x - prev_anchor.x, anchor.y - prev_anchor.y, prev.x - anchor.x, prev.y - anchor.y);
-			free_point  = true;
-		}
-	}
-	Triangle t = {prev.x, prev.y, cur.x, cur.y, anchor.x, anchor.y};
-	add_containing(t, points, contained, anchor);
-	Point to_be_added;
-	for (Point &p : contained) {
-		double angle = get_angle(prev.x, prev.y, anchor.x, anchor.y, p.x, p.y);
-		if (angle < smallest_angle) {
-			smallest_angle = angle;
-			free_point = false;
-			add_point = true;
-			to_be_added = p;
-		}
-	}
-	if (add_point) {
-		to_be_added.orientation = is_clockwise(anchor.x, anchor.y, to_be_added.x, to_be_added.y, cur.x, cur.y);
-		rope_points.push_back(to_be_added);
-		std::vector<Point> new_points;
-		new_points.swap(contained);
-		update_rope(rope_points, new_points, contained, cur, prev);
-	} else if (free_point) {
-		rope_points.pop_back();
-		Point &new_anchor = rope_points[rope_points.size() - 1];
-		Point new_prev = get_line_intersection(prev.x, prev.y, cur.x, cur.y, anchor.x, anchor.y, new_anchor.x, new_anchor.y);
-		contained.clear();
-		std::vector<Point> new_points;
-		for (const Point &p : points) {
-			if (p.x != anchor.x || p.y != anchor.y) {
-				new_points.push_back(p);
-			}
-		}
-		update_rope(rope_points, new_points, contained, cur, new_prev);
-	}
-	
-}
-
 
 
 class TestGame : public Game {
 	public:
 		TestGame() : Game(SCREEN_WIDTH, SCREEN_HEIGHT, "Test") {}
 	protected:
+	
+		double max_length = 300.0;
 		
-		std::vector<Point> points;
-		std::vector<Point> rope_points;
-		Texture circle;
-		Point p1 = {30, 300};
-		Point prev = {-1, -1};
-		Point cur = {-1, -1};
+		Texture circle1, circle2;
+		Point anchor = {SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2 - 200};
+		Point ball = {SCREEN_WIDTH / 2 - 300, SCREEN_HEIGHT / 2 - 50};
+		Point vel = {0.0, 0.0};
+		Point projected;
+		Point rotated;
+		Point line_vector;
+		bool toggle = false;
 		
 		virtual void init() override {
-			points.push_back({10, 10});
-			points.push_back({123, 42});
-			points.push_back({600, 242});
-			points.push_back({300, 300});
-			points.push_back({123, 556});
-			points.push_back({444, 232});
-			points.push_back({232, 430});
-			points.push_back({588, 333});
-			circle.load_from_file("assets/ball.png");
-			circle.set_dimensions(4, 4);
-			
-			rope_points.push_back({300, 500});
-			
+			circle1.load_from_file("assets/ball.png");
+			circle2.load_from_file("assets/ball.png");
+			circle1.set_dimensions(4, 4);
+			circle2.set_dimensions(20, 20);
 		}
 		
 		virtual void handle_mousepress(SDL_MouseButtonEvent e) override {
 			if (e.button == SDL_BUTTON_MIDDLE){
-				points.push_back({e.x, e.y});
-				
 				return;
 			}
-			if (prev.x == -1) {
-				prev = {e.x, e.y};
-				return;
-			}
-			prev = {cur.x, cur.y};
-			cur = {e.x, e.y};
-			std::vector<Point> con;
-			update_rope(rope_points, points, con, cur, prev);
-			printf(" --\n");
-			return;
-			int anchor_index = rope_points.size() - 1;
-			Point anchor = rope_points[anchor_index];
-			
-			Triangle t = {prev.x, prev.y, cur.x, cur.y, anchor.x, anchor.y};
-			std::vector<Point> contained;
-			
-			
-			
-			bool freed = false;
-			
-			Point to_ignore;
-			
-			add_containing(t, points, contained, anchor);
-			if (contained.size() == 0) {
-				Point next = {e.x, e.y};
-				if (free_anchor_point(next, anchor_index, rope_points)) {
-					Point &prev_anchor = rope_points[anchor_index -1];
-					t = {anchor.x, anchor.y, cur.x, cur.y, prev_anchor.x, prev_anchor.y};
-					to_ignore = anchor;
-					anchor = prev_anchor;
-					anchor_index--;
-					contained.clear();
-					add_containing(t, points, contained, anchor);
-				} else {
-					return;
-				}
-			}
-
-			do {
-				Point to_be_added = {-1, -1};
-				double smallest_angle = 10.0;
-				for (Point &p : contained) {
-					if (p.x == to_ignore.x && p.y == to_ignore.y) continue;
-					double angle = get_angle(prev.x, prev.y, anchor.x, anchor.y, p.x, p.y);
-					if (angle < smallest_angle) {
-						smallest_angle = angle;
-						to_be_added = p;
-					}
-				}
-				if (smallest_angle != 10.0) {
-					to_be_added.orientation = is_clockwise(anchor.x, anchor.y, to_be_added.x, to_be_added.y, e.x, e.y);
-					rope_points.push_back(to_be_added);
-					std::vector<Point> new_contained;
-					t = {prev.x, prev.y, cur.x, cur.y, to_be_added.x, to_be_added.y};
-					add_containing(t, contained, new_contained, to_be_added);
-					contained = new_contained;
-				} else {
-					break;
-				}
-			} while (true);
-			
-			if (anchor_index < rope_points.size() - 1) {
-				free_anchor_point(rope_points[anchor_index + 1], anchor_index, rope_points);
-			}
-			
+			vel.y = - 700.0; 
+			//toggle = !toggle;
+		}
 		
+		virtual void tick(Uint64 delta) {
+			double dDelta = delta / 1000.0;
+			const Uint8* currentKeyStates = SDL_GetKeyboardState(NULL);
+			if (currentKeyStates[SDL_SCANCODE_UP]) {
+				vel.y -= 300.0 * dDelta;
+			}
+			if (currentKeyStates[SDL_SCANCODE_DOWN]) {
+				vel.y += 300.0 * dDelta;
+			}
+			if (currentKeyStates[SDL_SCANCODE_LEFT]) {
+				vel.x -= 300.0 * dDelta;
+			}
+			if (currentKeyStates[SDL_SCANCODE_RIGHT]) {
+				vel.x += 300.0 * dDelta;
+			}
+			if (currentKeyStates[SDL_SCANCODE_Q] && max_length > 10.0) {
+				max_length -= 100.0 * dDelta;
+			}
+			if (currentKeyStates[SDL_SCANCODE_E]) {
+				max_length += 100.0 * dDelta;
+			}
 			
+			
+			//vel.y += (toggle ? 0.0: GRAVITY_ACCELERATION) * dDelta; 
+			//vel.x += (toggle ? 300.0 : 0.0) * dDelta;
+			vel.x -= vel.x * std::abs(vel.x) * 0.001 * dDelta;
+			vel.y -= vel.y * std::abs(vel.y) * 0.001 * dDelta;
+			
+			Point next = {ball.x + vel.x * dDelta, ball.y + vel.y * dDelta};
+			line_vector = {anchor.x - ball.x, anchor.y - ball.y};
+			rotated = {-line_vector.y, line_vector.x};
+			double line_length = distance(next.x, next.y, anchor.x, anchor.y);
+			
+			if (line_length > max_length) {
+				double angle = get_angle(vel.x, vel.y, line_vector.x, line_vector.y);
+				if (angle > 3.141592 / 2) {
+					double proj_scalar = (rotated.x * vel.x + rotated.y * vel.y)
+						/ (rotated.x * rotated.x + rotated.y * rotated.y);
+					
+					projected = {rotated.x * proj_scalar, rotated.y * proj_scalar};
+					vel = projected;
+					
+					next = {ball.x + vel.x * dDelta, ball.y + vel.y * dDelta};
+					
+					Point lv = {anchor.x - next.x, anchor.y - next.y};
+					double line_len = length(lv.x, lv.y);
+					
+					next.x = anchor.x + max_length * -lv.x / line_len;
+					next.y = anchor.y + max_length * -lv.y / line_len;
+				}
+			}
+			
+			
+			ball.x = next.x;
+			ball.y = next.y;
+		}
+		
+		virtual void handle_keyup(SDL_KeyboardEvent e) override {
+			if (e.keysym.sym == SDLK_ESCAPE) {
+				exit_game();
+			}
 		}
 		
 		virtual void render() override {
 			SDL_SetRenderDrawColor(gRenderer, 0xFF, 0xFF, 0xFF, 0xFF);
 			SDL_RenderClear(gRenderer);
 			
+			SDL_SetRenderDrawColor(gRenderer, 0x00, 0x00, 0x00, 0xFF);
+			SDL_RenderDrawLine(gRenderer, ball.x, ball.y, anchor.x, anchor.y);
 			
-			for (const Point &point : points) {
-				circle.render(point.x, point.y);
-				
+			circle1.render(anchor.x - 2, anchor.y - 2);
+			circle2.render(ball.x - 10, ball.y - 10);
+			
+			double len = length(vel.x, vel.y);
+			if (len != 0) { 
+				SDL_SetRenderDrawColor(gRenderer, 0x00, 0xFF, 0xFF, 0xFF);
+				SDL_RenderDrawLine(gRenderer, ball.x, ball.y, ball.x + 20 * vel.x / len * 2, ball.y  + 20 * vel.y / len * 2);
 			}
-			
-			
-			SDL_SetRenderDrawColor(gRenderer, 0x00, 0xFF, 0x00, 0xFF);
-			Point *prev_p = &prev;
-			for (int i = rope_points.size() - 1; i >=0; --i) {
-				
-				Point &p = rope_points[i];
-				SDL_RenderDrawLine(gRenderer, p.x, p.y, prev_p->x, prev_p->y);
-				prev_p = &rope_points[i];
+			len = length(projected.x, projected.y);
+			if (len != 0) {
+				SDL_SetRenderDrawColor(gRenderer, 0x00, 0x00, 0xFF, 0xFF);
+				SDL_RenderDrawLine(gRenderer, ball.x, ball.y, ball.x + 20 * projected.x / len * 2, ball.y + 20 * projected.y / len * 2);
 			}
-			
-			if (cur.x != -1 && prev.x != -1) {
-				SDL_SetRenderDrawColor(gRenderer, 0x00, 0x00, 0x00, 0xFF);
-				Point &p1 = rope_points[rope_points.size() - 1];
-				SDL_RenderDrawLine(gRenderer, p1.x, p1.y, prev.x, prev.y);
-				SDL_RenderDrawLine(gRenderer, p1.x, p1.y, cur.x,  cur.y);
-				SDL_RenderDrawLine(gRenderer, cur.x, cur.y, prev.x, prev.y);
+			len = length(line_vector.x, line_vector.y);
+			if (len != 0) {
+				SDL_SetRenderDrawColor(gRenderer, 0x00, 0x00, 0x99, 0xFF);
+				SDL_RenderDrawLine(gRenderer, ball.x, ball.y, ball.x + 20 * line_vector.x / len * 2, ball.y + 20 * line_vector.y / len * 2);
 			}
-			
+			len = length(rotated.x, rotated.y);
+			if (len != 0) {
+				SDL_SetRenderDrawColor(gRenderer, 0x00, 0x00, 0x99, 0xFF);
+				SDL_RenderDrawLine(gRenderer, ball.x, ball.y, ball.x + 20 * rotated.x / len * 2, ball.y + 20 * rotated.y / len * 2);
+			}
+
 			SDL_RenderPresent(gRenderer);
 		}
-		
-	private:
 		
 };
 

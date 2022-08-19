@@ -14,6 +14,10 @@ class Triangle {
 		bool contains_point(double x, double y) const;
 };
 
+double length(double x1, double x2);
+
+double distance(double x1, double y1, double x2, double y2);
+
 bool is_clockwise(double x0, double y0, double x1, double y1, double x2, double y2);
 
 double get_angle(double x0, double y0, double x1, double y1, double x2, double y2);

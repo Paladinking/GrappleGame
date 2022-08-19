@@ -7,19 +7,9 @@ void ClimbGame::tick(Uint64 delta) {
 	//printf("%f\n", 1 / dDelta);
 	handle_input(dDelta);
 	for (auto e : entities) {
-		const Vector2D &vel = e->get_velocity();
-		bool on_ground = e->on_ground(tilemap);
-		if (vel.y < MAX_GRAVITY_VEL && !on_ground) {
-			e->add_acceleration(0, GRAVITY_ACCELERATION); // Apply gravity
-		}
-		double factor = FRICTION_FACTOR * dDelta;
-		double air_resistance = AIR_RES_FACTOR * vel.length();
-
-		
 		e->tick(dDelta, tilemap, corners);
 	}
 }
-
 
 void ClimbGame::handle_input(double delta) {
 	const Uint8* currentKeyStates = SDL_GetKeyboardState(NULL);
@@ -35,11 +25,11 @@ void ClimbGame::handle_input(double delta) {
 	} 
 	if (currentKeyStates[SDL_SCANCODE_A] && vel.x > -MAX_MOVEMENT_VEL) 
 	{
-		player->add_acceleration(-MOVEMENT_ACCELERATION, 0);
+		player->add_velocity(-MOVEMENT_ACCELERATION * delta, 0);
 	} 
 	if (currentKeyStates[SDL_SCANCODE_D] && vel.x < MAX_MOVEMENT_VEL) 
 	{
-		player->add_acceleration(MOVEMENT_ACCELERATION, 0);
+		player->add_velocity(MOVEMENT_ACCELERATION * delta, 0);
 	}
 	if (currentKeyStates[SDL_SCANCODE_E]) {
 		if (!grapple_pressed) {

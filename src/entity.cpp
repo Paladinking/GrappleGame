@@ -11,29 +11,8 @@ void Entity::load_texture(std::string texture_path)
 
 void Entity::tick(const double delta, const TileMap &tilemap, std::vector<std::shared_ptr<Corner>> &corners) 
 {
-	vel.add_scaled(acc, delta);
-	double x = pos.x + width / 2, y = pos.y + height / 2, dx = vel.x, dy = vel.y;
-	printf("%f, %f, ", vel.x, vel.y);
-	double delta_part = delta / 10.0;
-	double moved_x = 0.0, moved_y = 0.0;
-	for (int i = 0; i < 10; i++) {
-		Vector2D d_acc = get_dynamic_acc(x, y, dx, dy);
-		dx += d_acc.x * delta_part;
-		dy += d_acc.y * delta_part;
-		moved_x += dx * delta_part;
-		moved_y += dy * delta_part;
-		x += dx * delta_part;
-		y += dy * delta_part;
-		
-	}
-	printf("%f, %f\n", moved_x, moved_y);
-	vel.x = dx;
-	vel.y = dy;
-	acc.x = 0.0;
-	acc.y = 0.0;
-	
 	int tilesize = tilemap.get_tilesize();
-	Vector2D to_move = {moved_x, moved_y};
+	Vector2D to_move = {vel.x * delta, vel.y * delta};
 	double len = to_move.length();
 	if (len > 0) 
 	{
@@ -81,12 +60,6 @@ void Entity::try_move(const double dx, const double dy, int tilesize, const Tile
 	}
 	pos.x = new_x;
 	pos.y = new_y;
-}
-
-void Entity::add_acceleration(const double dx, const double dy) 
-{
-	acc.x += dx;
-	acc.y += dy;
 }
 
 void Entity::add_velocity(const double dx, const double dy) 
@@ -150,42 +123,62 @@ void Player::render(const int cameraY)
 	grapple_hook.render(hook->x - 2, hook->y - cameraY - 2);
 }
 
-Vector2D Player::get_dynamic_acc(double x, double y, double dx, double dy) {
-	Vector2D acc = {0.0, 0.0};
-	// Air resistance
-	acc.x -= dx * std::abs(dx) * AIR_RES_FACTOR;
-	acc.y -= dy * std::abs(dy) * AIR_RES_FACTOR;
-	// Rope
-	if (grappling_mode == PLACED)
-	{
-		int i = 0;
-		double len = 0.0;
-		for (; i + 3 < grapple_points.size(); ++i) {
-			const auto &p1 = grapple_points[i].corner; 
-			const auto &p2 = grapple_points[i + 1].corner; 
-			len += std::sqrt((p1->x - p2->x)  * (p1->x - p2->x) + (p1->y - p2->y) * (p1->y - p2->y));
-		}
-		const auto &p = grapple_points[i].corner;
-		len += std::sqrt((p->x - x)  * (p->x - x) + (p->y - y) * (p->y - y));
-		double diff = len - GRAPPLE_LENGTH;
-		if (diff > 0) {
-			printf("+");
-			GrapplePoint &anchor = grapple_points[grapple_points.size() - 2];
-			Vector2D v = Vector2D(anchor.corner->x - x, anchor.corner->y - y);
-			v.normalize();
-			double size = GRAPPLE_FORCE * diff * diff;
-			acc.add_scaled(v, size);
-		}
-	}
-	return acc;
-	
-}
-
 
 void Player::tick(const double delta, const TileMap &tilemap, CornerList &corners)
 {
 	Vector2D old_pos = {pos.x + width / 2, pos.y + height / 2};
-	Entity::tick(delta, tilemap, corners);
+	bool is_on_ground = on_ground(tilemap);
+	if (is_on_ground) {
+		double factor = delta * FRICTION_FACTOR;
+		if (vel.x > 0) {
+			vel.x -= factor > vel.x ? vel.x : factor;
+		} else {
+			vel.x += factor > -vel.x ? -vel.x : factor;
+		}
+		
+	} else if (vel.y < MAX_GRAVITY_VEL) {
+		vel.y += GRAVITY_ACCELERATION * delta;
+	}
+	
+	Vector2D to_move = {vel.x * delta, vel.y * delta};
+	
+	if (grappling_mode == PLACED && grapple_length > GRAPPLE_LENGTH && (vel.x != 0 || vel.y != 0)) {
+		const std::shared_ptr<Corner> &anchor = grapple_points[grapple_points.size() - 2].corner;
+		Vector2D line_vector = {anchor->x - center_point->x, anchor->y - center_point->y};
+		double angle = get_angle(line_vector.x, line_vector.y, vel.x, vel.y);
+		if (angle > 3.141592 / 2.0) {
+			double rotated_x = -line_vector.y, rotated_y = line_vector.x;
+			double proj_scalar = (rotated_x * vel.x + rotated_y * vel.y)
+						/ (rotated_x * rotated_x + rotated_y * rotated_y);
+			vel.x = proj_scalar * rotated_x;
+			vel.y = proj_scalar * rotated_y;
+			
+			double prev_len = line_vector.length();
+			line_vector.x = anchor->x - (center_point->x + vel.x * delta);
+			line_vector.y = anchor->y - (center_point->y + vel.y * delta);
+			double new_len = line_vector.length();
+
+			to_move.x = -(center_point->x + (line_vector.x / new_len) * (GRAPPLE_LENGTH - (grapple_length - prev_len)) - anchor->x);
+			to_move.y = -(center_point->y + (line_vector.y / new_len) * (GRAPPLE_LENGTH - (grapple_length - prev_len)) - anchor->y);
+		}
+	}
+	int tilesize = tilemap.get_tilesize();
+	double len = to_move.length();
+	if (len > 0) 
+	{
+		// Get vector in movement direction of length TILE_SIZE.
+		// Calculate how many of those steps needed for full movement + the remainder movement.
+		// Then try_move won't skip any potential blocked tiles, even at low framerates.
+		Vector2D move_step = {(to_move.x / len) * tilesize, (to_move.y / len) * tilesize};
+		int steps = len / tilesize;
+		to_move.x -= steps * move_step.x;
+		to_move.y -= steps * move_step.y;
+		for (; steps > 0; steps--) 
+		{
+			try_move(move_step.x, move_step.y, tilesize, tilemap);
+		}
+		try_move(to_move.x, to_move.y, tilesize, tilemap);
+	}
 	//printf("delta : %f\n", pos.y - old_pos.y + height / 2);
 
 	if (grappling_mode == TRAVELING || (grappling_mode == PLACED && (vel.x != 0 || vel.y != 0))) 
