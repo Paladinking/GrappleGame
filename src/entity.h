@@ -126,6 +126,7 @@ class Player : public Entity {
 		GrapplingMode grappling_mode = UNUSED;
 
 		double grapple_length;
+		double grapple_max_len = GRAPPLE_LENGTH;
 		
 		bool pull;
 

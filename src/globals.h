@@ -18,8 +18,7 @@ const int PLAYER_FULL_WIDTH = 24;
 const int PLAYER_FULL_HEIGHT = 40;
 const int GRAPPLE_LENGTH = 350;
 const double GRAPPLE_SPEED = 800.0;
-const double GRAPPLE_PULL = 6000.0;
-const double GRAPPLE_FORCE = 200.0;
+const double GRAPPLE_PULL = 4000.0;
 
 const int TILE_SIZE = 8;
 const int FULL_TILE_HEIGHT = 160;

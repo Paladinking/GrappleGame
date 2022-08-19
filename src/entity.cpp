@@ -142,24 +142,32 @@ void Player::tick(const double delta, const TileMap &tilemap, CornerList &corner
 	
 	Vector2D to_move = {vel.x * delta, vel.y * delta};
 	
-	if (grappling_mode == PLACED && grapple_length > GRAPPLE_LENGTH && (vel.x != 0 || vel.y != 0)) {
+	if (grappling_mode == PLACED) {
 		const std::shared_ptr<Corner> &anchor = grapple_points[grapple_points.size() - 2].corner;
 		Vector2D line_vector = {anchor->x - center_point->x, anchor->y - center_point->y};
-		double angle = get_angle(line_vector.x, line_vector.y, vel.x, vel.y);
-		if (angle > 3.141592 / 2.0) {
-			double rotated_x = -line_vector.y, rotated_y = line_vector.x;
-			double proj_scalar = (rotated_x * vel.x + rotated_y * vel.y)
-						/ (rotated_x * rotated_x + rotated_y * rotated_y);
-			vel.x = proj_scalar * rotated_x;
-			vel.y = proj_scalar * rotated_y;
-			
-			double prev_len = line_vector.length();
-			line_vector.x = anchor->x - (center_point->x + vel.x * delta);
-			line_vector.y = anchor->y - (center_point->y + vel.y * delta);
-			double new_len = line_vector.length();
-
-			to_move.x = -(center_point->x + (line_vector.x / new_len) * (GRAPPLE_LENGTH - (grapple_length - prev_len)) - anchor->x);
-			to_move.y = -(center_point->y + (line_vector.y / new_len) * (GRAPPLE_LENGTH - (grapple_length - prev_len)) - anchor->y);
+		if (pull) {
+			line_vector.normalize();
+			vel.x += line_vector.x * GRAPPLE_PULL * delta;
+			vel.y += line_vector.y * GRAPPLE_PULL * delta;
+			to_move.x = vel.x * delta;
+			to_move.y = vel.y * delta;
+		} else if(grapple_length > grapple_max_len && (vel.x != 0 || vel.y != 0)) {
+			double angle = get_angle(line_vector.x, line_vector.y, vel.x, vel.y);
+			if (angle > 3.141592 / 2.0) {
+				double rotated_x = -line_vector.y, rotated_y = line_vector.x;
+				double proj_scalar = (rotated_x * vel.x + rotated_y * vel.y)
+							/ (rotated_x * rotated_x + rotated_y * rotated_y);
+				vel.x = proj_scalar * rotated_x;
+				vel.y = proj_scalar * rotated_y;
+				
+				double prev_len = line_vector.length();
+				line_vector.x = anchor->x - (center_point->x + vel.x * delta);
+				line_vector.y = anchor->y - (center_point->y + vel.y * delta);
+				double new_len = line_vector.length();
+	
+				to_move.x = -(center_point->x + (line_vector.x / new_len) * (grapple_max_len - (grapple_length - prev_len)) - anchor->x);
+				to_move.y = -(center_point->y + (line_vector.y / new_len) * (grapple_max_len - (grapple_length - prev_len)) - anchor->y);
+			}
 		}
 	}
 	int tilesize = tilemap.get_tilesize();
@@ -179,7 +187,6 @@ void Player::tick(const double delta, const TileMap &tilemap, CornerList &corner
 		}
 		try_move(to_move.x, to_move.y, tilesize, tilemap);
 	}
-	//printf("delta : %f\n", pos.y - old_pos.y + height / 2);
 
 	if (grappling_mode == TRAVELING || (grappling_mode == PLACED && (vel.x != 0 || vel.y != 0))) 
 	{
@@ -190,7 +197,7 @@ void Player::tick(const double delta, const TileMap &tilemap, CornerList &corner
 
 	if (grappling_mode == TRAVELING)
 	{
-		if (grapple_length >= GRAPPLE_LENGTH)
+		if (grapple_length >= grapple_max_len)
 		{
 			grapple_points.clear();
 			grappling_mode = UNUSED;
@@ -247,6 +254,7 @@ void Player::fire_grapple(const int targetX, const int targetY)
 		grappling_mode = TRAVELING;
 		pull = false;
 		grapple_length = 0;
+		grapple_max_len = GRAPPLE_LENGTH;
 		grapple_vel.x = targetX - (pos.x + width  / 2);
 		grapple_vel.y = targetY - (pos.y + height / 2);
 		grapple_vel.normalize();
