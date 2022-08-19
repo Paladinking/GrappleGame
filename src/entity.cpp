@@ -153,7 +153,7 @@ void Player::tick(const double delta, const TileMap &tilemap, CornerList &corner
 			to_move.y = vel.y * delta;
 		} else if(grapple_length > grapple_max_len && (vel.x != 0 || vel.y != 0)) {
 			double angle = get_angle(line_vector.x, line_vector.y, vel.x, vel.y);
-			if (angle > 3.141592 / 2.0) {
+			if (angle > PI_HALF) {
 				double rotated_x = -line_vector.y, rotated_y = line_vector.x;
 				double proj_scalar = (rotated_x * vel.x + rotated_y * vel.y)
 							/ (rotated_x * rotated_x + rotated_y * rotated_y);

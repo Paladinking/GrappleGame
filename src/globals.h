@@ -20,6 +20,9 @@ const int GRAPPLE_LENGTH = 350;
 const double GRAPPLE_SPEED = 800.0;
 const double GRAPPLE_PULL = 4000.0;
 
+const double PI = 3.141592654;
+const double PI_HALF = PI / 2;
+
 const int TILE_SIZE = 8;
 const int FULL_TILE_HEIGHT = 160;
 const int FULL_TILE_WIDTH = 80;
