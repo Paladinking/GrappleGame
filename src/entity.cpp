@@ -139,6 +139,9 @@ void Player::tick(const double delta, const TileMap &tilemap, CornerList &corner
 	} else if (vel.y < MAX_GRAVITY_VEL) {
 		vel.y += GRAVITY_ACCELERATION * delta;
 	}
+
+	vel.x -= vel.x * std::abs(vel.x) * AIR_RES_FACTOR * delta;
+	vel.y -= vel.y * std::abs(vel.y) * AIR_RES_FACTOR * delta;
 	
 	Vector2D to_move = {vel.x * delta, vel.y * delta};
 	
