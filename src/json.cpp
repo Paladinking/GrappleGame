@@ -79,7 +79,7 @@ bool read_number(FileReader &in, int &i_val, double &d_val) {
 		is_int = false;
 		if(!in.read_next(c)) throw end_of_file();
 	}
-	if (c - '0' > 9 || c - '0' < 1) {
+	if (c - '0' > 9 || c - '0' < 0) {
 		throw unexpected_char(c, in);
 	}
 	i_val = 0;
