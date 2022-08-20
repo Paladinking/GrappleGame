@@ -26,7 +26,7 @@ bool Triangle::contains_point(double x, double y) const
 {
 	double sp = s1 + s2 * x + s3 * y;
 	double tp = t1 + t2 * x + t3 * y;
-	return sp >= 0 && tp >= 0 && area2 >= sp + tp;
+	return sp > 0.000000001	&& tp > 0.000000001 && area2 > sp + tp;
 }
 
 double distance(double x1, double y1, double x2, double y2) 

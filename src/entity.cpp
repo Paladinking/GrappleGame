@@ -146,12 +146,13 @@ void Player::tick(const double delta, const TileMap &tilemap, CornerList &corner
 		const std::shared_ptr<Corner> &anchor = grapple_points[grapple_points.size() - 2].corner;
 		Vector2D line_vector = {anchor->x - center_point->x, anchor->y - center_point->y};
 		if (pull) {
-			line_vector.normalize();
-			vel.x += line_vector.x * GRAPPLE_PULL * delta;
-			vel.y += line_vector.y * GRAPPLE_PULL * delta;
+			double line_vec_len = line_vector.length();
+			vel.x += line_vector.x / line_vec_len * GRAPPLE_PULL * delta;
+			vel.y += line_vector.y / line_vec_len * GRAPPLE_PULL * delta;
 			to_move.x = vel.x * delta;
 			to_move.y = vel.y * delta;
-		} else if(grapple_length > grapple_max_len && (vel.x != 0 || vel.y != 0)) {
+		}
+		if(grapple_length > grapple_max_len && (vel.x != 0 || vel.y != 0)) {
 			double angle = get_angle(line_vector.x, line_vector.y, vel.x, vel.y);
 			if (angle > PI_HALF) {
 				double rotated_x = -line_vector.y, rotated_y = line_vector.x;
@@ -194,6 +195,11 @@ void Player::tick(const double delta, const TileMap &tilemap, CornerList &corner
 		center_point->x = pos.x + width / 2;
 		center_point->y = pos.y + height / 2;
 		update_grapple(corners, old_pos, false);
+		if (pull) {
+			if (grapple_length + 10.0 < grapple_max_len) {
+				grapple_max_len = grapple_length + 10.0;
+			}
+		}
 	}
 
 	if (grappling_mode == TRAVELING)
@@ -321,10 +327,10 @@ void Player::update_grapple(CornerList &allCorners, CornerList &corners, CornerL
 		}
 	}
 	
-	// 
 	Triangle t = {prev.x, prev.y, cur->x, cur->y, anchor->x, anchor->y};
 	anchor->ignored = true;
 	std::shared_ptr<Corner> to_be_added;
+
 	for (std::shared_ptr<Corner> &corner : corners) {
 		if (!corner->ignored && t.contains_point(corner->x, corner->y)) {
 			contained.push_back(corner);
