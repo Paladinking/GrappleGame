@@ -8,8 +8,6 @@
 #include "exceptions.h"
 #include "game.h"
 #include "climbGame.h"
-#include "testGame.h"
-#include "json.h"
 
 /**
  * Frees still used global resources and quits SDL and SDL_image.

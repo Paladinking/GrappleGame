@@ -102,8 +102,8 @@ void Player::init(const double x, const double y, const int w, const int h)
 	vel.y = 0;
 	width = w;
 	height = h;
-	load_texture("assets/player.png");
-	grapple_hook.load_from_file("assets/ball.png");
+	load_texture(ASSETS_ROOT + PLAYER_IMG);
+	grapple_hook.load_from_file(ASSETS_ROOT + HOOK_IMG);
 	grapple_hook.set_dimensions(4, 4);
 }
 
@@ -167,9 +167,7 @@ void Player::tick(const double delta, const TileMap &tilemap, CornerList &corner
 	
 				to_move.x = -(center_point->x + (line_vector.x / new_len) * (grapple_max_len - (grapple_length - prev_len)) - anchor->x);
 				to_move.y = -(center_point->y + (line_vector.y / new_len) * (grapple_max_len - (grapple_length - prev_len)) - anchor->y);
-			} else {
-				printf("False \n");
-			}
+			} 
 		}
 	}
 
@@ -191,7 +189,7 @@ void Player::tick(const double delta, const TileMap &tilemap, CornerList &corner
 		try_move(to_move.x, to_move.y, tilesize, tilemap);
 	}
 
-	if (grappling_mode == TRAVELING || (grappling_mode == PLACED && (vel.x != 0 || vel.y != 0))) 
+	if (grappling_mode == TRAVELING || (grappling_mode == PLACED && (len > 0))) 
 	{
 		center_point->x = pos.x + width / 2;
 		center_point->y = pos.y + height / 2;

@@ -1,31 +1,43 @@
 #ifndef GLOBALS_00_H
 #define GLOBALS_00_H
 #include <SDL.h>
+#include <string>
+
+const std::string GLOBALS_PATH = "globals.json";
 
 //Screen dimension constants
-const int SCREEN_WIDTH = 640;
-const int SCREEN_HEIGHT = 640;
+extern int SCREEN_WIDTH;
+extern int SCREEN_HEIGHT;
 
-const double MAX_GRAVITY_VEL = 700.0;
-const double GRAVITY_ACCELERATION = 3000.0;
-const double MAX_MOVEMENT_VEL = 350.0;
-const double MOVEMENT_ACCELERATION = 2200.0;
-const double FRICTION_FACTOR = 1200.0;
-const double AIR_RES_FACTOR = 0.005;
-const double JUMP_VEL = 800;
+extern double MAX_GRAVITY_VEL;
+extern double GRAVITY_ACCELERATION;
+extern double MAX_MOVEMENT_VEL;
+extern double MOVEMENT_ACCELERATION;
+extern double FRICTION_FACTOR;
+extern double AIR_RES_FACTOR;
+extern double JUMP_VEL;
 
-const int PLAYER_FULL_WIDTH = 24;
-const int PLAYER_FULL_HEIGHT = 40;
-const int GRAPPLE_LENGTH = 350;
-const double GRAPPLE_SPEED = 800.0;
-const double GRAPPLE_PULL = 5000.0;
+extern int PLAYER_FULL_WIDTH;
+extern int PLAYER_FULL_HEIGHT;
+extern int PLAYER_START_X;
+extern int PLAYER_START_Y;
+extern int GRAPPLE_LENGTH;
+extern double GRAPPLE_SPEED;
+extern double GRAPPLE_PULL;
 
-const double PI = 3.141592654;
-const double PI_HALF = PI / 2;
+extern bool VERBOSE;
 
-const int TILE_SIZE = 8;
-const int FULL_TILE_HEIGHT = 160;
-const int FULL_TILE_WIDTH = 80;
+extern std::string ASSETS_ROOT;
+extern std::string PLAYER_IMG;
+extern std::string MAP_IMG;
+extern std::string HOOK_IMG;
+
+constexpr double PI = 3.141592654;
+constexpr double PI_HALF = PI / 2;
+
+extern int TILE_SIZE;
+extern int FULL_TILE_HEIGHT;
+extern int FULL_TILE_WIDTH;
 
 // SDL globals
 extern SDL_Renderer* gRenderer;

@@ -19,7 +19,7 @@ class FileReader {
 		FileReader(std::string file_name, bool binary) {
 			in = SDL_RWFromFile(file_name.c_str(), binary ? "rb" : "r");
 			if (in == NULL) {
-				throw file_exception("Could not open file, " + std::string(SDL_GetError()));
+				throw file_exception("File exception: " + std::string(SDL_GetError()));
 			}
 			index = -1;
 			max = SDL_RWread(in, &buffer, sizeof(char), 256 * sizeof(char));

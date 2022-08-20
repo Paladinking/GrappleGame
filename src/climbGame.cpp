@@ -1,6 +1,9 @@
 #include <stdlib.h>
 #include <cmath>
 #include "climbGame.h"
+#include "json.h"
+
+void load_globals();
 
 void ClimbGame::tick(Uint64 delta) {	
 	double dDelta = delta / 1000.0;
@@ -82,7 +85,8 @@ void ClimbGame::render_tilemap() {
 }
 
 void ClimbGame::init() {
-	tilemap.load_from_image("assets/map.png");
+	load_globals();
+	tilemap.load_from_image(ASSETS_ROOT + MAP_IMG);
 	tilemap.set_tilesize(TILE_SIZE);
 	if (tilemap.get_width() != FULL_TILE_WIDTH || tilemap.get_height() != FULL_TILE_HEIGHT) 
 	{
@@ -134,7 +138,69 @@ void ClimbGame::init() {
 	Player* p = new Player();
 	
 	player.reset(p);
-	player->init(window_width / 2, window_height / 2 + camera_y, PLAYER_FULL_WIDTH, PLAYER_FULL_HEIGHT);
+	player->init(PLAYER_START_X, PLAYER_START_Y, PLAYER_FULL_WIDTH, PLAYER_FULL_HEIGHT);
 	
 	entities.push_back(player);
+}
+
+#define SET_IF_EXISTS(obj, T, S) if (obj.has_key_of_type<T>(#S)) S = obj.get<T>(#S)
+
+void load_globals() {
+	JsonObject obj;
+	try {
+		obj = json::read_from_file(GLOBALS_PATH);
+	} catch (base_exception &e) {
+		printf("%s\nUsing default globals.\n", e.msg.c_str());
+		return;
+	}
+	SET_IF_EXISTS(obj, double, MAX_GRAVITY_VEL);
+	SET_IF_EXISTS(obj, double, GRAVITY_ACCELERATION);
+	SET_IF_EXISTS(obj, double, MAX_MOVEMENT_VEL);
+	SET_IF_EXISTS(obj, double, MOVEMENT_ACCELERATION);
+	SET_IF_EXISTS(obj, double, FRICTION_FACTOR);
+	SET_IF_EXISTS(obj, double, AIR_RES_FACTOR);
+	SET_IF_EXISTS(obj, double, JUMP_VEL);
+	
+
+	SET_IF_EXISTS(obj, int, PLAYER_FULL_WIDTH);
+	SET_IF_EXISTS(obj, int, PLAYER_FULL_HEIGHT);
+	SET_IF_EXISTS(obj, int, PLAYER_START_X);
+	SET_IF_EXISTS(obj, int, PLAYER_START_Y);
+	SET_IF_EXISTS(obj, int, GRAPPLE_LENGTH);
+	SET_IF_EXISTS(obj, double, GRAPPLE_SPEED);
+	SET_IF_EXISTS(obj, double, GRAPPLE_PULL);
+	
+	SET_IF_EXISTS(obj, int, TILE_SIZE);
+	SET_IF_EXISTS(obj, int, FULL_TILE_HEIGHT);
+	SET_IF_EXISTS(obj, int, FULL_TILE_WIDTH);
+	SET_IF_EXISTS(obj, bool, VERBOSE);
+	
+	SET_IF_EXISTS(obj, std::string, ASSETS_ROOT);
+	SET_IF_EXISTS(obj, std::string, PLAYER_IMG);
+	SET_IF_EXISTS(obj, std::string, MAP_IMG);
+	SET_IF_EXISTS(obj, std::string, HOOK_IMG);
+	
+	if (!VERBOSE) return;
+	
+	printf("MAX_GRAVITY_VEL: %f\n", MAX_GRAVITY_VEL);
+	printf("MAX_MOVEMENT_VEL: %f\n", MAX_MOVEMENT_VEL);
+	printf("GRAVITY_ACCELERATION: %f\n", GRAVITY_ACCELERATION);
+	printf("MOVEMENT_ACCELERATION: %f\n", MOVEMENT_ACCELERATION);
+	printf("FRICTION_FACTOR: %f\n", FRICTION_FACTOR);
+	printf("AIR_RES_FACTOR: %f\n", AIR_RES_FACTOR);
+	printf("JUMP_VEL: %f\n", JUMP_VEL);
+	printf("PLAYER_FULL_WIDTH: %d\n", PLAYER_FULL_WIDTH);
+	printf("PLAYER_FULL_HEIGHT: %d\n", PLAYER_FULL_HEIGHT);
+	printf("PLAYER_START_X: %d\n", PLAYER_START_X);
+	printf("PLAYER_START_Y: %d\n", PLAYER_START_Y);
+	printf("GRAPPLE_LENGTH: %d\n", GRAPPLE_LENGTH);
+	printf("GRAPPLE_SPEED: %f\n", GRAPPLE_SPEED);
+	printf("GRAPPLE_PULL: %f\n", GRAPPLE_PULL);
+	printf("TILE_SIZE: %d\n", TILE_SIZE);
+	printf("FULL_TILE_HEIGHT: %d\n", FULL_TILE_HEIGHT);
+	printf("FULL_TILE_WIDTH: %d\n", FULL_TILE_WIDTH);
+	printf("ASSETS_ROOT: %s\n", ASSETS_ROOT.c_str());
+	printf("PLAYER_IMG: %s\n", PLAYER_IMG.c_str());
+	printf("MAP_IMG: %s\n", MAP_IMG.c_str());
+	printf("HOOK_IMG: %s\n", HOOK_IMG.c_str());
 }

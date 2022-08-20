@@ -55,6 +55,21 @@ class JsonObject {
 			return data.end();
 		}
 		
+		bool has_key(std::string key) {
+			return data.count(key) != 0;
+		}
+		
+		template<class T>
+		bool has_key_of_type(std::string key) {
+			if (!has_key(key)) return false;
+			json::Type &val = data[key];
+			return std::get_if<T>(&val) != nullptr;
+		}
+		
+		size_t get_size() const {
+			return data.size();
+		}
+		
 		void to_pretty_stream(std::ostream& os, int indentations) const;
 		
 		void to_stream(std::ostream& os) const;
@@ -91,6 +106,10 @@ class JsonList {
 		
 		std::vector<json::Type>::iterator end() {
 			return data.end();
+		}
+		
+		size_t get_size() const {
+			return data.size();
 		}
 		
 		void to_pretty_stream(std::ostream& os, int indentations) const;
