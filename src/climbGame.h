@@ -43,7 +43,7 @@ class ClimbGame : public Game {
 		int visible_tiles_x, visible_tiles_y;
 
 		TileMap tilemap;
-		Texture ball;
+		Texture tilemapTexture;
 		
 		std::shared_ptr<Player> player;
 		

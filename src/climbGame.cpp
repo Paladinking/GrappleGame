@@ -5,9 +5,10 @@
 
 void load_globals();
 
-void ClimbGame::tick(Uint64 delta) {	
+void ClimbGame::tick(Uint64 delta) {
+	if (delta == 0) return;
 	double dDelta = delta / 1000.0;
-	//printf("%f\n", 1 / dDelta);
+	printf("%f\n", 1 / dDelta);
 	handle_input(dDelta);
 	for (auto e : entities) {
 		e->tick(dDelta, tilemap, corners);
@@ -48,9 +49,12 @@ void ClimbGame::handle_input(double delta) {
 }
 
 void ClimbGame::render() {
+	SDL_SetRenderDrawColor(gRenderer, 0xFF, 0xFF, 0xFF, 0xFF);
 	SDL_RenderClear(gRenderer);
+	int camera_y_tile = ((int)camera_y) / TILE_SIZE;
+	tilemapTexture.render(0, 0, 0, camera_y, window_width, window_height);
 	
-	render_tilemap();
+	//render_tilemap();
 	player->render((int)camera_y);
 	
 	SDL_RenderPresent(gRenderer);
@@ -92,9 +96,6 @@ void ClimbGame::init() {
 	if (camera_y < camera_y_min) camera_y = camera_y_min;
 	if (camera_y > camera_y_max) camera_y = camera_y_max;
 	
-	ball.load_from_file("assets/ball.png");
-	ball.set_dimensions(4, 4);
-	
 	for (int x = 0; x < FULL_TILE_WIDTH; ++x) {
 		for (int y = 0; y < FULL_TILE_HEIGHT; ++y) {
 			if (!tilemap.is_blocked(x, y)) continue;
@@ -131,6 +132,9 @@ void ClimbGame::init() {
 		}
 	}
 	
+	tilemapTexture.load_from_file("assets/mapImage.png", FULL_TILE_WIDTH * TILE_SIZE, FULL_TILE_HEIGHT * TILE_SIZE);
+	tilemapTexture.set_dimensions(window_width, window_height);
+	
 	Player* p = new Player();
 	
 	player.reset(p);
@@ -159,7 +163,6 @@ void ClimbGame::create_inputs() {
 	release_input = get_press_input(controls.get_default("release", input::RELEASE), input::RELEASE);
 	jump_input = get_press_input(controls.get_default("jump", input::JUMP), input::JUMP);
 	return_input = get_press_input(controls.get_default("return", input::RETURN), input::RETURN);
-	
 }
 
 void ClimbGame::handle_down(const SDL_Keycode key, const Uint8 mouse) {
@@ -226,7 +229,6 @@ void load_globals() {
 	SET_IF_EXISTS(obj, double, FRICTION_FACTOR);
 	SET_IF_EXISTS(obj, double, AIR_RES_FACTOR);
 	SET_IF_EXISTS(obj, double, JUMP_VEL);
-	
 
 	SET_IF_EXISTS(obj, int, PLAYER_FULL_WIDTH);
 	SET_IF_EXISTS(obj, int, PLAYER_FULL_HEIGHT);

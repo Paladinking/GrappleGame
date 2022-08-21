@@ -18,6 +18,11 @@ class Texture {
 		 * Reads a texture from a file, trowing a image_load_exception if something goes wrong.
 		 */
 		void load_from_file(std::string path);
+		
+		/**
+		 * Reads a texture form a file and stretches it to (w, h), throwing a image_load_exception if something goes wrong.
+		 */
+		void load_from_file(std::string path, const int w, const int h);
 	
 		/**
 		 * Frees all resources associated with this texture.
@@ -28,6 +33,12 @@ class Texture {
 		 * Renders this texture at position (x, y) using the global gRenderer.
 		 */
 		void render(const int x, const int y);
+		
+		/**
+		 * Renders the rectangle (x, y, w, h) of this texture at position (dest_x, dest_y),
+		 * using the global gRenderer.
+		 */
+		void render(const int dest_x, const int dest_y, const int x, const int y, const int w, const int h);
 		
 		/**
 		 * Returns the width of this texture.
