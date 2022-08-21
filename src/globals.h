@@ -24,6 +24,7 @@ extern int PLAYER_START_Y;
 extern int GRAPPLE_LENGTH;
 extern double GRAPPLE_SPEED;
 extern double GRAPPLE_PULL;
+extern double GRAPPLE_RELEASE;
 
 extern bool VERBOSE;
 
@@ -38,6 +39,8 @@ constexpr double PI_HALF = PI / 2;
 extern int TILE_SIZE;
 extern int FULL_TILE_HEIGHT;
 extern int FULL_TILE_WIDTH;
+extern int CAMERA_PAN_REGION;
+extern double CAMERA_SPEED;
 
 // SDL globals
 extern SDL_Renderer* gRenderer;

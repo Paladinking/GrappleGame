@@ -12,6 +12,16 @@ void ClimbGame::tick(Uint64 delta) {
 	for (auto e : entities) {
 		e->tick(dDelta, tilemap, corners);
 	}
+	const Vector2D &pos = player->get_position();
+	double camera_y_delta = pos.y - camera_y;
+	if (camera_y_delta < CAMERA_PAN_REGION) {
+		camera_y -= CAMERA_SPEED * dDelta;
+		if (camera_y < camera_y_min) camera_y = camera_y_min;
+	}
+	else if (camera_y_delta > window_height - 250) {
+		camera_y += CAMERA_SPEED * dDelta;
+		if (camera_y > camera_y_max) camera_y = camera_y_max;
+	}
 }
 
 void ClimbGame::handle_input(double delta) {
@@ -33,7 +43,7 @@ void ClimbGame::handle_input(double delta) {
 	{
 		player->add_velocity(MOVEMENT_ACCELERATION * delta, 0);
 	}
-	if (currentKeyStates[SDL_SCANCODE_E]) {
+	if ((mouseButton & SDL_BUTTON_LMASK) != 0) {
 		if (!grapple_pressed) {
 			int world_mouseX = mouseX, world_mouseY = mouseY + camera_y;
 			player->fire_grapple(world_mouseX, world_mouseY);
@@ -42,13 +52,31 @@ void ClimbGame::handle_input(double delta) {
 	} else {
 		grapple_pressed = false;
 	}
+	if (currentKeyStates[SDL_SCANCODE_LSHIFT]) {
+		player->return_grapple();
+	}
+	if (currentKeyStates[SDL_SCANCODE_E]) {
+		if (!release_pressed) {
+			player->set_release(true);
+			release_pressed = true;
+		}
+	} else {
+		if (release_pressed) {
+			player->set_release(false);
+			release_pressed = false;
+		}
+	}
+	
 	if (currentKeyStates[SDL_SCANCODE_Q]) {
 		if (!pull_pressed) {
-			player->toggle_pull();
+			player->set_pull(true);
 			pull_pressed = true;
 		}
 	} else {
-		pull_pressed = false;
+		if (pull_pressed) {
+			player->set_pull(false);
+			pull_pressed = false;
+		}
 	}
 	
 	if (currentKeyStates[SDL_SCANCODE_ESCAPE]) {
@@ -60,13 +88,13 @@ void ClimbGame::render() {
 	SDL_RenderClear(gRenderer);
 	
 	render_tilemap();
-	player->render(camera_y);
+	player->render((int)camera_y);
 	
 	SDL_RenderPresent(gRenderer);
 }
 
 void ClimbGame::render_tilemap() {
-	int camera_y_tile = camera_y / TILE_SIZE;
+	int camera_y_tile = ((int)camera_y) / TILE_SIZE;
 	for (int x = 0; x < visible_tiles_x; x++) {
 		for (int y = camera_y_tile - 1; y < camera_y_tile + visible_tiles_y + 1; y++) {
 			if (tilemap.is_blocked(x, y)) {
@@ -74,7 +102,7 @@ void ClimbGame::render_tilemap() {
 			} else {
 				SDL_SetRenderDrawColor( gRenderer, 0xFF, 0xFF, 0xFF, 0xFF );
 			}
-			SDL_Rect fillRect = {x * TILE_SIZE, y * TILE_SIZE - camera_y, TILE_SIZE, TILE_SIZE};
+			SDL_Rect fillRect = {x * TILE_SIZE, y * TILE_SIZE - ((int)camera_y), TILE_SIZE, TILE_SIZE};
 			SDL_RenderFillRect( gRenderer, &fillRect );
 		}
 	}
@@ -94,7 +122,11 @@ void ClimbGame::init() {
 	}
 	visible_tiles_x = window_width / TILE_SIZE;
 	visible_tiles_y = window_height / TILE_SIZE;
-	camera_y = TILE_SIZE * (FULL_TILE_HEIGHT - visible_tiles_y);
+	camera_y = PLAYER_START_Y;
+	camera_y_max = TILE_SIZE * (FULL_TILE_HEIGHT - visible_tiles_y);
+	camera_y_min = 0;
+	if (camera_y < camera_y_min) camera_y = camera_y_min;
+	if (camera_y > camera_y_max) camera_y = camera_y_max;
 	
 	ball.load_from_file("assets/ball.png");
 	ball.set_dimensions(4, 4);
@@ -169,10 +201,13 @@ void load_globals() {
 	SET_IF_EXISTS(obj, int, GRAPPLE_LENGTH);
 	SET_IF_EXISTS(obj, double, GRAPPLE_SPEED);
 	SET_IF_EXISTS(obj, double, GRAPPLE_PULL);
+	SET_IF_EXISTS(obj, double, GRAPPLE_RELEASE);
 	
 	SET_IF_EXISTS(obj, int, TILE_SIZE);
 	SET_IF_EXISTS(obj, int, FULL_TILE_HEIGHT);
 	SET_IF_EXISTS(obj, int, FULL_TILE_WIDTH);
+	SET_IF_EXISTS(obj, int, CAMERA_PAN_REGION);
+	SET_IF_EXISTS(obj, double, CAMERA_SPEED);
 	SET_IF_EXISTS(obj, bool, VERBOSE);
 	
 	SET_IF_EXISTS(obj, std::string, ASSETS_ROOT);
@@ -196,9 +231,12 @@ void load_globals() {
 	printf("GRAPPLE_LENGTH: %d\n", GRAPPLE_LENGTH);
 	printf("GRAPPLE_SPEED: %f\n", GRAPPLE_SPEED);
 	printf("GRAPPLE_PULL: %f\n", GRAPPLE_PULL);
+	printf("GRAPPLE_RELEASE: %f\n", GRAPPLE_RELEASE);
 	printf("TILE_SIZE: %d\n", TILE_SIZE);
 	printf("FULL_TILE_HEIGHT: %d\n", FULL_TILE_HEIGHT);
 	printf("FULL_TILE_WIDTH: %d\n", FULL_TILE_WIDTH);
+	printf("CAMERA_PAN_REGION: %d\n", CAMERA_PAN_REGION);
+	printf("CAMERA_SPEED: %f\n", CAMERA_SPEED);
 	printf("ASSETS_ROOT: %s\n", ASSETS_ROOT.c_str());
 	printf("PLAYER_IMG: %s\n", PLAYER_IMG.c_str());
 	printf("MAP_IMG: %s\n", MAP_IMG.c_str());

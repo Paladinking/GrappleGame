@@ -202,20 +202,41 @@ void Player::tick(const double delta, const TileMap &tilemap, CornerList &corner
 			if (grapple_length + 10.0 < grapple_max_len) {
 				grapple_max_len = grapple_length + 10.0;
 			}
+		} else if (release) {
+			if (grapple_max_len < GRAPPLE_LENGTH) {
+				grapple_max_len += GRAPPLE_RELEASE * delta;
+			}
 		}
 	}
 
 	if (grappling_mode == TRAVELING)
 	{
+		Vector2D to_move = {grapple_vel.x * delta, grapple_vel.y * delta};
+		
+		
+		grapple_vel.y += GRAVITY_ACCELERATION * delta;
+		
 		if (grapple_length >= grapple_max_len)
 		{
-			grapple_points.clear();
-			grappling_mode = UNUSED;
-			return;
+			const std::shared_ptr<Corner> &anchor = grapple_points[1].corner;
+			Vector2D line_vector = {anchor->x - hook->x, anchor->y - hook->y};
+			double rotated_x = -line_vector.y, rotated_y = line_vector.x;
+			double proj_scalar = (rotated_x * grapple_vel.x + rotated_y * grapple_vel.y)
+						/ (rotated_x * rotated_x + rotated_y * rotated_y);
+			grapple_vel.x = proj_scalar * rotated_x;
+			grapple_vel.y = proj_scalar * rotated_y;
+			
+			double prev_len = line_vector.length();
+			line_vector.x = anchor->x - (hook->x + grapple_vel.x * delta);
+			line_vector.y = anchor->y - (hook->y + grapple_vel.y * delta);
+			double new_len = line_vector.length();
+	
+			to_move.x = -(hook->x + (line_vector.x / new_len) * (grapple_max_len - (grapple_length - prev_len)) - anchor->x);
+			to_move.y = -(hook->y + (line_vector.y / new_len) * (grapple_max_len - (grapple_length - prev_len)) - anchor->y);
+			
 		}
-		int tilesize = tilemap.get_tilesize();
+		
 		double new_x = hook->x, new_y = hook->y;
-		Vector2D to_move = {grapple_vel.x * delta, grapple_vel.y * delta};
 		double len = to_move.length();
 		Vector2D move_step = {(to_move.x / len), (to_move.y / len)};
 		int steps = (int)len;
@@ -257,12 +278,21 @@ void Player::place_grapple(const double x, const double y, const double dx, cons
 	update_grapple(corners, prev, true);
 }
 
+void Player::return_grapple() {
+	if (grappling_mode == TRAVELING ||  grappling_mode == PLACED) {
+		grapple_points.clear();
+		grappling_mode = UNUSED;
+	}
+}
+
 void Player::fire_grapple(const int targetX, const int targetY) 
 {
-	if (grappling_mode == UNUSED) 
+	if (grappling_mode == UNUSED || (grappling_mode == PLACED && grapple_length < 20.0)) 
 	{
+		grapple_points.clear();
 		grappling_mode = TRAVELING;
 		pull = false;
+		release = false;
 		grapple_length = 0;
 		grapple_max_len = GRAPPLE_LENGTH;
 		grapple_vel.x = targetX - (pos.x + width  / 2);
@@ -273,16 +303,17 @@ void Player::fire_grapple(const int targetX, const int targetY)
 		center_point = std::shared_ptr<Corner>(new Corner(pos.x + width / 2, pos.y + height / 2));
 		grapple_points.push_back({hook, false});
 		grapple_points.push_back({center_point, false});
-	}
-	else if (grappling_mode != TRAVELING)
-	{
-		grapple_points.clear();
-		grappling_mode = UNUSED;
+	} else if(grappling_mode == PLACED) {
+		return_grapple();
 	}
 }
 
-void Player::toggle_pull() {
-	pull = !pull;
+void Player::set_pull(bool b) {
+	pull = b;
+}
+
+void Player::set_release(bool b) {
+	release = b;
 }
 
 void Player::update_grapple(CornerList &corners, Vector2D prev, bool first) {

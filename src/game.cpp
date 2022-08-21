@@ -55,12 +55,8 @@ void Game::run() {
 				handle_mousepress(e.button);
 			}
 #endif		
-			else if (e.type == SDL_MOUSEMOTION) 
-			{
-				mouseX = e.motion.x;
-				mouseY = e.motion.y;
-			}
 		}
+		mouseButton = SDL_GetMouseState(&mouseX, &mouseY);
 		Uint64 cur_time = SDL_GetTicks64();
 		this->tick(cur_time - last_time);
 		last_time = cur_time;

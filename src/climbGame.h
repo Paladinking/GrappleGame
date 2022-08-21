@@ -22,17 +22,19 @@ class ClimbGame : public Game {
 	private:
 	
 		void render_tilemap();
+
+		double camera_y, camera_y_min, camera_y_max;
 		
-		double dCamera_y = 0.0;
-		long camera_y;
 		int visible_tiles_x, visible_tiles_y;
 
 		TileMap tilemap;
 		Texture ball;
 		
 		std::shared_ptr<Player> player;
+		
 		bool grapple_pressed = false;
 		bool pull_pressed = false;
+		bool release_pressed = false;
 		
 		std::vector<std::shared_ptr<Entity>> entities;
 		std::vector<std::shared_ptr<Corner>> corners;

@@ -97,7 +97,11 @@ class Player : public Entity {
 		
 		void fire_grapple(const int target_x, const int target_y);
 		
-		void toggle_pull();
+		void return_grapple();
+		
+		void set_pull(bool pull);
+		
+		void set_release(bool release);
 
 	private:
 		
@@ -128,7 +132,7 @@ class Player : public Entity {
 		double grapple_length;
 		double grapple_max_len = GRAPPLE_LENGTH;
 		
-		bool pull;
+		bool pull, release;
 
 		Vector2D grapple_vel;
 		
