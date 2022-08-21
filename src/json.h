@@ -34,16 +34,38 @@ namespace json {
 class JsonObject {
 	public:
 		template<class T>
-		T &get(std::string key) {
+		T &get(const std::string key) {
 			return std::get<T>(data[key]);
 		}
 		
-		json::Type &get(std::string key) {
+		template<class T>
+		const T &get_default(const std::string key, const T &defalt_val) {
+			auto& el = data.find(key);
+			if (el == data.end()) return defalt_val;
+			json::Type &var = el->second;
+			if (!std::holds_alternative<T>(var)) {
+				return defalt_val;
+			}
+			return std::get<T>(var);
+		}
+		
+		template<class T>
+		T &get_default(const std::string key, T &defalt_val) {
+			auto& el = data.find(key);
+			if (el == data.end()) return defalt_val;
+			json::Type &var = el->second;
+			if (!std::holds_alternative<T>(var)) {
+				return defalt_val;
+			}
+			return std::get<T>(var);
+		}
+		
+		json::Type &get(const std::string key) {
 			return data[key];
 		}
 		
 		template<class T>
-		void set(std::string key, T value) {
+		void set(const std::string key, const T value) {
 			data[key] = value;
 		}
 		
@@ -55,12 +77,12 @@ class JsonObject {
 			return data.end();
 		}
 		
-		bool has_key(std::string key) {
+		bool has_key(const std::string key) {
 			return data.count(key) != 0;
 		}
 		
 		template<class T>
-		bool has_key_of_type(std::string key) {
+		bool has_key_of_type(const std::string key) {
 			if (!has_key(key)) return false;
 			json::Type &val = data[key];
 			return std::get_if<T>(&val) != nullptr;
@@ -81,16 +103,16 @@ class JsonObject {
 class JsonList {
 	public:
 		template<class T>
-		T &get(unsigned index) {
+		T &get(const unsigned index) {
 			return std::get<T>(data[index]);
 		}
 		
-		json::Type &get(unsigned index) {
+		json::Type &get(const unsigned index) {
 			return data[index];
 		}
 		
 		template<class T>
-		void set(unsigned index, T value) {
+		void set(const unsigned index, T value) {
 			data[i] = value;
 		}
 		

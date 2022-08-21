@@ -26,57 +26,20 @@ void ClimbGame::tick(Uint64 delta) {
 
 void ClimbGame::handle_input(double delta) {
 	const Uint8* currentKeyStates = SDL_GetKeyboardState(NULL);
-	const Vector2D &vel = player->get_velocity();
-	if (currentKeyStates[SDL_SCANCODE_SPACE]) 
-	{
-		if (player->on_ground(tilemap)) 
-		{
-			player->add_velocity(0, -vel.y -JUMP_VEL);
-			//vel.y = -JUMP_VEL;
-		}
-	} 
-	if (currentKeyStates[SDL_SCANCODE_A] && vel.x > -MAX_MOVEMENT_VEL) 
-	{
+	const Vector2D &vel = player->get_velocity(); 
+	if (left_input->is_pressed(currentKeyStates, mouseButton) && vel.x > -MAX_MOVEMENT_VEL) {
 		player->add_velocity(-MOVEMENT_ACCELERATION * delta, 0);
-	} 
-	if (currentKeyStates[SDL_SCANCODE_D] && vel.x < MAX_MOVEMENT_VEL) 
+	}
+	if (right_input->is_pressed(currentKeyStates, mouseButton) && vel.x < MAX_MOVEMENT_VEL) 
 	{
 		player->add_velocity(MOVEMENT_ACCELERATION * delta, 0);
 	}
-	if ((mouseButton & SDL_BUTTON_LMASK) != 0) {
-		if (!grapple_pressed) {
-			int world_mouseX = mouseX, world_mouseY = mouseY + camera_y;
-			player->fire_grapple(world_mouseX, world_mouseY);
-			grapple_pressed = true;
-		}
-	} else {
-		grapple_pressed = false;
-	}
-	if (currentKeyStates[SDL_SCANCODE_LSHIFT]) {
-		player->return_grapple();
-	}
-	if (currentKeyStates[SDL_SCANCODE_E]) {
-		if (!release_pressed) {
-			player->set_release(true);
-			release_pressed = true;
-		}
-	} else {
-		if (release_pressed) {
-			player->set_release(false);
-			release_pressed = false;
-		}
-	}
-	
-	if (currentKeyStates[SDL_SCANCODE_Q]) {
-		if (!pull_pressed) {
-			player->set_pull(true);
-			pull_pressed = true;
-		}
-	} else {
-		if (pull_pressed) {
-			player->set_pull(false);
-			pull_pressed = false;
-		}
+
+
+	if (do_grapple) { //Grapple is a push input, but mouse_pos is updated after. (Change?)
+		do_grapple = false;
+		int world_mouseX = mouseX, world_mouseY = mouseY + camera_y;
+		player->fire_grapple(world_mouseX, world_mouseY);
 	}
 	
 	if (currentKeyStates[SDL_SCANCODE_ESCAPE]) {
@@ -114,11 +77,12 @@ void ClimbGame::render_tilemap() {
 
 void ClimbGame::init() {
 	load_globals();
+	create_inputs();
 	tilemap.load_from_image(ASSETS_ROOT + MAP_IMG);
 	tilemap.set_tilesize(TILE_SIZE);
 	if (tilemap.get_width() != FULL_TILE_WIDTH || tilemap.get_height() != FULL_TILE_HEIGHT) 
 	{
-		throw Game_exception("Map image has wrong dimensions.");
+		throw game_exception("Map image has wrong dimensions.");
 	}
 	visible_tiles_x = window_width / TILE_SIZE;
 	visible_tiles_y = window_height / TILE_SIZE;
@@ -175,6 +139,76 @@ void ClimbGame::init() {
 	entities.push_back(player);
 }
 
+void ClimbGame::create_inputs() {
+	JsonObject options, controls;
+	try {
+		options = json::read_from_file(CONFIG_ROOT + OPTIONS_FILE);
+		if (options.has_key_of_type<JsonObject>("CONTROLS")) {
+			controls = options.get<JsonObject>("CONTROLS");
+		} else {
+			printf("No controls in options\nUsing default bindings\n");
+		}
+	} catch (base_exception &e){
+		printf("%s\n", e.msg.c_str());
+		printf("Using default bindings\n");
+	}
+	left_input = get_hold_input(controls.get_default("left", input::LEFT), input::LEFT);
+	right_input = get_hold_input(controls.get_default("right", input::RIGHT), input::RIGHT);
+	grapple_input = get_press_input(controls.get_default("grapple", input::GRAPPLE), input::GRAPPLE);
+	pull_input = get_press_input(controls.get_default("pull", input::PULL), input::PULL);
+	release_input = get_press_input(controls.get_default("release", input::RELEASE), input::RELEASE);
+	jump_input = get_press_input(controls.get_default("jump", input::JUMP), input::JUMP);
+	return_input = get_press_input(controls.get_default("return", input::RETURN), input::RETURN);
+	
+}
+
+void ClimbGame::handle_down(const SDL_Keycode key, const Uint8 mouse) {
+	if (grapple_input->is_targeted(key, mouse)) {
+		do_grapple = true;
+	}
+	if (pull_input->is_targeted(key, mouse)) {
+		player->set_pull(true);
+	} 
+	if (release_input->is_targeted(key, mouse)) {
+		player->set_release(true);
+	}
+	if (jump_input->is_targeted(key, mouse)) {
+		if (player->on_ground(tilemap)) 
+		{
+			const Vector2D &vel = player->get_velocity();
+			player->add_velocity(0, -vel.y -JUMP_VEL);
+			//vel.y = -JUMP_VEL;
+		}
+	}
+	if (return_input->is_targeted(key, mouse)) {
+		player->return_grapple();
+	}
+}
+
+void ClimbGame::handle_up(const SDL_Keycode key, const Uint8 mouse) {
+	if (pull_input->is_targeted(key, mouse)) {
+		player->set_pull(false);
+	} 
+	if (release_input->is_targeted(key, mouse)) {
+		player->set_release(false);
+	}
+}
+
+void ClimbGame::handle_keydown(SDL_KeyboardEvent e) {
+	handle_down(e.keysym.sym, 0);
+}
+
+void ClimbGame::handle_keyup(SDL_KeyboardEvent e) {
+	handle_up(e.keysym.sym, 0);
+}
+
+void ClimbGame::handle_mousedown(SDL_MouseButtonEvent e) {
+	handle_down(SDLK_UNKNOWN, e.button);
+}
+void ClimbGame::handle_mouseup(SDL_MouseButtonEvent e) {
+	handle_up(SDLK_UNKNOWN, e.button);
+}
+
 #define SET_IF_EXISTS(obj, T, S) if (obj.has_key_of_type<T>(#S)) S = obj.get<T>(#S)
 
 void load_globals() {
@@ -215,6 +249,9 @@ void load_globals() {
 	SET_IF_EXISTS(obj, std::string, MAP_IMG);
 	SET_IF_EXISTS(obj, std::string, HOOK_IMG);
 	
+	SET_IF_EXISTS(obj, std::string, CONFIG_ROOT);
+	SET_IF_EXISTS(obj, std::string, OPTIONS_FILE);
+	
 	if (!VERBOSE) return;
 	
 	printf("MAX_GRAVITY_VEL: %f\n", MAX_GRAVITY_VEL);
@@ -241,4 +278,6 @@ void load_globals() {
 	printf("PLAYER_IMG: %s\n", PLAYER_IMG.c_str());
 	printf("MAP_IMG: %s\n", MAP_IMG.c_str());
 	printf("HOOK_IMG: %s\n", HOOK_IMG.c_str());
+	printf("CONFIG_ROOT: %s\n", CONFIG_ROOT.c_str());
+	printf("OPTIONS_FILE: %s\n", OPTIONS_FILE.c_str());
 }

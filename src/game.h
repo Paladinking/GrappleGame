@@ -43,7 +43,7 @@ class Game {
 		// Mouse position, updated every frame.
 		int mouseX, mouseY;
 		
-		int mouseButton;
+		Uint8 mouseButton;
 		
 		/**
 		 * Called once per frame, after tick has been called. 
@@ -72,10 +72,14 @@ class Game {
 		virtual void handle_keyup(SDL_KeyboardEvent e) {};
 		
 		/**
-		 * Called every time a MOUSEPRESS-event happens.
+		 * Called every time a MOUSEDOWN-event happens.
 		 */
-		virtual void handle_mousepress(SDL_MouseButtonEvent e) {};
+		virtual void handle_mousedown(SDL_MouseButtonEvent e) {};
 		
+		/**
+		 * Called every time a MOUSEUP-event happens.
+		 */
+		virtual void handle_mouseup(SDL_MouseButtonEvent e) {};
 	
 		
 	private:

@@ -6,6 +6,7 @@
 #include "globals.h"
 #include "utilities.h"
 #include "entity.h"
+#include "input.h"
 
 class ClimbGame : public Game {
 	public:
@@ -16,12 +17,26 @@ class ClimbGame : public Game {
 		virtual void init() override;
 		
 		virtual void render() override;
+	
+		virtual void handle_keydown(SDL_KeyboardEvent e) override;
+		
+		virtual void handle_keyup(SDL_KeyboardEvent e) override;
+		
+		virtual void handle_mousedown(SDL_MouseButtonEvent e) override;
+		
+		virtual void handle_mouseup(SDL_MouseButtonEvent e) override;
 		
 		void handle_input(double delta);
 		
 	private:
 	
+		void handle_up(const SDL_Keycode key, const Uint8 mouse);
+		
+		void handle_down(const SDL_Keycode key, const Uint8 mouse);
+	
 		void render_tilemap();
+		
+		void create_inputs();
 
 		double camera_y, camera_y_min, camera_y_max;
 		
@@ -32,9 +47,9 @@ class ClimbGame : public Game {
 		
 		std::shared_ptr<Player> player;
 		
-		bool grapple_pressed = false;
-		bool pull_pressed = false;
-		bool release_pressed = false;
+		std::unique_ptr<PressInput> grapple_input, pull_input, release_input, jump_input, return_input;
+		std::unique_ptr<HoldInput> left_input, right_input;
+		bool do_grapple = false;
 		
 		std::vector<std::shared_ptr<Entity>> entities;
 		std::vector<std::shared_ptr<Corner>> corners;

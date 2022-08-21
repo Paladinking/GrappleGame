@@ -1,0 +1,11 @@
+{
+	"CONTROLS" : {
+		"grapple" : "Mouse Left",
+		"pull" : "Q",
+		"release" : "E",
+		"jump" : "Space",
+		"return" : "Left Shift",
+		"left" : "A",
+		"right" : "D"
+	}
+}

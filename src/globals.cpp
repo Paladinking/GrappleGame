@@ -31,3 +31,6 @@ std::string ASSETS_ROOT = "assets/";
 std::string PLAYER_IMG = "player.png";
 std::string MAP_IMG = "map.png";
 std::string HOOK_IMG = "ball.png";
+
+std::string CONFIG_ROOT = "config/";
+std::string OPTIONS_FILE = "";

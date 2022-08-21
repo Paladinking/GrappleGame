@@ -51,9 +51,9 @@ class SDL_exception : public base_exception {
 /**
  * Game_exception, when creating a game fails (for example when one is already runnning).
  */
-class Game_exception : public base_exception {
+class game_exception : public base_exception {
 	public:
-		Game_exception(std::string msg) : base_exception(msg) {};
+		game_exception(std::string msg) : base_exception(msg) {};
 	
 };
 

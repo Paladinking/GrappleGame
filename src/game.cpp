@@ -10,7 +10,7 @@ void Game::create() {
 		throw SDL_exception("STL is not initialized!");
     }
 	if (gWindow != NULL || gRenderer != NULL) {
-		throw Game_exception("Previous game still alive!");
+		throw game_exception("Previous game still alive!");
 	}
 	
 	gWindow = SDL_CreateWindow(title.c_str(), SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, window_width, window_height, SDL_WINDOW_SHOWN );
@@ -42,19 +42,23 @@ void Game::run() {
 		SDL_Event e;
 		while (SDL_PollEvent(&e)) 
 		{
-			if (e.type == SDL_QUIT) {
-				exit_game();
-
-			} 
-#ifndef NO_EVENT_INPUT
-			else if (e.type == SDL_KEYDOWN) {
-				handle_keydown(e.key);
-			} else if (e.type == SDL_KEYUP) {
-				handle_keyup(e.key);
-			} else if (e.type == SDL_MOUSEBUTTONDOWN) {
-				handle_mousepress(e.button);
+			switch (e.type) {
+				case SDL_QUIT:
+					exit_game();
+					break; 
+				case SDL_KEYDOWN:
+					handle_keydown(e.key);
+					break;
+				case SDL_KEYUP:
+					handle_keyup(e.key);
+					break;
+				case SDL_MOUSEBUTTONDOWN:
+					handle_mousedown(e.button);
+					break;
+				case SDL_MOUSEBUTTONUP:
+					handle_mouseup(e.button);
+					break;
 			}
-#endif		
 		}
 		mouseButton = SDL_GetMouseState(&mouseX, &mouseY);
 		Uint64 cur_time = SDL_GetTicks64();
