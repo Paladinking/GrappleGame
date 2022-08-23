@@ -11,7 +11,7 @@ class Game {
 		Game(unsigned window_width, unsigned window_height, std::string title) 
 			: window_width(window_width), window_height(window_height), title(title) {}
 		
-		~Game();
+		virtual ~Game();
 		
 		/**
 		 * Creates a new game, opening a window and creating a renderer. Throws SDL_exception if creating window or renderer fails.
@@ -34,7 +34,7 @@ class Game {
 		/**
 		 * Frees all resources used by the game.
 		 */
-		void destroy_game();
+		virtual void destroy_game();
 		
 	protected:
 		// Window dimensions

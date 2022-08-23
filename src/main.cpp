@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <vector>
 #include <SDL.h>
 #include <SDL_image.h>
@@ -57,10 +58,10 @@ int main(int argc, char* args[])
 		exit(-1);
 	}
 	bool level_maker = false;
-	
+
 	if (argc > 1) {
 		for (unsigned i = 1; i < argc; ++i) {
-			if (args[i] == "level_maker" || args[i] == "--level_maker") {
+			if (strcmp(args[i], "level_maker") == 0 || strcmp(args[i], "--level_maker") == 0 ) {
 				level_maker = true;
 				break;
 			} 

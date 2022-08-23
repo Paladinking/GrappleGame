@@ -85,5 +85,5 @@ void Game::exit_game() {
 }
 
 Game::~Game() {
-	exit_game();
+	destroy_game();
 }
