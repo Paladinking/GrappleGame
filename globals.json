@@ -7,8 +7,8 @@
 	"AIR_RES_FACTOR" : 0.004,
 	"JUMP_VEL" : 800.0,
 
-	"PLAYER_FULL_WIDTH" : 48,
-	"PLAYER_FULL_HEIGHT" : 80,
+	"PLAYER_FULL_WIDTH" : 24,
+	"PLAYER_FULL_HEIGHT" : 40,
 	"PLAYER_START_X" : 320,
 	"PLAYER_START_Y" : 960,
 	"GRAPPLE_LENGTH" : 600,
@@ -25,7 +25,7 @@
 	"VERBOSE" : false,
 
 	"ASSETS_ROOT" : "assets/",
-	"PLAYER_IMG" : "player/full.png",
+	"PLAYER_IMG" : "player.png",
 	"MAP_IMG" : "map.png",
 	"HOOK_IMG" : "ball.png",
 	

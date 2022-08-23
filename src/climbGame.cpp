@@ -8,7 +8,7 @@ void load_globals();
 void ClimbGame::tick(Uint64 delta) {
 	if (delta == 0) return;
 	double dDelta = delta / 1000.0;
-	printf("%f\n", 1 / dDelta);
+
 	handle_input(dDelta);
 	for (auto e : entities) {
 		e->tick(dDelta, tilemap, corners);
