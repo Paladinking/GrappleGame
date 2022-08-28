@@ -1,5 +1,6 @@
 #ifndef UTILITIES_00_H
 #define UTILITIES_00_H
+#include <memory>
 #include <cmath>
 #include <vector>
 #include <SDL.h>
@@ -145,10 +146,6 @@ class Corner {
 class TileMap {
 	public:
 		TileMap() {}
-		
-		~TileMap() {
-			delete[] map;
-		}
 	
 		TileMap(const unsigned width, const unsigned height) : width(width), height(height) {} 
 	
@@ -167,7 +164,7 @@ class TileMap {
 			SDL_LockSurface(converted);
 			width = converted->w;
 			height = converted->h;
-			map = new bool[width * height];
+			map = std::make_unique<bool[]>(width * height);
 			SDL_PixelFormat* fmt = converted->format;
 
 			for (unsigned i = 0; i < width; i++) {
@@ -299,14 +296,15 @@ class TileMap {
 		 void set_tilesize(unsigned tilesize) {
 			 tile_size = tilesize;
 		 }
+		 
+	protected:
+		std::unique_ptr<bool[]> map;
 	
 	
 	private:
 		unsigned width = 0, height = 0;
 		
 		unsigned tile_size = 1;
-		
-		bool *map = NULL;
 };
 
 #endif

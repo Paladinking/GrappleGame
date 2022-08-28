@@ -10,6 +10,8 @@
 #include "game.h"
 #include "climbGame.h"
 #include "levelMaker.h"
+#include "fileIO.h"
+#include <cassert>
 
 /**
  * Frees still used global resources and quits SDL and SDL_image.
@@ -57,6 +59,7 @@ int main(int argc, char* args[])
 		printf("Could not initialize SDL, %s\n", SDL_GetError());
 		exit(-1);
 	}
+
 	bool level_maker = false;
 
 	if (argc > 1) {

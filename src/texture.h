@@ -12,6 +12,8 @@ class Texture {
 	public:
 		Texture() {};
 		
+		Texture(SDL_Texture* const t, const int w, const int h) : texture(t), width(w), height(h) {};
+		
 		~Texture();
 		
 		/**

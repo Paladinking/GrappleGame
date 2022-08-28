@@ -2,6 +2,7 @@
 #define FILE_READER_00_H
 #include <SDL.h>
 #include <string>
+#include <cstring>
 #include "exceptions.h"
 
 /*
@@ -12,6 +13,18 @@ class file_exception : std::exception {
 		
 		const std::string msg;
 };*/
+
+
+template<class T>
+T swap_byteorder(T &t) {
+	T new_t;
+	char* new_data = reinterpret_cast<char*>(&new_t);
+	char* old_data = reinterpret_cast<char*>(&t);
+	for (int j = 0; j < sizeof(T); ++j) {
+		new_data[j] = old_data[sizeof(T) - 1 - j];
+	}
+	return new_t;
+}
 
 
 class FileReader {
@@ -29,6 +42,9 @@ class FileReader {
 			SDL_RWclose(in);
 		}
 		
+		/**
+		 * Reads the next byte of data. Returns false if no more could be read.
+		 */
 		bool read_next(char &c) {
 			++index;
 			if (index == max) {
@@ -40,6 +56,90 @@ class FileReader {
 			return true;
 		}
 		
+		/**
+		 * Skips the next byte of data. False if no more data could be found.
+		 */
+		bool skip() {
+			char c;
+			return read_next(c);
+		}
+		
+		
+		/**
+		 * Reads data from file into T. Returns false if a full T object could not be read.
+		 * Assumes the data is written with the same byte-order as used native.
+		 */
+		template<class T>
+		bool read_next(T &res) {
+			char* res_data = reinterpret_cast<char*>(&res);
+			for (int j = 0; j < sizeof(T); ++j) {
+				if (!read_next(res_data[j])) return false;
+			}
+			return true;
+		}
+		
+		/**
+		 * Reads nr objects of Type T into res. Returns false if not all objects could be read.
+		 * This will not use the buffer at all, it will be cleared. If reading an amount of data 
+		 * smaller than 256 bytes (the buffer size) it could be better to iterate over read_next<T>().
+		 */ 
+		template<class T>
+		bool read_many(T* res, int nr) {
+			++index;
+			long pos = SDL_RWtell(in) - max + index;
+			SDL_RWseek(in, pos, RW_SEEK_SET);
+			long read = SDL_RWread(in, res, sizeof(T), nr);
+			index = -1;
+			max = 0;
+			return read == nr;
+		}
+		
+		
+		/**
+		 * Reads a null-terminated string from the file, allocates memory for it and pointing s to it.
+		 * Returns false if no null-ptr could be read. Will consume bytes even when 
+		 * returning false, but all memory will be freed and s will remain unchanged.
+		 */
+		bool read_string(char* &s) {
+			char c;
+			if (!read_next(c)) return false; // Read string only looks forwards.
+			int buf_len = 0;
+			char* buf = new char[buf_len];
+			char* null_pos;
+			do {
+				null_pos = (char*)memchr(buffer + index, '\0', max - index);
+				if (null_pos == NULL) {
+					char* tmp = new char[buf_len + max - index];
+					memcpy(tmp, buf, buf_len);
+					memcpy(tmp + buf_len, buffer + index, max - index);
+					delete[] buf;
+					buf = tmp;
+					buf_len += (max - index);
+					
+					index = max - 1; 		// 
+					if(!read_next(c)) { 	// Read new data into buffer.
+						delete[] tmp;
+						return false;
+					}
+				} else {
+					int len = 1 + null_pos - (buffer + index);
+					char* tmp = new char[buf_len + len];
+					memcpy(tmp, buf, buf_len);
+					memcpy(tmp + buf_len, buffer + index, len);
+					delete[] buf;
+					buf = tmp;
+					index += len - 1; // Should never move outside buffer since a null-byte was found here.
+				}
+			} while (null_pos == NULL);
+			
+			s = buf;
+			return true;
+		}
+		
+		/**
+		 * Reads the byte at the current position (the value previously given by read_next())
+		 * Returns false if this was not a valid byte of data.
+		 */
 		bool read_cur(char &c) const {
 			if (index == max || index == -1) {
 				return false;
@@ -47,32 +147,52 @@ class FileReader {
 			c = buffer[index];
 			return true;
 		}
-		
+
+		/**
+		 * Reverses one step without reloading the buffer, allowing read_next() to 
+		 * give the same value it previously did.
+		 */
 		void soft_back() {
 			--index;
 			if (index < -1) {
 				index = -1;
 			}
 		}
-		
+
+		/**
+		 * Stores this position for a future reset.
+		 */
 		void mark() {
 			mark(mark_index);
 		}
-		
+
+		/**
+		 * Stores this position in pos for a future reset.
+		 */
 		void mark(long &pos) {
 			pos = SDL_RWtell(in) - max + index;
 		}
-		
+
+		/**
+		 * Moves the file position to the last marked value.
+		 * This will always lead to reloading the buffer at next read.
+		 */
 		void reset() {
 			reset(mark_index);
 		}
-		
+
+		/**
+		 * Moves the file position to pos, reloading the buffer at next read.
+		 */
 		void reset(long &pos) {
 			SDL_RWseek(in, pos, RW_SEEK_SET);
-			index = -1;
+			index = 0;
 			max = SDL_RWread(in, &buffer, sizeof(char), 256 * sizeof(char));
 		}
-		
+
+		/**
+		 * Gets the current row and column.
+		 */
 		void get_position(int &row, int &col) {
 			long temp_mark;
 			mark(temp_mark);
@@ -131,14 +251,26 @@ class FileWriter {
 			return written == s.length();
 		}
 		
+		bool write(const char *s, long len) {
+			long written = SDL_RWwrite(out, s, 1, len + 1);
+			return written == len + 1;
+		}
+		
 		bool write(const char c) {
-			return SDL_RWwrite(out, &c, 1, 1) == 1;
-			
+			return SDL_RWwrite(out, &c, 1, 1) == 1;	
+		}
+		
+		bool write(const int i) {
+			return SDL_RWwrite(out, &i, sizeof(i), 1) == 1;
+		}
+		
+		template<class T>
+		bool write(const T& t) {
+			return SDL_RWwrite(out, &t, sizeof(T), 1) == 1;
 		}
 	
 	private:
 		SDL_RWops *out;
 };
-
 
 #endif
