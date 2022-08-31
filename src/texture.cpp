@@ -52,7 +52,11 @@ void Texture::free() {
 
 void Texture::render(const int x, const int y) {
 	SDL_Rect rect = {x, y, width, height};
-	SDL_RenderCopy(gRenderer, texture, NULL, &rect); 
+	SDL_RenderCopy(gRenderer, texture, NULL, &rect);
+	Uint32 format;
+	int acc, w, h;
+	SDL_QueryTexture(texture, &format, &acc, &w, &h);
+	//printf("format: %s, acc: %d, w: %d, w: %d\n", SDL_GetPixelFormatName(format), acc, w, h);
 }
 
 void Texture::render(const int dest_x, const int dest_y, const int x, const int y, const int w, const int h) {
@@ -80,4 +84,19 @@ void Texture::set_color_mod(Uint8 r, Uint8 g, Uint8 b) {
 
 Texture::~Texture() {
 	free();
+}
+
+Texture::Texture(Texture&& o) {
+	texture = o.texture;
+	width = o.width;
+	height = o.height;
+	o.texture = NULL;
+}
+
+Texture& Texture::operator=(Texture&& o) {
+	texture = o.texture;
+	width = o.width;
+	height = o.height;
+	o.texture = NULL;
+	return *this;
 }

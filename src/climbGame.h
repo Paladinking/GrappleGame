@@ -5,6 +5,7 @@
 #include "game.h"
 #include "globals.h"
 #include "utilities.h"
+#include "level.h"
 #include "entity.h"
 #include "input.h"
 
@@ -42,7 +43,7 @@ class ClimbGame : public Game {
 		
 		int visible_tiles_x, visible_tiles_y;
 
-		TileMap tilemap;
+		Level level;
 		Texture tilemapTexture;
 		
 		std::shared_ptr<Player> player;
@@ -52,7 +53,6 @@ class ClimbGame : public Game {
 		bool do_grapple = false;
 		
 		std::vector<std::shared_ptr<Entity>> entities;
-		std::vector<std::shared_ptr<Corner>> corners;
 };
 
 

@@ -1,0 +1,38 @@
+Level file format: (1 byte == 8 bits, little endian) 
+	4 bytes : width (should always be 80 for now)
+	4 bytes : height (80, 160, 240, ...)
+	4 bytes : tile image tile size
+	4 bytes : tile image width
+	4 bytes : tile image total tiles
+	null-terminated path to tile image
+	width * height * 2 bytes : mapdata
+		1 byte 0 / 1 is filled.
+		1 byte tile index.
+
+
+
+
+
+
+try {
+		FileWriter writer("level1", true);
+		writer.write<Uint32>(80);
+		writer.write<Uint32>(160);
+		writer.write<Uint32>(32);
+		writer.write<Uint32>(12);
+		writer.write<Uint32>(96);
+		writer.write("assets/tiles/tiles.png", 22);
+		for (int x = 0; x < 80; ++x) {
+			for (int y = 0; y < 160; ++y) {
+				if (y == 0 || x == 0 || y == 179 || x == 79) {
+					writer.write<Uint16>(0x0100);
+				} else {
+					writer.write<Uint16>(0x00FF);
+				}
+			}
+			
+		}
+		
+	} catch (base_exception &e) {
+		printf("%s\n", e.msg.c_str());
+	}

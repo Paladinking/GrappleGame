@@ -9,9 +9,9 @@ void Entity::load_texture(std::string texture_path)
 	texture.set_dimensions(width, height);
 }
 
-void Entity::tick(const double delta, const TileMap &tilemap, std::vector<std::shared_ptr<Corner>> &corners) 
+void Entity::tick(const double delta, Level& level) 
 {
-	int tilesize = tilemap.get_tilesize();
+	int tilesize = level.get_tilesize();
 	Vector2D to_move = {vel.x * delta, vel.y * delta};
 	double len = to_move.length();
 	if (len > 0) 
@@ -25,9 +25,9 @@ void Entity::tick(const double delta, const TileMap &tilemap, std::vector<std::s
 		to_move.y -= steps * move_step.y;
 		for (; steps > 0; steps--) 
 		{
-			try_move(move_step.x, move_step.y, tilesize, tilemap);
+			try_move(move_step.x, move_step.y, tilesize, level);
 		}
-		try_move(to_move.x, to_move.y, tilesize, tilemap);
+		try_move(to_move.x, to_move.y, tilesize, level);
 	}
 }
 
@@ -40,12 +40,12 @@ void Entity::render(const int cameraY)
 
 
 
-void Entity::try_move(const double dx, const double dy, int tilesize, const TileMap &tilemap) 
+void Entity::try_move(const double dx, const double dy, int tilesize, const Level &level) 
 {
 	double new_x = pos.x, new_y = pos.y;
 	new_x += dx;
 	int x_tile = (dx > 0 ? (new_x + width - 1) : new_x) / tilesize;
-	if (tilemap.is_blocked_line_v(x_tile, new_y, height)) 
+	if (level.is_blocked_line_v(x_tile, new_y, height)) 
 	{
 		vel.x = 0;
 		new_x = dx > 0 ? (x_tile * tilesize - width) : (x_tile + 1) * tilesize;
@@ -53,7 +53,7 @@ void Entity::try_move(const double dx, const double dy, int tilesize, const Tile
 
 	new_y += dy;
 	int y_tile = (dy > 0 ? (new_y + height - 1) : new_y) / tilesize;
-	if (tilemap.is_blocked_line_h(y_tile, new_x, width)) 
+	if (level.is_blocked_line_h(y_tile, new_x, width)) 
 	{
 		vel.y = 0;
 		new_y = dy > 0 ? y_tile * tilesize - height : (y_tile + 1) * tilesize;
@@ -78,13 +78,13 @@ const Vector2D &Entity::get_position() const
 	return pos;
 }
 
-bool Entity::on_ground(const TileMap &tilemap) const 
+bool Entity::on_ground(const Level &level) const 
 {
-	int tilesize = tilemap.get_tilesize();
+	int tilesize = level.get_tilesize();
 	int y_tile =  (pos.y + height) / tilesize;
 	for (int i = pos.x / tilesize; i <= (pos.x + width - 1) / tilesize; i++) 
 	{
-		if (tilemap.is_blocked(i, y_tile))
+		if (level.is_blocked(i, y_tile))
 		{
 			return true;
 		}
@@ -124,10 +124,10 @@ void Player::render(const int cameraY)
 }
 
 
-void Player::tick(const double delta, const TileMap &tilemap, CornerList &corners)
+void Player::tick(const double delta, Level &level)
 {
 	Vector2D old_pos = {pos.x + width / 2, pos.y + height / 2};
-	bool is_on_ground = on_ground(tilemap);
+	bool is_on_ground = on_ground(level);
 	if (is_on_ground) {
 		double factor = delta * FRICTION_FACTOR;
 		if (vel.x > 0) {
@@ -175,7 +175,7 @@ void Player::tick(const double delta, const TileMap &tilemap, CornerList &corner
 		}
 	}
 
-	int tilesize = tilemap.get_tilesize();
+	int tilesize = level.get_tilesize();
 	double len = to_move.length();
 	if (len > 0) 
 	{
@@ -188,16 +188,16 @@ void Player::tick(const double delta, const TileMap &tilemap, CornerList &corner
 		to_move.y -= steps * move_step.y;
 		for (; steps > 0; steps--) 
 		{
-			try_move(move_step.x, move_step.y, tilesize, tilemap);
+			try_move(move_step.x, move_step.y, tilesize, level);
 		}
-		try_move(to_move.x, to_move.y, tilesize, tilemap);
+		try_move(to_move.x, to_move.y, tilesize, level);
 	}
 
 	if (grappling_mode == TRAVELING || (grappling_mode == PLACED && (len > 0))) 
 	{
 		center_point->x = pos.x + width / 2;
 		center_point->y = pos.y + height / 2;
-		update_grapple(corners, old_pos, false);
+		update_grapple(level.get_corners(), old_pos, false);
 		if (pull) {
 			if (grapple_length + 10.0 < grapple_max_len) {
 				grapple_max_len = grapple_length + 10.0;
@@ -246,22 +246,22 @@ void Player::tick(const double delta, const TileMap &tilemap, CornerList &corner
 		{
 			new_x += move_step.x;
 			new_y += move_step.y;
-			if (tilemap.is_blocked_pixel(new_x, new_y))
+			if (level.is_blocked_pixel(new_x, new_y))
 			{
-				place_grapple(new_x, new_y, move_step.x, move_step.y, tilesize, corners);
+				place_grapple(new_x, new_y, move_step.x, move_step.y, tilesize, level.get_corners());
 				return;
 			}
 		}
 		new_x += to_move.x;
 		new_y += to_move.y;
-		if (tilemap.is_blocked_pixel(new_x, new_y)) {
-			place_grapple(new_x, new_y, to_move.x, to_move.y, tilesize, corners);
+		if (level.is_blocked_pixel(new_x, new_y)) {
+			place_grapple(new_x, new_y, to_move.x, to_move.y, tilesize, level.get_corners());
 			return;
 		}
 		Vector2D prev = {hook->x, hook->y};
 		hook->x = new_x;
 		hook->y = new_y;
-		update_grapple(corners, prev, true);
+		update_grapple(level.get_corners(), prev, true);
 	} 
 }
 

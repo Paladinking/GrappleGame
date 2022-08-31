@@ -11,7 +11,7 @@ void ClimbGame::tick(Uint64 delta) {
 
 	handle_input(dDelta);
 	for (auto e : entities) {
-		e->tick(dDelta, tilemap, corners);
+		e->tick(dDelta, level);
 	}
 	const Vector2D &pos = player->get_position();
 	double camera_y_delta = pos.y - camera_y;
@@ -52,8 +52,8 @@ void ClimbGame::render() {
 	SDL_SetRenderDrawColor(gRenderer, 0xFF, 0xFF, 0xFF, 0xFF);
 	SDL_RenderClear(gRenderer);
 	int camera_y_tile = ((int)camera_y) / TILE_SIZE;
-	tilemapTexture.render(0, 0, 0, camera_y, window_width, window_height);
-	
+	//tilemapTexture.render(0, 0, 0, camera_y, window_width, window_height);
+	level.render((int)camera_y);
 	//render_tilemap();
 	player->render((int)camera_y);
 	
@@ -64,7 +64,7 @@ void ClimbGame::render_tilemap() {
 	int camera_y_tile = ((int)camera_y) / TILE_SIZE;
 	for (int x = 0; x < visible_tiles_x; x++) {
 		for (int y = camera_y_tile - 1; y < camera_y_tile + visible_tiles_y + 1; y++) {
-			if (tilemap.is_blocked(x, y)) {
+			if (level.is_blocked(x, y)) {
 				SDL_SetRenderDrawColor( gRenderer, 0x00, 0x00, 0x00, 0xFF );
 			} else {
 				SDL_SetRenderDrawColor( gRenderer, 0xFF, 0xFF, 0xFF, 0xFF );
@@ -82,9 +82,13 @@ void ClimbGame::render_tilemap() {
 void ClimbGame::init() {
 	load_globals();
 	create_inputs();
-	tilemap.load_from_image(ASSETS_ROOT + MAP_IMG);
-	tilemap.set_tilesize(TILE_SIZE);
-	if (tilemap.get_width() != FULL_TILE_WIDTH || tilemap.get_height() != FULL_TILE_HEIGHT) 
+	level.set_window_size(window_width, window_height);
+	level.load_from_file("config/level1");
+	//tilemap.load_from_image(ASSETS_ROOT + MAP_IMG);
+	
+	level.set_tilesize(TILE_SIZE);
+
+	if (level.get_width() != FULL_TILE_WIDTH || level.get_height() != FULL_TILE_HEIGHT) 
 	{
 		throw game_exception("Map image has wrong dimensions.");
 	}
@@ -95,42 +99,6 @@ void ClimbGame::init() {
 	camera_y_min = 0;
 	if (camera_y < camera_y_min) camera_y = camera_y_min;
 	if (camera_y > camera_y_max) camera_y = camera_y_max;
-	
-	for (int x = 0; x < FULL_TILE_WIDTH; ++x) {
-		for (int y = 0; y < FULL_TILE_HEIGHT; ++y) {
-			if (!tilemap.is_blocked(x, y)) continue;
-			bool top_left = true, top_right = true, botton_left = true, bottom_right = true;
-			if (tilemap.is_blocked(x - 1, y)) {
-				top_left = false;
-				botton_left = false;
-			}
-			if (tilemap.is_blocked(x + 1, y)) {
-				top_right = false;
-				bottom_right = false;
-			}
-			if (tilemap.is_blocked(x, y - 1)) {
-				top_left = false;
-				top_right = false;
-			}
-			if (tilemap.is_blocked(x, y + 1)) {
-				botton_left = false;
-				bottom_right = false;
-			}
-			double x_pos = (double) x, y_pos = (double) y;
-			if (top_left) {
-				corners.push_back(std::shared_ptr<Corner>(new Corner(x_pos * TILE_SIZE, y_pos * TILE_SIZE)));
-			}
-			if (top_right) {
-				corners.push_back(std::shared_ptr<Corner>(new Corner((x_pos + 1) * TILE_SIZE, y_pos * TILE_SIZE)));
-			}
-			if (botton_left) {
-				corners.push_back(std::shared_ptr<Corner>(new Corner(x_pos * TILE_SIZE, (y_pos + 1) * TILE_SIZE)));
-			}
-			if (bottom_right) {
-				corners.push_back(std::shared_ptr<Corner>(new Corner((x_pos + 1) * TILE_SIZE, (y_pos + 1) * TILE_SIZE)));
-			}
-		}
-	}
 	
 	tilemapTexture.load_from_file("assets/mapImage.png", FULL_TILE_WIDTH * TILE_SIZE, FULL_TILE_HEIGHT * TILE_SIZE);
 	tilemapTexture.set_dimensions(window_width, window_height);
@@ -176,7 +144,7 @@ void ClimbGame::handle_down(const SDL_Keycode key, const Uint8 mouse) {
 		player->set_release(true);
 	}
 	if (jump_input->is_targeted(key, mouse)) {
-		if (player->on_ground(tilemap)) 
+		if (player->on_ground(level)) 
 		{
 			const Vector2D &vel = player->get_velocity();
 			player->add_velocity(0, -vel.y -JUMP_VEL);

@@ -299,12 +299,11 @@ class TileMap {
 		 
 	protected:
 		std::unique_ptr<bool[]> map;
-	
-	
-	private:
+		
 		unsigned width = 0, height = 0;
 		
 		unsigned tile_size = 1;
+		
 };
 
 #endif

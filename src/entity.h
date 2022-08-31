@@ -5,6 +5,7 @@
 #include <memory>
 #include <stdio.h>
 #include "utilities.h"
+#include "level.h"
 #include "texture.h"
 
 class Entity {
@@ -26,7 +27,7 @@ class Entity {
 		 * Tick for the entity called every frame. The default implementation moves the entity by
 		 * the velocity.
 		 */
-		virtual void tick(const double delta, const TileMap &tilemap, std::vector<std::shared_ptr<Corner>> &corners);
+		virtual void tick(const double delta, Level &level);
 		
 		
 		/**
@@ -42,7 +43,7 @@ class Entity {
 		/**
 		 * Returns true if this entity is standing on ground.
 		 */
-		bool on_ground(const TileMap &tilemap) const;
+		bool on_ground(const Level &level) const;
 		
 		/**
 		 * Returns the velocity vector of this entity.
@@ -63,7 +64,7 @@ class Entity {
 		* Tries to move the entity by (dx, dy), stopping if a wall is in the way. 
 		* Requires that -tilesize < dx < tilesize and -tilesize < dy < tilesize
 		*/
-		void try_move(const double dx, const double dy, const int tilesize, const TileMap &tilemap);
+		void try_move(const double dx, const double dy, const int tilesize, const Level &level);
 		
 		Vector2D pos;
 		Vector2D vel;
@@ -93,7 +94,7 @@ class Player : public Entity {
 		
 		virtual void render(const int cameraY) override;
 		
-		virtual void tick(const double delta, const TileMap &tilemap, std::vector<std::shared_ptr<Corner>> &corners) override;
+		virtual void tick(const double delta, Level &level) override;
 		
 		void fire_grapple(const int target_x, const int target_y);
 		
