@@ -1,5 +1,6 @@
 #ifndef LEVEL_MAKER_00_H
 #define LEVEL_MAKER_00_H
+#include <memory>
 #include "texture.h"
 #include "game.h"
 #include "globals.h"
@@ -29,11 +30,21 @@ class LevelMaker : public Game {
 		
 		SDL_Surface* marker;
 		
+		SDL_Surface* editor_window;
+		
 		SDL_Surface* window_surface;
 		
-		std::unique_ptr<PressInput> click;
-		
 		int selected = 0;
+		
+		int width = 80, height = 80;
+		
+		int x_start = 0, x_end = 80;
+		int y_start = 0, y_end = 80;
+		int zoom_level = 0;
+		
+		int tile_size = 8;
+		
+		std::unique_ptr<Uint16[]> data = std::make_unique<Uint16[]>(80 * 80);
 	
 };
 
