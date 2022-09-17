@@ -138,7 +138,7 @@ class FileReader {
 		
 		/**
 		 * Reads the byte at the current position (the value previously given by read_next())
-		 * Returns false if this was not a valid byte of data.
+		 * Returns false if this is not a valid byte of data.
 		 */
 		bool read_cur(char &c) const {
 			if (index == max || index == -1) {
@@ -175,14 +175,14 @@ class FileReader {
 
 		/**
 		 * Moves the file position to the last marked value.
-		 * This will always lead to reloading the buffer at next read.
+		 * This will always lead to reloading the buffer.
 		 */
 		void reset() {
 			reset(mark_index);
 		}
 
 		/**
-		 * Moves the file position to pos, reloading the buffer at next read.
+		 * Moves the file position to pos, reloading the buffer.
 		 */
 		void reset(long &pos) {
 			SDL_RWseek(in, pos, RW_SEEK_SET);
