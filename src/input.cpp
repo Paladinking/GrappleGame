@@ -1,11 +1,12 @@
 #include "input.h"
 #include "exceptions.h"
+#include <iostream>
 
 std::unique_ptr<PressInput> get_press_input(const std::string& name, const std::string& default_name) {
 	try {
 		return get_press_input(name);
 	} catch (base_exception &e) {
-		printf("Invalid key %s, using %s\n", name.c_str(), default_name.c_str());
+		std::cout << "Invalid key " << name << " using " << default_name << std::endl;
 		return get_press_input(default_name);
 	}
 }
@@ -14,7 +15,7 @@ std::unique_ptr<HoldInput> get_hold_input(const std::string& name, const std::st
 	try {
 		return get_hold_input(name);
 	} catch (base_exception &e) {
-		printf("Invalid key %s, using %s\n", name.c_str(), default_name.c_str());
+		std::cout << "Invalid key " << name << " using " << default_name << std::endl;
 		return get_hold_input(default_name);
 	}	
 }

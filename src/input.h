@@ -1,11 +1,12 @@
 #ifndef INPUT_00_H
 #define INPUT_00_H
 #include <memory>
-#include <SDL.h>
 #include <string>
+#include <SDL.h>
+
 
 namespace input {
-	const std::string 
+	const std::string // Default bindings
 		LEFT = "A",
 		RIGHT = "D", 
 		JUMP = "Space", 

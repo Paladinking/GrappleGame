@@ -1,7 +1,5 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 #include <vector>
+#include <iostream>
 #include <SDL.h>
 #include <SDL_image.h>
 #include "globals.h"
@@ -11,7 +9,6 @@
 #include "climbGame.h"
 #include "levelMaker.h"
 #include "fileIO.h"
-#include <cassert>
 
 /**
  * Frees still used global resources and quits SDL and SDL_image.
@@ -21,16 +18,15 @@ void cleanup()
 {
 	if (gRenderer != NULL) 
 	{
-		printf("Destroying renderer\n");
+		std::cout << "Destroying renderer" << std::endl;
 		SDL_DestroyRenderer(gRenderer);
 	}
 	if (gWindow != NULL) 
 	{
-		printf("Destroying window\n");
+		std::cout << "Destroying window" << std::endl;
 		SDL_DestroyWindow(gWindow);
 	}
-	
-	printf("Shutting down...\n");
+	std::cout << "Shutting down..." << std::endl;
 	IMG_Quit();
     SDL_Quit();
 }
@@ -44,7 +40,7 @@ void run_game(Game &game, int* exit_status) {
 		game.create();
 		game.run();
 	} catch (base_exception &e) {
-		printf("%s\n", e.msg.c_str());
+		std::cout << e.msg << std::endl;
 		*exit_status = -1;
 	}
 	game.destroy_game();
@@ -56,7 +52,7 @@ int main(int argc, char* args[])
 	at_quick_exit(cleanup);
 	
 	if (SDL_Init(SDL_INIT_VIDEO) < 0) {
-		printf("Could not initialize SDL, %s\n", SDL_GetError());
+		std::cout << "Could not initialize SDL, "  << SDL_GetError() << std::endl;
 		exit(-1);
 	}
 

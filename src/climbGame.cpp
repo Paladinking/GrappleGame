@@ -1,5 +1,5 @@
-#include <stdlib.h>
 #include <cmath>
+#include <iostream>
 #include "climbGame.h"
 #include "json.h"
 
@@ -118,11 +118,10 @@ void ClimbGame::create_inputs() {
 		if (options.has_key_of_type<JsonObject>("CONTROLS")) {
 			controls = options.get<JsonObject>("CONTROLS");
 		} else {
-			printf("No controls in options\nUsing default bindings\n");
+			std::cout << "No controls in options\nUsing default bindings" << std::endl;
 		}
 	} catch (base_exception &e){
-		printf("%s\n", e.msg.c_str());
-		printf("Using default bindings\n");
+		std::cout << e.msg << '\n' << "Using default bindings" << std::endl;
 	}
 	left_input = get_hold_input(controls.get_default("left", input::LEFT), input::LEFT);
 	right_input = get_hold_input(controls.get_default("right", input::RIGHT), input::RIGHT);
@@ -187,7 +186,7 @@ void load_globals() {
 	try {
 		obj = json::read_from_file(GLOBALS_PATH);
 	} catch (base_exception &e) {
-		printf("%s\nUsing default globals.\n", e.msg.c_str());
+		std::cout << e.msg << '\n' << "Using default globals" << std::endl;
 		return;
 	}
 	SET_IF_EXISTS(obj, double, MAX_GRAVITY_VEL);
@@ -224,30 +223,32 @@ void load_globals() {
 	
 	if (!VERBOSE) return;
 	
-	printf("MAX_GRAVITY_VEL: %f\n", MAX_GRAVITY_VEL);
-	printf("MAX_MOVEMENT_VEL: %f\n", MAX_MOVEMENT_VEL);
-	printf("GRAVITY_ACCELERATION: %f\n", GRAVITY_ACCELERATION);
-	printf("MOVEMENT_ACCELERATION: %f\n", MOVEMENT_ACCELERATION);
-	printf("FRICTION_FACTOR: %f\n", FRICTION_FACTOR);
-	printf("AIR_RES_FACTOR: %f\n", AIR_RES_FACTOR);
-	printf("JUMP_VEL: %f\n", JUMP_VEL);
-	printf("PLAYER_FULL_WIDTH: %d\n", PLAYER_FULL_WIDTH);
-	printf("PLAYER_FULL_HEIGHT: %d\n", PLAYER_FULL_HEIGHT);
-	printf("PLAYER_START_X: %d\n", PLAYER_START_X);
-	printf("PLAYER_START_Y: %d\n", PLAYER_START_Y);
-	printf("GRAPPLE_LENGTH: %d\n", GRAPPLE_LENGTH);
-	printf("GRAPPLE_SPEED: %f\n", GRAPPLE_SPEED);
-	printf("GRAPPLE_PULL: %f\n", GRAPPLE_PULL);
-	printf("GRAPPLE_RELEASE: %f\n", GRAPPLE_RELEASE);
-	printf("TILE_SIZE: %d\n", TILE_SIZE);
-	printf("FULL_TILE_HEIGHT: %d\n", FULL_TILE_HEIGHT);
-	printf("FULL_TILE_WIDTH: %d\n", FULL_TILE_WIDTH);
-	printf("CAMERA_PAN_REGION: %d\n", CAMERA_PAN_REGION);
-	printf("CAMERA_SPEED: %f\n", CAMERA_SPEED);
-	printf("ASSETS_ROOT: %s\n", ASSETS_ROOT.c_str());
-	printf("PLAYER_IMG: %s\n", PLAYER_IMG.c_str());
-	printf("MAP_IMG: %s\n", MAP_IMG.c_str());
-	printf("HOOK_IMG: %s\n", HOOK_IMG.c_str());
-	printf("CONFIG_ROOT: %s\n", CONFIG_ROOT.c_str());
-	printf("OPTIONS_FILE: %s\n", OPTIONS_FILE.c_str());
+	std::cout << "MAX_GRAVITY_VEL: " 		<< MAX_GRAVITY_VEL << '\n';
+	std::cout << "MAX_GRAVITY_VEL: " 		<< MAX_GRAVITY_VEL << '\n';
+	std::cout << "MAX_MOVEMENT_VEL: " 		<< MAX_MOVEMENT_VEL << '\n';
+	std::cout << "GRAVITY_ACCELERATION: "	<< GRAVITY_ACCELERATION << '\n';
+	std::cout << "MOVEMENT_ACCELERATION: "  << MOVEMENT_ACCELERATION << '\n';
+	std::cout << "FRICTION_FACTOR: " 		<< FRICTION_FACTOR << '\n';
+	std::cout << "AIR_RES_FACTOR: " 		<< AIR_RES_FACTOR << '\n';
+	std::cout << "JUMP_VEL: " 				<< JUMP_VEL << '\n';
+	std::cout << "PLAYER_FULL_WIDTH: " 		<< PLAYER_FULL_WIDTH << '\n';
+	std::cout << "PLAYER_FULL_HEIGHT: " 	<< PLAYER_FULL_HEIGHT << '\n';
+	std::cout << "PLAYER_START_X: "			<< PLAYER_START_X << '\n';
+	std::cout << "PLAYER_START_Y: " 		<< PLAYER_START_Y << '\n';
+	std::cout << "GRAPPLE_LENGTH: " 		<< GRAPPLE_LENGTH << '\n';
+	std::cout << "GRAPPLE_SPEED:" 			<< GRAPPLE_SPEED << '\n';
+	std::cout << "GRAPPLE_PULL: " 			<< GRAPPLE_PULL << '\n';
+	std::cout << "GRAPPLE_RELEASE: " 		<< GRAPPLE_RELEASE << '\n';
+	std::cout << "TILE_SIZE: " 				<< TILE_SIZE << '\n';
+	std::cout << "FULL_TILE_HEIGHT: " 		<< FULL_TILE_HEIGHT << '\n';
+	std::cout << "FULL_TILE_WIDTH: " 		<< FULL_TILE_WIDTH << '\n';
+	std::cout << "CAMERA_PAN_REGION: " 		<< CAMERA_PAN_REGION << '\n';
+	std::cout << "CAMERA_SPEED: " 			<< CAMERA_SPEED << '\n';
+	std::cout << "ASSETS_ROOT: " 			<< ASSETS_ROOT << '\n';
+	std::cout << "PLAYER_IMG: " 			<< PLAYER_IMG << '\n';
+	std::cout << "MAP_IMG: " 				<< MAP_IMG << '\n';
+	std::cout << "HOOK_IMG: " 				<< HOOK_IMG << '\n';
+	std::cout << "CONFIG_ROOT: " 			<< CONFIG_ROOT << '\n';
+	std::cout << "OPTIONS_FILE: " 			<< OPTIONS_FILE << '\n';
+	std::cout << std::flush;
 }
