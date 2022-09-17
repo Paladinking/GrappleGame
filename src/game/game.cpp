@@ -1,5 +1,5 @@
 #include "game.h"
-#include "exceptions.h"
+#include "util/exceptions.h"
 
 SDL_Renderer* gRenderer;
 SDL_Window* gWindow;

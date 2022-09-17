@@ -3,12 +3,10 @@
 #include <SDL.h>
 #include <SDL_image.h>
 #include "globals.h"
-#include "texture.h"
-#include "exceptions.h"
-#include "game.h"
-#include "climbGame.h"
-#include "levelMaker.h"
-#include "fileIO.h"
+#include "util/exceptions.h"
+#include "game/game.h"
+#include "game/climbGame.h"
+#include "game/levelMaker.h"
 
 /**
  * Frees still used global resources and quits SDL and SDL_image.

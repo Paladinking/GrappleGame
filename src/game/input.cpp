@@ -1,5 +1,5 @@
 #include "input.h"
-#include "exceptions.h"
+#include "util/exceptions.h"
 #include <iostream>
 
 std::unique_ptr<PressInput> get_press_input(const std::string& name, const std::string& default_name) {

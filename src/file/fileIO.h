@@ -3,7 +3,7 @@
 #include <SDL.h>
 #include <string>
 #include <cstring>
-#include "exceptions.h"
+#include "util/exceptions.h"
 
 /*
 #include <exception>

@@ -1,5 +1,5 @@
 #include "entity.h"
-#include "geometry.h"
+#include "util/geometry.h"
 
 Entity::~Entity() {}
 

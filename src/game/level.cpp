@@ -2,9 +2,9 @@
 #include <SDL_image.h>
 #include <string>
 #include "level.h"
-#include "fileIO.h"
-#include "json.h"
-#include "exceptions.h"
+#include "file/fileIO.h"
+#include "file/json.h"
+#include "util/exceptions.h"
 
 
 

@@ -1,7 +1,7 @@
 #include <cmath>
 #include <iostream>
 #include "climbGame.h"
-#include "json.h"
+#include "file/json.h"
 
 void load_globals();
 

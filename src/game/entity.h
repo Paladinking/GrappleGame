@@ -4,7 +4,7 @@
 #include <vector>
 #include <memory>
 #include <stdio.h>
-#include "utilities.h"
+#include "util/utilities.h"
 #include "level.h"
 #include "texture.h"
 

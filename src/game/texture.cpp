@@ -1,6 +1,6 @@
 #include "texture.h"
 #include "globals.h"
-#include "exceptions.h"
+#include "util/exceptions.h"
 
 void Texture::load_from_file(std::string path) {
 	free();

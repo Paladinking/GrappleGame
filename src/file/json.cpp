@@ -3,8 +3,9 @@
 #include <sstream>
 #include <cerrno>
 #include "json.h"
-#include "exceptions.h"
 #include "fileIO.h"
+#include "util/exceptions.h"
+
 
 
 json_exception expected_char(char c, FileReader &in) {

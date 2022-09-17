@@ -4,7 +4,7 @@
 #include <memory>
 #include "game.h"
 #include "globals.h"
-#include "utilities.h"
+#include "util/utilities.h"
 #include "level.h"
 #include "entity.h"
 #include "input.h"
