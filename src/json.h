@@ -18,17 +18,37 @@ namespace json {
 	};
 	
 	typedef std::variant<JsonObject, JsonList, int, double, bool, std::string, JsonNull> Type;
-	
+
+	/**
+	 * Reads a JsonObject from a file.
+	 */
 	JsonObject read_from_file(std::string path);
-	
+
+	/**
+	 * Writes a JsonObject to a file, in prettified form with indentations and newlines.
+	 */
 	void write_to_file(std::string path, const JsonObject &obj);
-	
+
+	/**
+	 * Writes a JsonObject to a file.
+	 * If pretty is true, indentations and newlines will be written.
+	 */
 	void write_to_file(std::string path, const JsonObject &obj, bool pretty);
 	
+	/**
+	 *  Writes a json::Type variant to a stream, in prettified form with indentations and newlines.
+	 */
 	void to_pretty_stream(std::ostream& os, const Type& type);
 
+	/**
+	 *  Writes a json::Type variant to a stream, in compact form.
+	 */
 	void to_stream(std::ostream& os, const Type& type);
 	
+	/**
+	 * Writes a string to a stream surrounded with quotes and replaces \, ", LF, tab, backspace, form feed and CR with
+	 * \\, \", \n, \t, \b, \f  and \r respectively.
+	 */
 	void escape_string_to_stream(std::ostream& os, const std::string& s);
 }
 
