@@ -28,6 +28,8 @@ namespace json {
 	void to_pretty_stream(std::ostream& os, const Type& type);
 
 	void to_stream(std::ostream& os, const Type& type);
+	
+	void escape_string_to_stream(std::ostream& os, const std::string& s);
 }
 
 

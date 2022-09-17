@@ -343,6 +343,37 @@ void json::to_pretty_stream(std::ostream& os, const json::Type& val) {
 	to_pretty_stream(os, val, 0);
 }
 
+void json::escape_string_to_stream(std::ostream& os, const std::string& s) {
+	os << '"';
+	for (char c : s) {
+		switch (c) {
+			case '\\':
+				os << "\\\\";
+				break;
+			case '\"':
+				os << "\\\"";
+				break;
+			case '\n':
+				os << "\\n";
+				break;
+			case '\t':
+				os << "\\t";
+				break;
+			case '\b':
+				os << "\\b";
+				break;
+			case '\f':
+				os << "\\f";
+			case '\r':
+				os << "\\r";
+				break;
+			default:
+				os << c;
+		}
+	}
+	os << '"';
+}
+
 void json::to_stream(std::ostream& os, const json::Type& val) {
 	if (const JsonObject *obj = std::get_if<JsonObject>(&val)) {
 		obj->to_stream(os);
@@ -358,7 +389,7 @@ void json::to_stream(std::ostream& os, const json::Type& val) {
 		if (*b) os << "true";
 		else os << "false";
 	} else if (const std::string *s = std::get_if<std::string>(&val)) {
-		os << '"' << *s << '"';
+		json::escape_string_to_stream(os, *s);
 	}
 }
 
@@ -395,7 +426,7 @@ void to_pretty_stream(std::ostream& os, const json::Type& val, int indentations)
 		if (*b) os << "true";
 		else os << "false";
 	} else if (const std::string *s = std::get_if<std::string>(&val)) {
-		os << '"' << *s << '"';
+		json::escape_string_to_stream(os, *s);
 	}
 }
 
