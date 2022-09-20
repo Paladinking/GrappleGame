@@ -49,4 +49,6 @@ extern double CAMERA_SPEED;
 extern SDL_Renderer* gRenderer;
 extern SDL_Window* gWindow;
 
+void load_globals();
+
 #endif

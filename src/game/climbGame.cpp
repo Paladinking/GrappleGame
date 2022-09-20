@@ -3,8 +3,6 @@
 #include "climbGame.h"
 #include "file/json.h"
 
-void load_globals();
-
 void ClimbGame::tick(Uint64 delta) {
 	if (delta == 0) return;
 	double dDelta = delta / 1000.0;
@@ -80,7 +78,11 @@ void ClimbGame::render_tilemap() {
 }
 
 void ClimbGame::init() {
-	load_globals();
+	try {
+		load_globals();
+	} catch (base_exception &e) {
+		std::cout << e.msg << '\n' << "Using default globals" << std::endl;
+	}
 	create_inputs();
 	level.set_window_size(window_width, window_height);
 	level.load_from_file("config/level1");
@@ -177,78 +179,4 @@ void ClimbGame::handle_mousedown(SDL_MouseButtonEvent e) {
 }
 void ClimbGame::handle_mouseup(SDL_MouseButtonEvent e) {
 	handle_up(SDLK_UNKNOWN, e.button);
-}
-
-#define SET_IF_EXISTS(obj, T, S) if (obj.has_key_of_type<T>(#S)) S = obj.get<T>(#S)
-
-void load_globals() {
-	JsonObject obj;
-	try {
-		obj = json::read_from_file(GLOBALS_PATH);
-	} catch (base_exception &e) {
-		std::cout << e.msg << '\n' << "Using default globals" << std::endl;
-		return;
-	}
-	SET_IF_EXISTS(obj, double, MAX_GRAVITY_VEL);
-	SET_IF_EXISTS(obj, double, GRAVITY_ACCELERATION);
-	SET_IF_EXISTS(obj, double, MAX_MOVEMENT_VEL);
-	SET_IF_EXISTS(obj, double, MOVEMENT_ACCELERATION);
-	SET_IF_EXISTS(obj, double, FRICTION_FACTOR);
-	SET_IF_EXISTS(obj, double, AIR_RES_FACTOR);
-	SET_IF_EXISTS(obj, double, JUMP_VEL);
-
-	SET_IF_EXISTS(obj, int, PLAYER_FULL_WIDTH);
-	SET_IF_EXISTS(obj, int, PLAYER_FULL_HEIGHT);
-	SET_IF_EXISTS(obj, int, PLAYER_START_X);
-	SET_IF_EXISTS(obj, int, PLAYER_START_Y);
-	SET_IF_EXISTS(obj, int, GRAPPLE_LENGTH);
-	SET_IF_EXISTS(obj, double, GRAPPLE_SPEED);
-	SET_IF_EXISTS(obj, double, GRAPPLE_PULL);
-	SET_IF_EXISTS(obj, double, GRAPPLE_RELEASE);
-	
-	SET_IF_EXISTS(obj, int, TILE_SIZE);
-	SET_IF_EXISTS(obj, int, FULL_TILE_HEIGHT);
-	SET_IF_EXISTS(obj, int, FULL_TILE_WIDTH);
-	SET_IF_EXISTS(obj, int, CAMERA_PAN_REGION);
-	SET_IF_EXISTS(obj, double, CAMERA_SPEED);
-	SET_IF_EXISTS(obj, bool, VERBOSE);
-	
-	SET_IF_EXISTS(obj, std::string, ASSETS_ROOT);
-	SET_IF_EXISTS(obj, std::string, PLAYER_IMG);
-	SET_IF_EXISTS(obj, std::string, MAP_IMG);
-	SET_IF_EXISTS(obj, std::string, HOOK_IMG);
-	
-	SET_IF_EXISTS(obj, std::string, CONFIG_ROOT);
-	SET_IF_EXISTS(obj, std::string, OPTIONS_FILE);
-	
-	if (!VERBOSE) return;
-	
-	std::cout << "MAX_GRAVITY_VEL: " 		<< MAX_GRAVITY_VEL << '\n';
-	std::cout << "MAX_GRAVITY_VEL: " 		<< MAX_GRAVITY_VEL << '\n';
-	std::cout << "MAX_MOVEMENT_VEL: " 		<< MAX_MOVEMENT_VEL << '\n';
-	std::cout << "GRAVITY_ACCELERATION: "	<< GRAVITY_ACCELERATION << '\n';
-	std::cout << "MOVEMENT_ACCELERATION: "  << MOVEMENT_ACCELERATION << '\n';
-	std::cout << "FRICTION_FACTOR: " 		<< FRICTION_FACTOR << '\n';
-	std::cout << "AIR_RES_FACTOR: " 		<< AIR_RES_FACTOR << '\n';
-	std::cout << "JUMP_VEL: " 				<< JUMP_VEL << '\n';
-	std::cout << "PLAYER_FULL_WIDTH: " 		<< PLAYER_FULL_WIDTH << '\n';
-	std::cout << "PLAYER_FULL_HEIGHT: " 	<< PLAYER_FULL_HEIGHT << '\n';
-	std::cout << "PLAYER_START_X: "			<< PLAYER_START_X << '\n';
-	std::cout << "PLAYER_START_Y: " 		<< PLAYER_START_Y << '\n';
-	std::cout << "GRAPPLE_LENGTH: " 		<< GRAPPLE_LENGTH << '\n';
-	std::cout << "GRAPPLE_SPEED:" 			<< GRAPPLE_SPEED << '\n';
-	std::cout << "GRAPPLE_PULL: " 			<< GRAPPLE_PULL << '\n';
-	std::cout << "GRAPPLE_RELEASE: " 		<< GRAPPLE_RELEASE << '\n';
-	std::cout << "TILE_SIZE: " 				<< TILE_SIZE << '\n';
-	std::cout << "FULL_TILE_HEIGHT: " 		<< FULL_TILE_HEIGHT << '\n';
-	std::cout << "FULL_TILE_WIDTH: " 		<< FULL_TILE_WIDTH << '\n';
-	std::cout << "CAMERA_PAN_REGION: " 		<< CAMERA_PAN_REGION << '\n';
-	std::cout << "CAMERA_SPEED: " 			<< CAMERA_SPEED << '\n';
-	std::cout << "ASSETS_ROOT: " 			<< ASSETS_ROOT << '\n';
-	std::cout << "PLAYER_IMG: " 			<< PLAYER_IMG << '\n';
-	std::cout << "MAP_IMG: " 				<< MAP_IMG << '\n';
-	std::cout << "HOOK_IMG: " 				<< HOOK_IMG << '\n';
-	std::cout << "CONFIG_ROOT: " 			<< CONFIG_ROOT << '\n';
-	std::cout << "OPTIONS_FILE: " 			<< OPTIONS_FILE << '\n';
-	std::cout << std::flush;
 }
