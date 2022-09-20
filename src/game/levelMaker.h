@@ -32,8 +32,6 @@ class LevelMaker : public Game {
 		
 		SDL_Surface* marker = nullptr;
 		
-		SDL_Surface* editor_window = nullptr;
-		
 		SDL_Surface* window_surface = nullptr;
 		
 		std::unique_ptr<PressInput> zoom_in_input, zoom_out_input, put_tile_input, clear_tile_input,
@@ -41,7 +39,7 @@ class LevelMaker : public Game {
 		
 		int selected = 0;
 		
-		int width = 80, height = 80;
+		int width = 80, height = 160;
 		
 		int x_start = 0, x_end = 80;
 		int y_start = 0, y_end = 80;
@@ -49,7 +47,7 @@ class LevelMaker : public Game {
 		
 		int tile_size = 8;
 		
-		std::unique_ptr<Uint16[]> data = std::make_unique<Uint16[]>(80 * 80);
+		std::unique_ptr<Uint16[]> data;
 	
 };
 

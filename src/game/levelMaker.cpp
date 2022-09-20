@@ -47,11 +47,11 @@ void LevelMaker::init() {
 	up_input = get_press_input(controls.get_default<std::string>("navigate_up", input::LM_UP), input::LM_UP);
 	down_input = get_press_input(controls.get_default<std::string>("navigate_down", input::LM_DOWN), input::LM_DOWN);
 	
+	data = std::make_unique<Uint16[]>(width * height);
+
 	tiles = IMG_Load("assets/tiles/tiles.png");
 	
 	marker = IMG_Load("assets/marker.png");
-	
-	editor_window = SDL_CreateRGBSurfaceWithFormat(0, EDITOR_W, EDITOR_H, tiles->format->BitsPerPixel, tiles->format->format);
 	
 	window_surface = SDL_GetWindowSurface(gWindow);
 	
@@ -169,5 +169,4 @@ void LevelMaker::destroy_game() {
 	Game::destroy_game();
 	SDL_FreeSurface(tiles);
 	SDL_FreeSurface(marker);
-	SDL_FreeSurface(editor_window);
 }
