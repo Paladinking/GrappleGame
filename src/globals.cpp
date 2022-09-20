@@ -42,7 +42,7 @@ std::string OPTIONS_FILE = "options.json";
 
 void load_globals() {
 	JsonObject obj = json::read_from_file(GLOBALS_PATH);
-	
+
 	SET_IF_EXISTS(obj, int, SCREEN_WIDTH);
 	SET_IF_EXISTS(obj, int, SCREEN_HEIGHT);
 

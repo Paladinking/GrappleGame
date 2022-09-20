@@ -96,7 +96,7 @@ class JsonObject {
 		}
 		
 		template<class T>
-		void set(const std::string& key, const T value) {
+		void set(const std::string& key, const T& value) {
 			data[key] = value;
 		}
 		
@@ -153,14 +153,13 @@ class JsonList {
 		}
 		
 		template<class T>
-		void set(const unsigned index, T value) {
-			data[i] = value;
+		void set(const unsigned index, const T& value) {
+			data[index] = value;
 		}
 		
 		template<class T>
-		void push_back(T value) {
-			json::Type v = value;
-			data.push_back(v);
+		void push_back(const T& value) {
+			data.emplace_back(value);
 		}
 		
 		std::vector<json::Type>::iterator begin() {
