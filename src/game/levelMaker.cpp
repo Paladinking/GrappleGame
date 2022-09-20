@@ -171,8 +171,3 @@ void LevelMaker::render() {
 	
 	SDL_UpdateWindowSurface(gWindow);
 }
-
-
-void LevelMaker::destroy_game() {
-	Game::destroy_game();
-}

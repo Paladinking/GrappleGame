@@ -11,8 +11,6 @@
 class LevelMaker : public Game {
 	public:
 		LevelMaker() : Game(640 + 640, 640, "Level maker") {}
-		
-		virtual void destroy_game();
 	
 	protected:
 		virtual void handle_mousedown(SDL_MouseButtonEvent e) override;
