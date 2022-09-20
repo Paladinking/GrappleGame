@@ -16,8 +16,6 @@ class LevelMaker : public Game {
 	protected:
 		virtual void handle_mousedown(SDL_MouseButtonEvent e) override;
 		
-		virtual void handle_mouseup(SDL_MouseButtonEvent e) override;
-		
 		virtual void handle_keydown(SDL_KeyboardEvent e) override;
 		
 		virtual void init() override;
@@ -26,13 +24,20 @@ class LevelMaker : public Game {
 		
 		
 	private:
-		SDL_Surface* tiles;
+		void handle_down(const SDL_Keycode key, const Uint8 mouse);
 		
-		SDL_Surface* marker;
+		void tile_press(bool put);
+	
+		SDL_Surface* tiles = nullptr;
 		
-		SDL_Surface* editor_window;
+		SDL_Surface* marker = nullptr;
 		
-		SDL_Surface* window_surface;
+		SDL_Surface* editor_window = nullptr;
+		
+		SDL_Surface* window_surface = nullptr;
+		
+		std::unique_ptr<PressInput> zoom_in_input, zoom_out_input, put_tile_input, clear_tile_input,
+			left_input, right_input, up_input, down_input;
 		
 		int selected = 0;
 		

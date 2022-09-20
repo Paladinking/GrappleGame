@@ -7,13 +7,24 @@
 
 namespace input {
 	const std::string // Default bindings
+		//Regular game
 		LEFT = "A",
 		RIGHT = "D", 
 		JUMP = "Space", 
 		PULL = "Q", 
 		RELEASE = "E", 
 		RETURN = "Left Shift",
-		GRAPPLE = "MOUSE_LEFT";
+		GRAPPLE = "Mouse Left",
+		
+		//Level maker controlls
+		ZOOM_IN = "+",
+		ZOOM_OUT = "-",
+		PLACE_TILE = "Mouse Left",
+		CLEAR_TILE = "Mouse Right",
+		LM_LEFT = "Left",
+		LM_RIGHT = "Right",
+		LM_UP = "Up",
+		LM_DOWN = "Down";
 };
 
 class PressInput {
@@ -81,6 +92,5 @@ std::unique_ptr<HoldInput> get_hold_input(const std::string& name);
 std::unique_ptr<PressInput> get_press_input(const std::string& name, const std::string& default_name);
 
 std::unique_ptr<HoldInput> get_hold_input(const std::string& name, const std::string& default_name);
-
 
 #endif

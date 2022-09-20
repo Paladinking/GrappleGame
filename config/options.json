@@ -6,6 +6,15 @@
 		"jump" : "Space",
 		"return" : "Left Shift",
 		"left" : "A",
-		"right" : "D"
+		"right" : "D",
+		
+		"place_tile" : "Mouse Left",
+		"clear_tile" : "Mouse Right",
+		"zoom_in" : "+",
+		"zoom_out" : "-",
+		"navigate_up" : "Up", 
+		"navigate_down" : "Down", 
+		"navigate_left" : "Left", 
+		"navigate_right" : "Right"
 	}
 }
