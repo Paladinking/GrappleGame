@@ -87,11 +87,11 @@ class JsonObject {
 			return std::get<T>(var);
 		}
 		
-		const json::Type &get(const std::string& key) const {
+		const json::Type& get(const std::string& key) const {
 			return data.at(key);
 		}
 		
-		json::Type &get(const std::string& key) {
+		json::Type& get(const std::string& key) {
 			return data[key];
 		}
 		
@@ -116,7 +116,7 @@ class JsonObject {
 		bool has_key_of_type(const std::string& key) const {
 			auto& el = data.find(key);
 			if (el == data.end()) return false;
-			const json::Type &val = el->second;
+			const json::Type& val = el->second;
 			return std::get_if<T>(&val) != nullptr;
 		}
 		
