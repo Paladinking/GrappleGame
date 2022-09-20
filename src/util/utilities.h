@@ -306,4 +306,9 @@ class TileMap {
 		
 };
 
+
+struct SurfaceDeleter {
+	void operator()(SDL_Surface* s) {SDL_FreeSurface(s);}
+};
+
 #endif

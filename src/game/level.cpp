@@ -6,12 +6,6 @@
 #include "file/json.h"
 #include "util/exceptions.h"
 
-
-
-struct SurfaceDeleter {
-	void operator()(SDL_Surface* s) {SDL_FreeSurface(s);}
-};
-
 void Level::set_window_size(const int win_width, const int win_height) {
 	window_width = win_width;
 	window_height = win_height;
