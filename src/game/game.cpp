@@ -21,13 +21,14 @@ void Game::create() {
 	gRenderer = SDL_CreateRenderer(gWindow, -1, SDL_RENDERER_ACCELERATED);
 	if (gRenderer == NULL) 
 	{
+		SDL_DestroyWindow(gWindow);
 		throw SDL_exception("Renderer could not be created, " + std::string(SDL_GetError()));
 	}
 	
 	SDL_SetRenderDrawColor(gRenderer, 0xFF, 0xFF, 0xFF, 0xFF);
 	
-	init();
 	destroyed = false;
+	init();
 }
 
 void Game::run() {
