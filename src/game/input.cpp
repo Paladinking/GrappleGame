@@ -2,6 +2,14 @@
 #include "util/exceptions.h"
 #include <iostream>
 
+std::unique_ptr<PressInput> get_press_input(const std::string& key_name, const std::string& default_name, const JsonObject& obj) {
+	return get_press_input(obj.get_default<std::string>(key_name, default_name), default_name);
+}
+
+std::unique_ptr<HoldInput> get_hold_input(const std::string& key_name, const std::string& default_name, const JsonObject& obj) {
+	return get_hold_input(obj.get_default<std::string>(key_name, default_name), default_name);
+}
+
 std::unique_ptr<PressInput> get_press_input(const std::string& name, const std::string& default_name) {
 	try {
 		return get_press_input(name);
@@ -15,7 +23,7 @@ std::unique_ptr<HoldInput> get_hold_input(const std::string& name, const std::st
 	try {
 		return get_hold_input(name);
 	} catch (base_exception &e) {
-		std::cout << "Invalid key " << name << " using " << default_name << std::endl;
+		std::cout << "Invalid key \"" << name << "\" using \"" << default_name << '"' << std::endl;
 		return get_hold_input(default_name);
 	}	
 }

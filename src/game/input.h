@@ -1,5 +1,6 @@
 #ifndef INPUT_00_H
 #define INPUT_00_H
+#include "file/json.h"
 #include <memory>
 #include <string>
 #include <SDL.h>
@@ -92,5 +93,11 @@ std::unique_ptr<HoldInput> get_hold_input(const std::string& name);
 std::unique_ptr<PressInput> get_press_input(const std::string& name, const std::string& default_name);
 
 std::unique_ptr<HoldInput> get_hold_input(const std::string& name, const std::string& default_name);
+
+std::unique_ptr<PressInput> get_press_input(const std::string& key_name, const std::string& default_name, const JsonObject& obj);
+
+std::unique_ptr<HoldInput> get_hold_input(const std::string& key_name, const std::string& default_name, const JsonObject& obj);
+
+
 
 #endif

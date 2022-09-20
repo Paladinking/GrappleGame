@@ -125,13 +125,13 @@ void ClimbGame::create_inputs() {
 	} catch (base_exception &e){
 		std::cout << e.msg << '\n' << "Using default bindings" << std::endl;
 	}
-	left_input = get_hold_input(controls.get_default("left", input::LEFT), input::LEFT);
-	right_input = get_hold_input(controls.get_default("right", input::RIGHT), input::RIGHT);
-	grapple_input = get_press_input(controls.get_default("grapple", input::GRAPPLE), input::GRAPPLE);
-	pull_input = get_press_input(controls.get_default("pull", input::PULL), input::PULL);
-	release_input = get_press_input(controls.get_default("release", input::RELEASE), input::RELEASE);
-	jump_input = get_press_input(controls.get_default("jump", input::JUMP), input::JUMP);
-	return_input = get_press_input(controls.get_default("return", input::RETURN), input::RETURN);
+	left_input = get_hold_input("left", input::LEFT, controls);
+	right_input = get_hold_input("right", input::RIGHT, controls);
+	grapple_input = get_press_input("grapple", input::GRAPPLE, controls);
+	pull_input = get_press_input("pull", input::PULL, controls);
+	release_input = get_press_input("release", input::RELEASE, controls);
+	jump_input = get_press_input("jump", input::JUMP, controls);
+	return_input = get_press_input("return", input::RETURN, controls);
 }
 
 void ClimbGame::handle_down(const SDL_Keycode key, const Uint8 mouse) {

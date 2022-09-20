@@ -37,15 +37,15 @@ void LevelMaker::init() {
 		std::cout << e.msg << "Using default bindings" << std::endl;
 	}
 	
-	zoom_in_input = get_press_input(controls.get_default<std::string>("zoom_in", input::ZOOM_IN), input::ZOOM_IN);
-	zoom_out_input = get_press_input(controls.get_default<std::string>("zoom_out", input::ZOOM_OUT), input::ZOOM_OUT);
-	put_tile_input = get_press_input(controls.get_default<std::string>("place_tile", input::PLACE_TILE), input::PLACE_TILE);
-	clear_tile_input = get_press_input(controls.get_default<std::string>("clear, tile", input::CLEAR_TILE), input::CLEAR_TILE);
+	zoom_in_input = get_press_input("zoom_in", input::ZOOM_IN, controls);
+	zoom_out_input = get_press_input("zoom_out", input::ZOOM_OUT, controls);
+	put_tile_input = get_press_input("place_tile", input::PLACE_TILE, controls);
+	clear_tile_input = get_press_input("clear, tile", input::CLEAR_TILE, controls);
 	
-	left_input = get_press_input(controls.get_default<std::string>("navigate_left", input::LM_LEFT), input::LM_LEFT);
-	right_input = get_press_input(controls.get_default<std::string>("navigate_right", input::LM_RIGHT), input::LM_RIGHT);
-	up_input = get_press_input(controls.get_default<std::string>("navigate_up", input::LM_UP), input::LM_UP);
-	down_input = get_press_input(controls.get_default<std::string>("navigate_down", input::LM_DOWN), input::LM_DOWN);
+	left_input = get_press_input("navigate_left", input::LM_LEFT, controls);
+	right_input = get_press_input("navigate_right", input::LM_RIGHT, controls);
+	up_input = get_press_input("navigate_up", input::LM_UP, controls);
+	down_input = get_press_input("navigate_down", input::LM_DOWN, controls);
 	
 	data = std::make_unique<Uint16[]>(width * height);
 
