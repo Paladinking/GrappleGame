@@ -56,15 +56,20 @@ namespace json {
 class JsonObject {
 	public:
 		template<class T>
-		T &get(const std::string key) {
+		T& get(const std::string& key) {
 			return std::get<T>(data[key]);
 		}
 		
 		template<class T>
-		const T &get_default(const std::string key, const T &defalt_val) {
+		const T& get(const std::string& key) const {
+			return std::get<T>(data[key]);
+		}
+		
+		template<class T>
+		const T &get_default(const std::string& key, const T& defalt_val) const {
 			auto& el = data.find(key);
 			if (el == data.end()) return defalt_val;
-			json::Type &var = el->second;
+			const json::Type &var = el->second;
 			if (!std::holds_alternative<T>(var)) {
 				return defalt_val;
 			}
@@ -72,7 +77,7 @@ class JsonObject {
 		}
 		
 		template<class T>
-		T &get_default(const std::string key, T &defalt_val) {
+		T& get_default(const std::string& key, T& defalt_val) {
 			auto& el = data.find(key);
 			if (el == data.end()) return defalt_val;
 			json::Type &var = el->second;
@@ -82,12 +87,16 @@ class JsonObject {
 			return std::get<T>(var);
 		}
 		
-		json::Type &get(const std::string key) {
+		const json::Type &get(const std::string& key) const {
+			return data.at(key);
+		}
+		
+		json::Type &get(const std::string& key) {
 			return data[key];
 		}
 		
 		template<class T>
-		void set(const std::string key, const T value) {
+		void set(const std::string& key, const T value) {
 			data[key] = value;
 		}
 		
@@ -99,14 +108,15 @@ class JsonObject {
 			return data.end();
 		}
 		
-		bool has_key(const std::string key) {
+		bool has_key(const std::string& key) const {
 			return data.count(key) != 0;
 		}
 		
 		template<class T>
-		bool has_key_of_type(const std::string key) {
-			if (!has_key(key)) return false;
-			json::Type &val = data[key];
+		bool has_key_of_type(const std::string& key) const {
+			auto& el = data.find(key);
+			if (el == data.end()) return false;
+			const json::Type &val = el->second;
 			return std::get_if<T>(&val) != nullptr;
 		}
 		
@@ -125,11 +135,20 @@ class JsonObject {
 class JsonList {
 	public:
 		template<class T>
-		T &get(const unsigned index) {
+		T& get(const unsigned index) {
 			return std::get<T>(data[index]);
 		}
 		
-		json::Type &get(const unsigned index) {
+		template<class T>
+		const T& get(const unsigned index) const {
+			return std::get<T>(data[index]);
+		}
+		
+		json::Type& get(const unsigned index) {
+			return data[index];
+		}
+		
+		const json::Type& get(const unsigned index) const {
 			return data[index];
 		}
 		
