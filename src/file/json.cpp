@@ -75,8 +75,11 @@ bool read_number(FileReader &in, int &i_val, double &d_val) {
 		
 	} 
 	if (c == '0') {
-		if (!in.read_next(c)) throw end_of_file();
-		if (c != '.') throw expected_char('.', in);
+		if (!in.read_next(c) || c != '.') {
+			i_val = 0;
+			in.soft_back();
+			return true;
+		}
 		is_int = false;
 		if(!in.read_next(c)) throw end_of_file();
 	}
