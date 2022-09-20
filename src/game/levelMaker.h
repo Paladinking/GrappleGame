@@ -5,6 +5,7 @@
 #include "game.h"
 #include "globals.h"
 #include "input.h"
+#include "util/utilities.h"
 
 
 class LevelMaker : public Game {
@@ -27,11 +28,12 @@ class LevelMaker : public Game {
 		void handle_down(const SDL_Keycode key, const Uint8 mouse);
 		
 		void tile_press(bool put);
-	
-		SDL_Surface* tiles = nullptr;
 		
-		SDL_Surface* marker = nullptr;
+		std::unique_ptr<SDL_Surface, SurfaceDeleter> tiles;
 		
+		std::unique_ptr<SDL_Surface, SurfaceDeleter> marker;
+
+		// window_surface is owned by the gWindow instance, and will be freed when gWindow is freed.
 		SDL_Surface* window_surface = nullptr;
 		
 		std::unique_ptr<PressInput> zoom_in_input, zoom_out_input, put_tile_input, clear_tile_input,

@@ -49,9 +49,17 @@ void LevelMaker::init() {
 	
 	data = std::make_unique<Uint16[]>(width * height);
 
-	tiles = IMG_Load("assets/tiles/tiles.png");
+	SDL_Surface* t = IMG_Load("assets/tiles/tiles.png");
+	if (t == NULL) {
+		throw image_load_exception(std::string(IMG_GetError()));
+	}
+	tiles.reset(t);
 	
-	marker = IMG_Load("assets/marker.png");
+	SDL_Surface* m = IMG_Load("assets/marker.png");
+	if (m == NULL) {
+		throw image_load_exception(std::string(IMG_GetError()));
+	}
+	marker.reset(m);
 	
 	window_surface = SDL_GetWindowSurface(gWindow);
 	
@@ -140,7 +148,7 @@ void LevelMaker::render() {
 			if (tile_index != 0xFF) {
 				SDL_Rect source = get_tile_rect(tile_index);
 				SDL_Rect dest = {(x - x_start) * ts, (y - y_start) * ts, ts, ts};
-				SDL_BlitScaled(tiles, &source, window_surface, &dest);
+				SDL_BlitScaled(tiles.get(), &source, window_surface, &dest);
 			}
 		}
 	}
@@ -153,9 +161,9 @@ void LevelMaker::render() {
 			(i / TILE_SELECTOR_TW) * TILE_SELECTOR_SIZE, 
 			TILE_SELECTOR_SIZE, TILE_SELECTOR_SIZE
 		};
-		SDL_BlitScaled(tiles, &tile_rect, window_surface, &dest);
+		SDL_BlitScaled(tiles.get(), &tile_rect, window_surface, &dest);
 		if (i == selected) {
-			SDL_BlitScaled(marker, NULL, window_surface, &dest);
+			SDL_BlitScaled(marker.get(), NULL, window_surface, &dest);
 		}
 	}
 	
@@ -167,6 +175,4 @@ void LevelMaker::render() {
 
 void LevelMaker::destroy_game() {
 	Game::destroy_game();
-	SDL_FreeSurface(tiles);
-	SDL_FreeSurface(marker);
 }
