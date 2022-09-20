@@ -42,6 +42,9 @@ std::string OPTIONS_FILE = "options.json";
 
 void load_globals() {
 	JsonObject obj = json::read_from_file(GLOBALS_PATH);
+	
+	SET_IF_EXISTS(obj, int, SCREEN_WIDTH);
+	SET_IF_EXISTS(obj, int, SCREEN_HEIGHT);
 
 	SET_IF_EXISTS(obj, double, MAX_GRAVITY_VEL);
 	SET_IF_EXISTS(obj, double, GRAVITY_ACCELERATION);
@@ -77,6 +80,8 @@ void load_globals() {
 
 	if (!VERBOSE) return;
 	
+	std::cout << "SCREEN_WIDTH: " 			<< SCREEN_WIDTH << '\n';
+	std::cout << "SCREEN_HEIGHT: " 			<< SCREEN_HEIGHT << '\n';
 	std::cout << "MAX_GRAVITY_VEL: " 		<< MAX_GRAVITY_VEL << '\n';
 	std::cout << "MAX_GRAVITY_VEL: " 		<< MAX_GRAVITY_VEL << '\n';
 	std::cout << "MAX_MOVEMENT_VEL: " 		<< MAX_MOVEMENT_VEL << '\n';

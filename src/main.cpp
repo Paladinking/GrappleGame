@@ -65,6 +65,12 @@ int main(int argc, char* args[])
 		}
 	}
 	
+	try {
+		load_globals();
+	} catch (base_exception &e) {
+		std::cout << e.msg << '\n' << "Using default globals" << std::endl;
+	}
+	
 	int exit_status = 0;
 	if (level_maker) {
 		LevelMaker game;

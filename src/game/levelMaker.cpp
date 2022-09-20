@@ -19,12 +19,6 @@ constexpr int ZOOM_FACTOR = 4;
 constexpr int ZOOM_MAX = 19;
 
 void LevelMaker::init() {
-	try {
-		load_globals();
-	} catch (base_exception &e) {
-		std::cout << e.msg << "Using default globals" << std::endl;
-	}
-
 	JsonObject options, controls;
 	try {
 		options = json::read_from_file(CONFIG_ROOT + OPTIONS_FILE);

@@ -10,7 +10,7 @@
 
 class LevelMaker : public Game {
 	public:
-		LevelMaker() : Game(640 + 640, 640, "Level maker") {}
+		LevelMaker() : Game(SCREEN_WIDTH * 2, SCREEN_HEIGHT, "Level maker") {}
 
 	protected:
 		virtual void handle_mousedown(SDL_MouseButtonEvent e) override;

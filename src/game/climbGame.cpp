@@ -78,11 +78,6 @@ void ClimbGame::render_tilemap() {
 }
 
 void ClimbGame::init() {
-	try {
-		load_globals();
-	} catch (base_exception &e) {
-		std::cout << e.msg << '\n' << "Using default globals" << std::endl;
-	}
 	create_inputs();
 	level.set_window_size(window_width, window_height);
 	level.load_from_file("config/level1");
