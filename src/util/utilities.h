@@ -102,7 +102,7 @@ class Vector2D {
 		{
 			return x * other.x + y * other.y;
 		}
-		
+
 		/**
 		 * Reduces the length of this vector by amount, stopping at 0.
 		 */
@@ -117,7 +117,7 @@ class Vector2D {
 			x = (x / len) * diff;
 			y = (y / len) * diff;
 		}
-		
+
 		/**
 		 * Subtracts other vector from this.
 		 */
@@ -125,7 +125,7 @@ class Vector2D {
 			x -= other.x;
 			y -= other.y;
 		}
-		
+
 		double x, y;
 };
 
@@ -133,11 +133,11 @@ class Corner {
 	public:
 		double x, y;
 		bool ignored = false;
-		
+
 		Corner(double x, double y) : x(x), y(y) {}
-		
+
 		Corner() {}
-	
+
 };
 
 /**
@@ -146,9 +146,9 @@ class Corner {
 class TileMap {
 	public:
 		TileMap() {}
-	
+
 		TileMap(const unsigned width, const unsigned height) : width(width), height(height) {} 
-	
+
 		/**
 		 * Loads this tilemap from an immage, trowing an image_load_exception if something goes wrong.
 		 * White pixels are free, all others are filled.
@@ -160,7 +160,7 @@ class TileMap {
 			}
 			SDL_Surface* converted = SDL_ConvertSurfaceFormat(surface, SDL_PIXELFORMAT_RGBA32, 0);
 			SDL_FreeSurface(surface);
-			
+
 			SDL_LockSurface(converted);
 			width = converted->w;
 			height = converted->h;
@@ -198,7 +198,7 @@ class TileMap {
 			SDL_UnlockSurface(converted);
 			SDL_FreeSurface(converted);
 		}
-		
+
 		/**
 		 * Returns true if a tile contained in the pixel rectangle (x, y, w, h) contains a blocked tile.
 		 */
@@ -216,7 +216,7 @@ class TileMap {
 			}
 			return false;
 		}
-		
+
 		/**
 		 * Returns true if some point at a vertical line is blocked.
 		 */
@@ -231,7 +231,7 @@ class TileMap {
 			}
 			return false;
 		}
-		
+
 		/**
 		 * Returns true if some point at a horizontal line is blocked.
 		 */
@@ -246,14 +246,14 @@ class TileMap {
 			}
 			return false;
 		}
-		
+
 		/**
 		 * Returns true if the pixel (x, y) is blocked or not, returning true if the pixel is out of bounds.
 		 */
 		bool is_blocked_pixel(const int x, const int y) const {
 			return is_blocked(x / tile_size, y / tile_size);
 		}
-		bool is_blocked_pixel(const double x, const double y) {
+		bool is_blocked_pixel(const double x, const double y) const {
 			return is_blocked(static_cast<int>(x) / tile_size, static_cast<int>(y) / tile_size);
 		}
 		/**
