@@ -6,84 +6,115 @@
 #include "file/json.h"
 #include "util/exceptions.h"
 
+
+void LevelData::load_from_file(const std::string& path) {
+	FileReader reader = FileReader(path, true);
+	char* img_path_cstr;
+	if (
+		!reader.read_next(width) ||
+		!reader.read_next(height) ||
+		!reader.read_next(img_tilesize) ||
+		!reader.read_next(img_tilewidth) ||
+		!reader.read_next(img_tilecount) ||
+		!reader.read_string(img_path_cstr)
+	) {
+		throw game_exception("Could not read level file");
+	}
+	img_path = std::string(img_path_cstr);
+	delete[] img_path_cstr;
+	data = std::make_unique<Uint16[]>(width * height);
+	if (!reader.read_many(data.get(), width * height)) {
+		throw game_exception("Could not read level file");
+	}
+}
+
+void LevelData::write_to_file(const std::string& path) {
+	FileWriter writer = FileWriter(path, true);
+	if (
+		!writer.write(width) ||
+		!writer.write(height) ||
+		!writer.write(img_tilesize) ||
+		!writer.write(img_tilewidth) ||
+		!writer.write(img_tilecount) ||
+		!writer.write(img_path.c_str(), img_path.length()) ||
+		!writer.write_many(data.get(), width * height)
+	) {
+		throw file_exception("Could not write to level file");
+	}
+}
+
 void Level::set_window_size(const int win_width, const int win_height) {
 	window_width = win_width;
 	window_height = win_height;
 }
 
-void Level::load_from_file(std::string path) {
-
-	FileReader reader = FileReader(path, true);
-	Uint32 width, height;
-	if (!(reader.read_next(width) && reader.read_next(height) && 
-		width == window_width / TILE_SIZE && height % (window_height / TILE_SIZE) == 0
-	)) {
+void Level::load_from_file(const std::string& path) {
+	LevelData level_data;
+	level_data.load_from_file(path);
+	
+	if (level_data.width != window_width / TILE_SIZE || level_data.height % (window_width / TILE_SIZE) != 0) {
 		throw game_exception("Invalid level file");
 	}
 	
-	Uint32 img_tilesize, img_tilewidth, img_tilecount;
-	if (!(reader.read_next(img_tilesize) && reader.read_next(img_tilewidth) && reader.read_next(img_tilecount))) {
-		throw game_exception("Invalid level file");
-	}
-	
-	char* tile_path;
-	if (!(reader.read_string(tile_path))) {
-		throw game_exception("Invalid level file");
-	}
-	
-	std::unique_ptr<SDL_Surface, SurfaceDeleter> tiles(IMG_Load(tile_path));
-	delete[] tile_path;
+	std::unique_ptr<SDL_Surface, SurfaceDeleter> tiles(IMG_Load(level_data.img_path.c_str()));
 	
 	if (tiles == nullptr) {
 		throw image_load_exception(std::string(IMG_GetError()));
 	}
-	
-	std::unique_ptr<Uint16[]> data = std::make_unique<Uint16[]>(width * height);
-	if (!reader.read_many(data.get(), width * height)) {
-		throw game_exception("Invalid level file");
-	}
 
-	int visible_screens = height / (window_height / TILE_SIZE);
+	int visible_screens = level_data.height / (window_height / TILE_SIZE);
 	
 	std::unique_ptr<std::unique_ptr<SDL_Surface, SurfaceDeleter>[]> surfaces = 
 		std::make_unique<std::unique_ptr<SDL_Surface, SurfaceDeleter>[]>(visible_screens);
-	
-	//SDL_Surface** surfaces = new SDL_Surface*[visible_screens];
+
 	for (int i = 0; i < visible_screens; ++i) {
 		surfaces[i].reset(SDL_CreateRGBSurfaceWithFormat(
 			0, window_width, window_height, tiles->format->BitsPerPixel, tiles->format->format
 		));
 	}
 	
-	map = std::make_unique<bool[]>(width * height);
-	for (int i = 0; i < width * height; ++i) {
-		Uint16 tile = swap_byteorder(data[i]); //Should probably just read twice as long array of Uint8 instead...
-		bool filled = (tile >> 8) != 0;
-		int tile_index = (tile & 0xFF);
+	map = std::make_unique<bool[]>(level_data.width * level_data.height);
+	for (int i = 0; i < level_data.width * level_data.height; ++i) {
+		Uint16 tile = level_data.data[i];
+		
+		int tile_index = (tile >> 8);
+		bool filled = (tile & 0xFF) != 0;
 		
 		map[i] = filled;
+		
 
-		if (tile_index == 0xFF) continue;
-		if (tile_index >= img_tilecount) {
+		if (tile_index == 0xFF) {
+			continue;
+		};
+		if (tile_index >= level_data.img_tilecount) {
 			throw game_exception("Invalid tile " + std::to_string(tile_index) + " in level file");
 		}
 		
 		SDL_Rect source = {
-			(tile_index % (int)img_tilewidth) * (int)img_tilesize, 
-			(tile_index / (int)img_tilewidth) * (int)img_tilesize,
-			(int)img_tilesize, 
-			(int)img_tilesize
+			(tile_index % static_cast<int>(level_data.img_tilewidth)) * static_cast<int>(level_data.img_tilesize), 
+			(tile_index / static_cast<int>(level_data.img_tilewidth)) * static_cast<int>(level_data.img_tilesize),
+			static_cast<int>(level_data.img_tilesize), 
+			static_cast<int>(level_data.img_tilesize)
 		};
 		
 		SDL_Rect dest = {
-			(i % (int)width) * TILE_SIZE, ((i / (int)width) * TILE_SIZE) % window_height, TILE_SIZE, TILE_SIZE
+			(i % static_cast<int>(level_data.width)) * TILE_SIZE,
+			((i / static_cast<int>(level_data.width)) * TILE_SIZE) % window_height,
+			TILE_SIZE, TILE_SIZE
 		};
-		
-		
-		const int surface_index = ((i / width)) / (window_height / TILE_SIZE);
+
+		const int surface_index = ((i / level_data.width)) / (window_height / TILE_SIZE);
 
 		SDL_BlitScaled(tiles.get(), &source, surfaces[surface_index].get(), &dest);
 	}
+	
+	for (int i = 0; i < level_data.width; ++i) {
+		for (int j = 0; j < level_data.height; ++j) {
+			std::cout << map[i + j * level_data.width];
+		}
+		std::cout << '\n';
+	}
+	std::cout << std::flush;
 	
 	level_textures.clear();
 	for (int i = 0; i < visible_screens; ++i) {
@@ -93,8 +124,8 @@ void Level::load_from_file(std::string path) {
 	
 	
 	tile_size = TILE_SIZE;
-	this->width = width;
-	this->height = height;
+	this->width = level_data.width;
+	this->height = level_data.height;
 	create_corners();
 }
 

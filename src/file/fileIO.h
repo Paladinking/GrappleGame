@@ -268,6 +268,11 @@ class FileWriter {
 		bool write(const T& t) {
 			return SDL_RWwrite(out, &t, sizeof(T), 1) == 1;
 		}
+		
+		template<class T>
+		bool write_many(const T* t, const int count) {
+			return SDL_RWwrite(out, t, sizeof(T), count) == count;
+		}
 	
 	private:
 		SDL_RWops *out;
