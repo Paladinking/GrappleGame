@@ -35,7 +35,6 @@ void Level::load_from_file(std::string path) {
 	delete[] tile_path;
 	
 	if (tiles == nullptr) {
-		
 		throw image_load_exception(std::string(IMG_GetError()));
 	}
 	

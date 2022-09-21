@@ -20,7 +20,7 @@ void Entity::tick(const double delta, Level& level)
 		// Calculate how many of those steps needed for full movement + the remainder movement.
 		// Then try_move won't skip any potential blocked tiles, even at low framerates.
 		Vector2D move_step = {(to_move.x / len) * tilesize, (to_move.y / len) * tilesize};
-		int steps = len / tilesize;
+		int steps = static_cast<int>(len / tilesize);
 		to_move.x -= steps * move_step.x;
 		to_move.y -= steps * move_step.y;
 		for (; steps > 0; steps--) 
@@ -33,7 +33,7 @@ void Entity::tick(const double delta, Level& level)
 
 void Entity::render(const int cameraY) 
 {
-	int x = pos.x, y = pos.y - cameraY;
+	int x = static_cast<int>(pos.x), y = static_cast<int>(pos.y - cameraY);
 	texture.render(x, y);
 }
 
@@ -44,7 +44,7 @@ void Entity::try_move(const double dx, const double dy, int tilesize, const Leve
 {
 	double new_x = pos.x, new_y = pos.y;
 	new_x += dx;
-	int x_tile = (dx > 0 ? (new_x + width - 1) : new_x) / tilesize;
+	int x_tile = static_cast<int>((dx > 0 ? (new_x + width - 1) : new_x) / tilesize);
 	if (level.is_blocked_line_v(x_tile, new_y, height)) 
 	{
 		vel.x = 0;
@@ -52,8 +52,8 @@ void Entity::try_move(const double dx, const double dy, int tilesize, const Leve
 	}
 
 	new_y += dy;
-	int y_tile = (dy > 0 ? (new_y + height - 1) : new_y) / tilesize;
-	if (level.is_blocked_line_h(y_tile, new_x, width)) 
+	int y_tile = static_cast<int>((dy > 0 ? (new_y + height - 1) : new_y) / tilesize);
+	if (level.is_blocked_line_h(y_tile, new_x, width))
 	{
 		vel.y = 0;
 		new_y = dy > 0 ? y_tile * tilesize - height : (y_tile + 1) * tilesize;
@@ -81,8 +81,8 @@ const Vector2D &Entity::get_position() const
 bool Entity::on_ground(const Level &level) const 
 {
 	int tilesize = level.get_tilesize();
-	int y_tile =  (pos.y + height) / tilesize;
-	for (int i = pos.x / tilesize; i <= (pos.x + width - 1) / tilesize; i++) 
+	int y_tile =  static_cast<int>((pos.y + height) / tilesize);
+	for (int i = static_cast<int>(pos.x / tilesize); i <= (pos.x + width - 1) / tilesize; ++i)
 	{
 		if (level.is_blocked(i, y_tile))
 		{
@@ -116,11 +116,16 @@ void Player::render(const int cameraY)
 	SDL_SetRenderDrawColor(gRenderer, 0x00, 0x00, 0xFF, 0xFF);
 	for (auto it = grapple_points.rbegin(); it != grapple_points.rend(); it++) 
 	{
-		SDL_RenderDrawLine(gRenderer, prev_pos.x, prev_pos.y - cameraY, it->corner->x, it->corner->y - cameraY);
+		SDL_RenderDrawLine(gRenderer,
+			static_cast<int>(prev_pos.x),
+			static_cast<int>(prev_pos.y - cameraY),
+			static_cast<int>(it->corner->x),
+			static_cast<int>(it->corner->y - cameraY)
+		);
 		prev_pos = *(it->corner);
 	}
 
-	grapple_hook.render(hook->x - 2, hook->y - cameraY - 2);
+	grapple_hook.render(static_cast<int>(hook->x) - 2, static_cast<int>(hook->y - cameraY) - 2);
 }
 
 
@@ -183,7 +188,7 @@ void Player::tick(const double delta, Level &level)
 		// Calculate how many of those steps needed for full movement + the remainder movement.
 		// Then try_move won't skip any potential blocked tiles, even at low framerates.
 		Vector2D move_step = {(to_move.x / len) * tilesize, (to_move.y / len) * tilesize};
-		int steps = len / tilesize;
+		int steps = static_cast<int>(len / tilesize);
 		to_move.x -= steps * move_step.x;
 		to_move.y -= steps * move_step.y;
 		for (; steps > 0; steps--) 
@@ -268,10 +273,10 @@ void Player::tick(const double delta, Level &level)
 void Player::place_grapple(const double x, const double y, const double dx, const double dy, const int tilesize, CornerList &corners) 
 {
 	grappling_mode = PLACED;
-	int prev_tile_x  = (x - dx) / tilesize;
-	int prev_tile_y  = (y - dy) / tilesize;
-	int tile_x = x / tilesize;
-	int tile_y = y / tilesize;
+	int prev_tile_x  = static_cast<int>((x - dx) / tilesize);
+	int prev_tile_y  = static_cast<int>((y - dy) / tilesize);
+	int tile_x = static_cast<int>(x / tilesize);
+	int tile_y = static_cast<int>(y / tilesize);
 	Vector2D prev = {hook->x, hook->y};
 	hook->x = (((int)x) / tilesize + 0.5 + prev_tile_x - tile_x) * tilesize;
 	hook->y = (((int)y) / tilesize + 0.5 + prev_tile_y - tile_y) * tilesize;

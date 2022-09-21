@@ -46,6 +46,8 @@ class LevelMaker : public Game {
 
 		int tile_size = 8;
 
+		int editor_width = 640;
+
 		std::unique_ptr<Uint16[]> data;
 };
 

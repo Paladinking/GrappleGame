@@ -37,7 +37,7 @@ void ClimbGame::handle_input(double delta) {
 
 	if (do_grapple) { //Grapple is a push input, but mouse_pos is updated after. (Change?)
 		do_grapple = false;
-		int world_mouseX = mouseX, world_mouseY = mouseY + camera_y;
+		int world_mouseX = mouseX, world_mouseY = mouseY + static_cast<int>(camera_y);
 		player->fire_grapple(world_mouseX, world_mouseY);
 	}
 	
@@ -49,17 +49,17 @@ void ClimbGame::handle_input(double delta) {
 void ClimbGame::render() {
 	SDL_SetRenderDrawColor(gRenderer, 0xFF, 0xFF, 0xFF, 0xFF);
 	SDL_RenderClear(gRenderer);
-	int camera_y_tile = ((int)camera_y) / TILE_SIZE;
+	int camera_y_tile = (static_cast<int>(camera_y)) / TILE_SIZE;
 	//tilemapTexture.render(0, 0, 0, camera_y, window_width, window_height);
-	level.render((int)camera_y);
+	level.render(static_cast<int>(camera_y));
 	//render_tilemap();
-	player->render((int)camera_y);
+	player->render(static_cast<int>(camera_y));
 	
 	SDL_RenderPresent(gRenderer);
 }
 
 void ClimbGame::render_tilemap() {
-	int camera_y_tile = ((int)camera_y) / TILE_SIZE;
+	int camera_y_tile = static_cast<int>(camera_y) / TILE_SIZE;
 	for (int x = 0; x < visible_tiles_x; x++) {
 		for (int y = camera_y_tile - 1; y < camera_y_tile + visible_tiles_y + 1; y++) {
 			if (level.is_blocked(x, y)) {
@@ -67,7 +67,7 @@ void ClimbGame::render_tilemap() {
 			} else {
 				SDL_SetRenderDrawColor( gRenderer, 0xFF, 0xFF, 0xFF, 0xFF );
 			}
-			SDL_Rect fillRect = {x * TILE_SIZE, y * TILE_SIZE - ((int)camera_y), TILE_SIZE, TILE_SIZE};
+			SDL_Rect fillRect = {x * TILE_SIZE, y * TILE_SIZE - static_cast<int>(camera_y), TILE_SIZE, TILE_SIZE};
 			SDL_RenderFillRect( gRenderer, &fillRect );
 		}
 	}

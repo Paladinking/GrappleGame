@@ -10,10 +10,6 @@ constexpr int TILE_COUNT = 96;
 constexpr int TILE_SELECTOR_SIZE = 64;
 constexpr int TILE_SELECTOR_TW = 10;
 constexpr int TILE_SELECTOR_TH = 10;
-constexpr int EDITOR_W = 640;
-constexpr int EDITOR_H = 640;
-constexpr int SELECTOR_W = 640;
-constexpr int SELECTOR_H = EDITOR_H;
 
 constexpr int ZOOM_FACTOR = 4;
 constexpr int ZOOM_MAX = 19;
@@ -41,6 +37,8 @@ void LevelMaker::init() {
 	up_input = get_press_input("navigate_up", input::LM_UP, controls);
 	down_input = get_press_input("navigate_down", input::LM_DOWN, controls);
 	
+	editor_width = window_width / 2;
+
 	data = std::make_unique<Uint16[]>(width * height);
 
 	SDL_Surface* t = IMG_Load("assets/tiles/tiles.png");
@@ -57,7 +55,7 @@ void LevelMaker::init() {
 	
 	window_surface = SDL_GetWindowSurface(gWindow);
 	
-	tile_size = EDITOR_W / width;
+	tile_size = editor_width / width;
 	
 	for (int i = 0; i < width * height; ++i) data[i] = 0xFF;
 }
@@ -77,13 +75,13 @@ void LevelMaker::handle_mousedown(SDL_MouseButtonEvent e) {
 }
 
 void LevelMaker::tile_press(const bool put) {
-	if (mouseX > EDITOR_W) {
-		int index = (mouseX - EDITOR_W) / TILE_SELECTOR_SIZE + (mouseY / TILE_SELECTOR_SIZE) * TILE_SELECTOR_TW;
+	if (mouseX > editor_width) {
+		int index = (mouseX - editor_width) / TILE_SELECTOR_SIZE + (mouseY / TILE_SELECTOR_SIZE) * TILE_SELECTOR_TW;
 		if (index >= 0 && index < TILE_COUNT) {
 			selected = index;
 		}
 	} else {
-		int zoom_tile_size = EDITOR_W / (x_end - x_start);
+		int zoom_tile_size = editor_width / (x_end - x_start);
 		int x_tile = x_start + (mouseX / zoom_tile_size);
 		int y_tile = y_start + (mouseY / zoom_tile_size);
 		int index = x_tile + y_tile * width;
@@ -133,9 +131,9 @@ void LevelMaker::handle_down(const SDL_Keycode key, const Uint8 mouse) {
 
 
 void LevelMaker::render() {
-	SDL_Rect r = {0, 0, SELECTOR_W + EDITOR_W, EDITOR_H};
+	SDL_Rect r = {0, 0, static_cast<int>(window_width), static_cast<int>(window_height)};
 	SDL_FillRect(window_surface, &r, SDL_MapRGB(window_surface->format, 255, 255, 255));
-	int ts = tile_size * ((double)width / ((double)x_end - (double)x_start));
+	int ts = static_cast<int>(tile_size * (static_cast<double>(width) / static_cast<double>(x_end - x_start)));
 	for (int x = x_start; x < x_end; ++x) {
 		for (int y = y_start; y < y_end; ++y) {
 			int tile_index = data[x + width * y];
@@ -146,12 +144,12 @@ void LevelMaker::render() {
 			}
 		}
 	}
-	
+
 
 	for (int i = 0; i < TILE_COUNT; ++i) {
 		SDL_Rect tile_rect = get_tile_rect(i);
 		SDL_Rect dest = {
-			EDITOR_W + (i % TILE_SELECTOR_TW) * TILE_SELECTOR_SIZE, 
+			editor_width + (i % TILE_SELECTOR_TW) * TILE_SELECTOR_SIZE,
 			(i / TILE_SELECTOR_TW) * TILE_SELECTOR_SIZE, 
 			TILE_SELECTOR_SIZE, TILE_SELECTOR_SIZE
 		};

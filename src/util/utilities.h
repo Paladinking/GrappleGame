@@ -222,7 +222,7 @@ class TileMap {
 		 */
 		bool is_blocked_line_v(int x_tile, double y_start, double length) const
 		{
-			for (int i = y_start / tile_size; i <= (y_start + length - 1) / tile_size; ++i) 
+			for (int i = static_cast<int>(y_start / tile_size); i <= (y_start + static_cast<int>(length) - 1) / tile_size; ++i)
 			{
 				if (is_blocked(x_tile, i)) 
 				{
@@ -237,7 +237,7 @@ class TileMap {
 		 */
 		bool is_blocked_line_h(int y_tile, double x_start, double length) const
 		{
-			for (int i = x_start / tile_size; i <= (x_start + length - 1) / tile_size; ++i)
+			for (int i = static_cast<int>(x_start / tile_size); i <= (x_start + static_cast<int>(length) - 1) / tile_size; ++i)
 			{
 				if (is_blocked(i, y_tile))
 				{
@@ -250,8 +250,11 @@ class TileMap {
 		/**
 		 * Returns true if the pixel (x, y) is blocked or not, returning true if the pixel is out of bounds.
 		 */
-		bool is_blocked_pixel(int x, int y) const {
+		bool is_blocked_pixel(const int x, const int y) const {
 			return is_blocked(x / tile_size, y / tile_size);
+		}
+		bool is_blocked_pixel(const double x, const double y) const {
+			return is_blocked(static_cast<int>(x), static_cast<int>(y));
 		}
 		
 		/**
