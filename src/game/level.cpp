@@ -107,15 +107,7 @@ void Level::load_from_file(const std::string& path) {
 
 		SDL_BlitScaled(tiles.get(), &source, surfaces[surface_index].get(), &dest);
 	}
-	
-	for (int i = 0; i < level_data.width; ++i) {
-		for (int j = 0; j < level_data.height; ++j) {
-			std::cout << map[i + j * level_data.width];
-		}
-		std::cout << '\n';
-	}
-	std::cout << std::flush;
-	
+
 	level_textures.clear();
 	for (int i = 0; i < visible_screens; ++i) {
 		SDL_Texture* texture = SDL_CreateTextureFromSurface(gRenderer, surfaces[i].get());
