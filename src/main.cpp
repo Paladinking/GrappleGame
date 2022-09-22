@@ -2,11 +2,13 @@
 #include <iostream>
 #include <SDL.h>
 #include <SDL_image.h>
+#include <SDL_ttf.h>
 #include "globals.h"
 #include "util/exceptions.h"
 #include "game/game.h"
 #include "game/climbGame.h"
 #include "game/levelMaker.h"
+#include "game/menu.h"
 
 /**
  * Frees still used global resources and quits SDL and SDL_image.
@@ -26,6 +28,7 @@ void cleanup()
 	}
 	std::cout << "Shutting down..." << std::endl;
 	IMG_Quit();
+	TTF_Quit();
     SDL_Quit();
 }
 
@@ -53,6 +56,11 @@ int main(int argc, char* args[])
 		std::cout << "Could not initialize SDL, "  << SDL_GetError() << std::endl;
 		exit(-1);
 	}
+	
+	if (TTF_Init() != 0) {
+		std::cout << "Could not initialize SDL_tff, " << TTF_GetError() << std::endl;
+		exit(-2);
+	}
 
 	bool level_maker = false;
 
@@ -71,12 +79,18 @@ int main(int argc, char* args[])
 		std::cout << e.msg << '\n' << "Using default globals" << std::endl;
 	}
 	
+	try {
+		Button::init();
+	} catch (const base_exception &e) {
+		std::cout << e.msg << std::endl;
+		exit(-3);
+	}
 	int exit_status = 0;
 	State* state;
 	if (level_maker) {
 		state = new LevelMaker();
 	} else {
-		state = new ClimbGame();
+		state = new MainMenu();
 	}
 	StateGame game(state);
 	run_game(game, exit_status);

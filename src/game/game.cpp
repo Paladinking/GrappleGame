@@ -8,6 +8,13 @@ SDL_Window* gWindow;
  * Base Game class
  *
  */
+ 
+Game::Game(const int window_width, const int window_height, const std::string& title) 
+	: initial_width(window_width), initial_height(window_height), initial_title(title) {
+	if (initial_width <= 0 || initial_height <= 0) throw game_exception("Invalid window dimensions");
+}
+ 
+ 
 void Game::create() {
 	if (SDL_WasInit(SDL_INIT_VIDEO) == 0)
     {
@@ -16,8 +23,14 @@ void Game::create() {
 	if (gWindow != NULL || gRenderer != NULL) {
 		throw game_exception("Previous game still alive!");
 	}
-	
-	gWindow = SDL_CreateWindow(title.c_str(), SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, window_width, window_height, SDL_WINDOW_SHOWN);
+
+	gWindow = SDL_CreateWindow(
+		initial_title.c_str(), 
+		SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 
+		initial_width, initial_height, 
+		SDL_WINDOW_SHOWN
+	);
+
     if (gWindow == NULL )
     {
 		throw SDL_exception("Window could not be created, " + std::string(SDL_GetError()));

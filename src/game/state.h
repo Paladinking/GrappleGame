@@ -15,6 +15,8 @@ class State {
 	public:
 		State(const int window_width, const int window_height, const std::string& title) :
 			window_width(window_width), window_height(window_height), title(title) {};
+			
+		State() : title(""), window_width(-1), window_height(-1) {};
 
 		void set_mouse_state(const int mouseX, const int mouseY, const Uint8 mouseButton);
 
@@ -35,7 +37,7 @@ class State {
 		int get_height() const;
 
 	protected:
-		const std::string title;
+		std::string title;
 
 		int window_width, window_height;
 

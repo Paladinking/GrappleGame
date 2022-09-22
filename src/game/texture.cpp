@@ -56,7 +56,6 @@ void Texture::render(const int x, const int y) {
 	Uint32 format;
 	int acc, w, h;
 	SDL_QueryTexture(texture, &format, &acc, &w, &h);
-	//printf("format: %s, acc: %d, w: %d, w: %d\n", SDL_GetPixelFormatName(format), acc, w, h);
 }
 
 void Texture::render(const int dest_x, const int dest_y, const int x, const int y, const int w, const int h) {

@@ -2,11 +2,18 @@
 #include <SDL.h>
 
 void State::init() {
-	SDL_SetWindowSize(gWindow, window_width, window_height);
-	if (title != "") {
+	if (title == "") {
+		title = std::string(SDL_GetWindowTitle(gWindow));
+	} else {
 		SDL_SetWindowTitle(gWindow, title.c_str());
 	}
-	SDL_SetWindowPosition(gWindow, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
+
+	if (window_width <= 0 || window_height <= 0) {
+		SDL_GetWindowSize(gWindow, &window_width, &window_height);
+	} else {
+		SDL_SetWindowSize(gWindow, window_width, window_height);
+		SDL_SetWindowPosition(gWindow, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
+	}
 }
 
 void State::set_mouse_state(const int mouseX, const int mouseY, const Uint8 mouseButton) {

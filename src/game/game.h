@@ -10,8 +10,7 @@
  */
 class Game {
 	public:
-		Game(const unsigned window_width, const unsigned window_height, const std::string& title) 
-			: window_width(window_width), window_height(window_height), title(title) {}
+		Game(const int window_width, const int window_height, const std::string& title);
 		
 		virtual ~Game();
 		
@@ -40,7 +39,7 @@ class Game {
 		
 	protected:
 		// Window dimensions
-		const unsigned window_width = 100, window_height = 100;
+		const int initial_width = 100, initial_height = 100;
 		
 		// Mouse position, updated every frame.
 		int mouseX, mouseY;
@@ -88,7 +87,7 @@ class Game {
 		bool running = false;
 		bool destroyed = true;
 		
-		const std::string title = "Title";
+		const std::string initial_title = "Title";
 };
 
 
