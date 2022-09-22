@@ -100,7 +100,8 @@ Game::~Game() {
  *
  */
  
-StateGame::StateGame(State* initial_state, const unsigned w, const unsigned h, const std::string& title) : Game(w, h, title) {
+StateGame::StateGame(State* initial_state) : 
+	Game(initial_state->get_width(), initial_state->get_height(), initial_state->get_title()) {
 	states.emplace(initial_state);
 }
 
@@ -114,7 +115,8 @@ void StateGame::render() {
 
 void StateGame::tick(Uint64 delta) {
 	StateStatus status = {StateStatus::NONE, nullptr};
-	states.top()->tick(delta, mouseX, mouseY, status);
+	states.top()->set_mouse_state(mouseX, mouseY, mouseButton);
+	states.top()->tick(delta, status);
 
 	switch (status.action) {
 		case StateStatus::PUSH:

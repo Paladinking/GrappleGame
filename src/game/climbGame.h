@@ -9,31 +9,23 @@
 #include "entity.h"
 #include "input.h"
 
-class ClimbGame : public Game {
+class ClimbGame : public State {
 	public:
-		ClimbGame() : Game(SCREEN_WIDTH, SCREEN_HEIGHT, "Climbgame") {}
-	protected:
-		virtual void tick(Uint64 delta) override;
-		
+		ClimbGame() : State(SCREEN_WIDTH, SCREEN_HEIGHT, "Climbgame") {}
+
+		virtual void tick(const Uint64 delta, StateStatus& res) override;
+
 		virtual void init() override;
-		
+
 		virtual void render() override;
-	
-		virtual void handle_keydown(SDL_KeyboardEvent e) override;
-		
-		virtual void handle_keyup(SDL_KeyboardEvent e) override;
-		
-		virtual void handle_mousedown(SDL_MouseButtonEvent e) override;
-		
-		virtual void handle_mouseup(SDL_MouseButtonEvent e) override;
-		
-		void handle_input(double delta);
-		
+
+		virtual void handle_up(const SDL_Keycode key, const Uint8 mouse) override;
+
+		virtual void handle_down(const SDL_Keycode key, const Uint8 mouse) override;
+
 	private:
 	
-		void handle_up(const SDL_Keycode key, const Uint8 mouse);
-		
-		void handle_down(const SDL_Keycode key, const Uint8 mouse);
+		void handle_input(double delta, StateStatus& res);
 	
 		void render_tilemap();
 		

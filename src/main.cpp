@@ -76,7 +76,8 @@ int main(int argc, char* args[])
 		LevelMaker game;
 		run_game(game, &exit_status);
 	} else {
-		ClimbGame game;
+		State* state = new ClimbGame();
+		StateGame game(state);
 		run_game(game, &exit_status);
 	}
 	return exit_status;

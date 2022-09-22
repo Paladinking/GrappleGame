@@ -3,11 +3,11 @@
 #include "climbGame.h"
 #include "file/json.h"
 
-void ClimbGame::tick(Uint64 delta) {
+void ClimbGame::tick(const Uint64 delta, StateStatus& res) {
 	if (delta == 0) return;
 	double dDelta = delta / 1000.0;
 
-	handle_input(dDelta);
+	handle_input(dDelta, res);
 	for (auto e : entities) {
 		e->tick(dDelta, level);
 	}
@@ -23,7 +23,7 @@ void ClimbGame::tick(Uint64 delta) {
 	}
 }
 
-void ClimbGame::handle_input(double delta) {
+void ClimbGame::handle_input(double delta, StateStatus& res) {
 	const Uint8* currentKeyStates = SDL_GetKeyboardState(NULL);
 	const Vector2D &vel = player->get_velocity(); 
 	if (left_input->is_pressed(currentKeyStates, mouseButton) && vel.x > -MAX_MOVEMENT_VEL) {
@@ -42,7 +42,7 @@ void ClimbGame::handle_input(double delta) {
 	}
 	
 	if (currentKeyStates[SDL_SCANCODE_ESCAPE]) {
-		exit_game();
+		res.action = StateStatus::EXIT;
 	}
 }
 
@@ -78,6 +78,7 @@ void ClimbGame::render_tilemap() {
 }
 
 void ClimbGame::init() {
+	State::init();
 	create_inputs();
 	level.set_window_size(window_width, window_height);
 	level.load_from_file("config/level1");
@@ -159,19 +160,4 @@ void ClimbGame::handle_up(const SDL_Keycode key, const Uint8 mouse) {
 	if (release_input->is_targeted(key, mouse)) {
 		player->set_release(false);
 	}
-}
-
-void ClimbGame::handle_keydown(SDL_KeyboardEvent e) {
-	handle_down(e.keysym.sym, 0);
-}
-
-void ClimbGame::handle_keyup(SDL_KeyboardEvent e) {
-	handle_up(e.keysym.sym, 0);
-}
-
-void ClimbGame::handle_mousedown(SDL_MouseButtonEvent e) {
-	handle_down(SDLK_UNKNOWN, e.button);
-}
-void ClimbGame::handle_mouseup(SDL_MouseButtonEvent e) {
-	handle_up(SDLK_UNKNOWN, e.button);
 }

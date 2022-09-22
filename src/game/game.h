@@ -94,7 +94,8 @@ class Game {
 
 class StateGame : public Game {
 	public:
-		StateGame(State* state, const unsigned w, const unsigned h, const std::string& title);
+		StateGame(State* state);
+
 	protected:
 		
 		virtual void init() override;
