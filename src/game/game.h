@@ -1,14 +1,16 @@
 #ifndef GAME_00_H
 #define GAME_00_H
-#include <SDL.h>
-#include "Texture.h"
+#include <memory>
+#include <stack>
+#include "texture.h"
+#include "state.h"
 
 /**
  * Bases Game class, to be extended by a more specific game. On it's own is only a white window with a title that can be closed.
  */
 class Game {
 	public:
-		Game(unsigned window_width, unsigned window_height, std::string title) 
+		Game(const unsigned window_width, const unsigned window_height, const std::string& title) 
 			: window_width(window_width), window_height(window_height), title(title) {}
 		
 		virtual ~Game();
@@ -90,5 +92,30 @@ class Game {
 };
 
 
+class StateGame : public Game {
+	public:
+		StateGame(State* state, const unsigned w, const unsigned h, const std::string& title);
+	protected:
+		
+		virtual void init() override;
 
-#endif
+		virtual void render() override;
+
+		virtual void tick(Uint64 delta) override;
+
+		virtual void handle_keydown(SDL_KeyboardEvent e) override;
+
+		virtual void handle_keyup(SDL_KeyboardEvent e) override;
+
+		virtual void handle_mousedown(SDL_MouseButtonEvent e) override;
+		
+		virtual void handle_mouseup(SDL_MouseButtonEvent e) override;
+
+		
+	private:
+		std::stack<std::unique_ptr<State>> states;
+	
+};
+
+
+#endif //Include guard
