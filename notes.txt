@@ -1,50 +1,36 @@
-
-RENDER SURFACE AT RECT
-
-SDL_Rect rect;
-rect.x = 10;
-rect.y = 10;
-rect.w = SCREEN_WIDTH - 20;
-rect.h = SCREEN_HEIGHT - 20;
-
-// Blit (stamp on) surface
-SDL_BlitScaled(currentSurface, NULL, screenSurface, &rect);
-
-SDL_UpdateWindowSurface(window);
-
-
-
-
-Ajust position when colliding at corner...
-	for (int i = new_x / tilesize; i <= (new_x + width - 1) / tilesize; i++) {
-		if (tilemap.is_blocked(i, y_tile))
-		{
-			if (!adjust && dy < 0) 
-			{
-				if (i * tilesize - pos.x < tilesize * 0.75) {
-					adjust = true;
-					printf("1\n");
-					adj_x = (i + 1) * tilesize;
-					continue;
-				} 
-				else if (pos.x + width - i * tilesize < tilesize * 0.75) 
-				{
-					adjust = true;
-					printf("2\n");
-					adj_x = i * tilesize - width;
-					continue;
-				}
-			}
-			adjust = false;
-			vel.y = 0;
-			new_y = dy > 0 ? y_tile * tilesize - height : (y_tile + 1) * tilesize;
-			break;
-		}
-	}
-	if (adjust) 
-	{
-		pos.x = adj_x;
-	} else 
-	{
-		pos.x = new_x;
-	}
+main:
+	init SDL
+	parse args?
+	load globals.json
+	create Game
+	
+Game:
+	create window + renderer
+	Stack of states, top is active
+	Event handle loop
+		Events are passed to active state 
+	
+	data:
+		Stack<State> states;
+		int mouseX, mouseY?
+		GameData object passed to tick?
+			int mouseX, mouseY;
+			
+			void swapState()
+			void pushState()
+			void popState()
+			void exitGame()
+			
+		bool running;
+		
+	
+	
+State:
+	MainMenu,
+	ClimbGame,
+		PauseMenu,
+	LevelMakerMenu,
+	LevelMaker
+	
+	data:
+		mouseX, mouseY

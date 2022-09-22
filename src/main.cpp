@@ -33,13 +33,13 @@ void cleanup()
 /**
  * Run a game, and set the exit status in case of error.
  */
-void run_game(Game &game, int* exit_status) {
+void run_game(Game &game, int& exit_status) {
 	try {
 		game.create();
 		game.run();
 	} catch (base_exception &e) {
 		std::cout << e.msg << std::endl;
-		*exit_status = -1;
+		exit_status = -1;
 	}
 	game.destroy_game();
 }
@@ -48,7 +48,7 @@ int main(int argc, char* args[])
 {
 	atexit(cleanup);
 	at_quick_exit(cleanup);
-	
+
 	if (SDL_Init(SDL_INIT_VIDEO) < 0) {
 		std::cout << "Could not initialize SDL, "  << SDL_GetError() << std::endl;
 		exit(-1);
@@ -72,13 +72,14 @@ int main(int argc, char* args[])
 	}
 	
 	int exit_status = 0;
+	State* state;
 	if (level_maker) {
-		LevelMaker game;
-		run_game(game, &exit_status);
+		state = new LevelMaker();
 	} else {
-		State* state = new ClimbGame();
-		StateGame game(state);
-		run_game(game, &exit_status);
+		state = new ClimbGame();
 	}
+	StateGame game(state);
+	run_game(game, exit_status);
+
 	return exit_status;
 }

@@ -15,6 +15,7 @@ constexpr int ZOOM_FACTOR = 4;
 constexpr int ZOOM_MAX = 19;
 
 void LevelMaker::init() {
+	State::init();
 	JsonObject options, controls;
 	try {
 		options = json::read_from_file(CONFIG_ROOT + OPTIONS_FILE);
@@ -60,18 +61,8 @@ void LevelMaker::init() {
 	for (int i = 0; i < width * height; ++i) data[i] = 0xFF;
 }
 
-
-void LevelMaker::handle_keydown(SDL_KeyboardEvent e) {
-	handle_down(e.keysym.sym, 0);
-}
-
 SDL_Rect get_tile_rect(int index) {
 	return {(index % TILE_IMG_TW) * TILE_IMG_SIZE, (index / TILE_IMG_TW) * TILE_IMG_SIZE,  TILE_IMG_SIZE, TILE_IMG_SIZE};
-}
-
-void LevelMaker::handle_mousedown(SDL_MouseButtonEvent e) {
-	handle_down(SDLK_UNKNOWN, e.button);
-	
 }
 
 void LevelMaker::tile_press(const bool put) {

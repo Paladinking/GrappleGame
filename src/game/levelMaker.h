@@ -8,22 +8,18 @@
 #include "util/utilities.h"
 
 
-class LevelMaker : public Game {
+class LevelMaker : public State {
 	public:
-		LevelMaker() : Game(SCREEN_WIDTH * 2, SCREEN_HEIGHT, "Level maker") {}
+		LevelMaker() : State(SCREEN_WIDTH * 2, SCREEN_HEIGHT, "Level maker") {}
 
-	protected:
-		virtual void handle_mousedown(SDL_MouseButtonEvent e) override;
-
-		virtual void handle_keydown(SDL_KeyboardEvent e) override;
+		virtual void handle_down(const SDL_Keycode key, const Uint8 mouse) override;
 
 		virtual void init() override;
 
 		virtual void render() override;
 
 	private:
-		void handle_down(const SDL_Keycode key, const Uint8 mouse);
-		
+
 		void tile_press(bool put);
 		
 		std::unique_ptr<SDL_Surface, SurfaceDeleter> tiles;

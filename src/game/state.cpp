@@ -3,7 +3,9 @@
 
 void State::init() {
 	SDL_SetWindowSize(gWindow, window_width, window_height);
-	SDL_SetWindowTitle(gWindow, title.c_str());
+	if (title) {
+		SDL_SetWindowTitle(gWindow, title.c_str());
+	}
 	SDL_SetWindowPosition(gWindow, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
 }
 
