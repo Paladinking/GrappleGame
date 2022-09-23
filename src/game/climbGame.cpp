@@ -42,7 +42,7 @@ void ClimbGame::handle_input(double delta, StateStatus& res) {
 	}
 	
 	if (currentKeyStates[SDL_SCANCODE_ESCAPE]) {
-		res.action = StateStatus::EXIT;
+		res.action = StateStatus::POP;
 	}
 }
 
