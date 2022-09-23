@@ -1,5 +1,7 @@
 #include "menu.h"
 #include "util/exceptions.h"
+#include "climbGame.h"
+#include "levelMaker.h"
 #include <iostream>
 
 TTF_Font* Button::font;
@@ -58,9 +60,10 @@ void Button::render(const int mouseX, const int mouseY) {
 		SDL_SetRenderDrawColor(gRenderer, 100, 100, 220, 0xFF);
 	}
 	SDL_Rect r = {x, y, w, h};
-	SDL_RenderFillRect(gRenderer, &r);
+	if (SDL_RenderFillRect(gRenderer, &r) != 0) {
+		std::cout << SDL_GetError() << std::endl;
+	}
 	texture.render(x + text_offset_x, y + text_offset_y);
-	
 }
 
 void Button::set_dimensions(const int w, const int h) {
@@ -68,33 +71,72 @@ void Button::set_dimensions(const int w, const int h) {
 	text_offset_y = (h - this->h) / 2 + text_offset_y;
 	this->w = w;
 	this->h = h;
-	
 }
 
+const std::string MainMenu::BUTTON_NAMES[] = {"Start Game", "Level Maker", "Options"};
 
 void MainMenu::init() {
 	State::init();
-	button = Button(100, 100, 100, 100, "Start Game");
-	button.set_dimensions(200, 150);
+	buttons.reserve(ButtonId::TOTAL);
+	for (int i = 0; i < ButtonId::TOTAL; ++i) {
+		buttons.emplace_back(
+			(window_width - BUTTON_WIDTH) / 2,
+			(i + 1) * window_height / 4, 
+			BUTTON_WIDTH, 
+			BUTTON_HEIGHT, 
+			BUTTON_NAMES[i]
+		);
+	}
+	exit = false;
 }
 
 void MainMenu::tick(const Uint64 delta, StateStatus& res) {
-	if (next_state != nullptr) {
+	if (exit) {
+		res.action = StateStatus::POP;
+	} else if (next_state != nullptr) {
 		res.new_state = next_state;
-		next_state = nullptr; //Just for safety
-		res.action = StateStatus::SWAP;
+		res.action = StateStatus::PUSH;
+		next_state = nullptr;
 	}
 }
 
 void MainMenu::handle_down(const SDL_Keycode key, const Uint8 mouse) {
-	
+	if (mouse == SDL_BUTTON_LEFT) {
+		targeted_button = ButtonId::NONE;
+		for (int i = 0; i < buttons.size(); ++i) {
+			if (buttons[i].is_pressed(mouseX, mouseY)) {
+				targeted_button = static_cast<ButtonId>(i);
+				break;
+			}
+		}
+	} else if (key == SDLK_ESCAPE) {
+		exit = true;
+	}
+}
+
+void MainMenu::handle_up(const SDL_Keycode key, const Uint8 mouse) {
+	if (mouse == SDL_BUTTON_LEFT) {
+		if (targeted_button != ButtonId::NONE && buttons[targeted_button].is_pressed(mouseX, mouseY)) {
+			switch (targeted_button) {
+				case ButtonId::START_GAME:
+					next_state = new ClimbGame();
+					break;
+				case ButtonId::LEVEL_MAKER:
+					next_state = new LevelMaker();
+					break;
+			}
+		}
+	}
 }
 
 void MainMenu::render() {
 	SDL_SetRenderDrawColor(gRenderer, 0xFF, 0xFF, 0xFF, 0xFF);
-	SDL_RenderClear(gRenderer);
-
-	button.render(mouseX, mouseY);
+	if (0 != SDL_RenderClear(gRenderer)) {
+		std::cout << SDL_GetError() << std::endl;
+	}
+	for (auto& b : buttons) {
+		b.render(mouseX, mouseY);
+	}
 	SDL_RenderPresent(gRenderer);
 }
 

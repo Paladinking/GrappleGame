@@ -1,6 +1,7 @@
 #ifndef MENU_00_H
 #define MENU_00_H
 #include <SDL_ttf.h>
+#include <vector>
 #include "state.h"
 
 class Button {
@@ -42,14 +43,28 @@ class MainMenu : public State {
 
 		virtual void handle_down(const SDL_Keycode key, const Uint8 mouse) override;
 
+		virtual void handle_up(const SDL_Keycode key, const Uint8 mouse) override;
+
 		virtual void tick(const Uint64 delta, StateStatus& res) override;
 
 		virtual void render() override;
 
 	private:
-		State* next_state = nullptr;
+	
+
+		static const int BUTTON_WIDTH = 180, BUTTON_HEIGHT = 90;
+
+		enum ButtonId {
+			START_GAME, LEVEL_MAKER, OPTIONS, TOTAL, NONE
+		} targeted_button = ButtonId::NONE;
+	
+		static const std::string BUTTON_NAMES[ButtonId::TOTAL];
 		
-		Button button;
+		State* next_state = nullptr;
+
+		std::vector<Button> buttons;
+
+		bool exit;
 };
 
 
