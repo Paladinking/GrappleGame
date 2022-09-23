@@ -4,25 +4,22 @@
 #include "levelMaker.h"
 #include <iostream>
 
-TTF_Font* Button::font;
+TTF_Font* TextBox::font;
 
-void Button::init() {
+void TextBox::init() {
 	Button::font = TTF_OpenFont((ASSETS_ROOT + "font/OpenSans-Bold.ttf").c_str(), 20); //TODO make path dynamic
 	if (Button::font == NULL) {
 		throw game_exception(std::string(TTF_GetError()));
 	}
 }
 
-Button::Button(
+TextBox::TextBox(
 	const int x, const int y, const int w, const int h, const std::string& text) : x(x), y(y), w(w), h(h), text(text), texture(nullptr, 0, 0) {
 	generate_texture();
 }
 
-bool Button::is_pressed(const int mouseX, const int mouseY) const {
-	return mouseX >= x && mouseX < x + w && mouseY >= y && mouseY < y + h;
-}
 
-void Button::generate_texture() {
+void TextBox::generate_texture() {
 	SDL_Color text_color = {0, 0, 0, 0};
 	SDL_Surface* text_surface = TTF_RenderUTF8_Solid(font, text.c_str(), text_color);
 	if (text_surface == NULL) {
@@ -32,7 +29,7 @@ void Button::generate_texture() {
 	int height = text_surface->h;
 	SDL_Texture* text_texture = SDL_CreateTextureFromSurface(gRenderer, text_surface);
 	SDL_FreeSurface(text_surface);
-	
+
 	if (text_texture == NULL) {
 		throw image_load_exception(std::string(SDL_GetError()));
 	}
@@ -43,14 +40,34 @@ void Button::generate_texture() {
 	text_offset_y = (h - height) / 2;
 }
 
-void Button::set_position(const int x, const int y) {
+void TextBox::set_position(const int x, const int y) {
 	this->x = x;
 	this->y = y;
 }
 
-void Button::set_text(const std::string& text) {
+void TextBox::set_text(const std::string& text) {
 	this->text = text;
 	generate_texture();
+}
+
+const std::string& TextBox::get_text() {
+	return text;
+}
+
+
+void TextBox::set_dimensions(const int w, const int h) {
+	text_offset_x = (w - this->w) / 2 + text_offset_x;
+	text_offset_y = (h - this->h) / 2 + text_offset_y;
+	this->w = w;
+	this->h = h;
+}
+
+void TextBox::render() {
+	texture.render(x + text_offset_x, y + text_offset_x);
+}
+
+bool Button::is_pressed(const int mouseX, const int mouseY) const {
+	return mouseX >= x && mouseX < x + w && mouseY >= y && mouseY < y + h;
 }
 
 void Button::render(const int mouseX, const int mouseY) {
@@ -60,17 +77,12 @@ void Button::render(const int mouseX, const int mouseY) {
 		SDL_SetRenderDrawColor(gRenderer, 100, 100, 220, 0xFF);
 	}
 	SDL_Rect r = {x, y, w, h};
-	if (SDL_RenderFillRect(gRenderer, &r) != 0) {
-		std::cout << SDL_GetError() << std::endl;
-	}
-	texture.render(x + text_offset_x, y + text_offset_y);
+	SDL_RenderFillRect(gRenderer, &r);
+	TextBox::render();
 }
 
-void Button::set_dimensions(const int w, const int h) {
-	text_offset_x = (w - this->w) / 2 + text_offset_x;
-	text_offset_y = (h - this->h) / 2 + text_offset_y;
-	this->w = w;
-	this->h = h;
+void Button::render() {
+	render(x - 1, y - 1);
 }
 
 const std::string MainMenu::BUTTON_NAMES[] = {"Start Game", "Level Maker", "Options"};
@@ -81,9 +93,9 @@ void MainMenu::init() {
 	for (int i = 0; i < ButtonId::TOTAL; ++i) {
 		buttons.emplace_back(
 			(window_width - BUTTON_WIDTH) / 2,
-			(i + 1) * window_height / 4, 
-			BUTTON_WIDTH, 
-			BUTTON_HEIGHT, 
+			(i + 1) * window_height / 4,
+			BUTTON_WIDTH,
+			BUTTON_HEIGHT,
 			BUTTON_NAMES[i]
 		);
 	}

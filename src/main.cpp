@@ -80,7 +80,7 @@ int main(int argc, char* args[])
 	}
 	
 	try {
-		Button::init();
+		TextBox::init();
 	} catch (const base_exception &e) {
 		std::cout << e.msg << std::endl;
 		exit(-3);

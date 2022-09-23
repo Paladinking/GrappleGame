@@ -4,27 +4,21 @@
 #include <vector>
 #include "state.h"
 
-class Button {
+class TextBox {
 	public:
-		/**
-		 * Default initialization
-		 */
-		Button() {};
+		TextBox() {};
+
+		TextBox(const int x, const int y, const int w, const int h, const std::string& text);
 
 		/**
-		 * Constructs a button with given size and text positioned at given location.
-		 */
-		Button(const int x, const int y, const int w, const int h, const std::string& text);
-
-		/**
-		 * Returns true if the button contains the point (mouseX, mousey). 
-		 */
-		bool is_pressed(const int mouseX, const int mouseY) const;
-
-		/**
-		 * Sets the text of the button to text.
+		 * Sets the text of the textbox.
 		 */
 		void set_text(const std::string& text);
+
+		/**
+		 * Gets the text of the textbox.
+		 */
+		const std::string& get_text();
 
 		/**
 		 * Sets the position of the button (upper corner) to (x, y).
@@ -37,29 +31,61 @@ class Button {
 		void set_dimensions(const int w, const int h);
 
 		/**
-		 * Renders the button, looks different if hovered over by the mouse.
+		 * Renders the textbox.
 		 */
-		void render(const int mouseX, const int mouseY);
-		
+		virtual void render();
+
 		/**
 		 * Initializes the button class, loading the font used for the button text.
 		 */
 		static void init();
-	private:
-		int x, y, w, h;
-		//Offset used to center text
-		int text_offset_x, text_offset_y;
 
-		Texture texture;
+	protected:
+		int x, y, w, h;
+
+		int text_offset_x;
+
+		int text_offset_y;
 
 		std::string text;
-		
+
+	private:
+		Texture texture;
+
 		/**
 		 * Generates the texture containing the text of the button. Called by constuctor and set_text.
 		 */
 		void generate_texture();
-		
+
 		static TTF_Font* font;
+};
+
+class Button : public TextBox {
+	public:
+		/**
+		 * Default initialization
+		 */
+		Button() {};
+
+		/**
+		 * Constructs a button with given size and text positioned at given location.
+		 */
+		Button(const int x, const int y, const int w, const int h, const std::string& text) : TextBox(x, y, w, h, text){};
+
+		/**
+		 * Returns true if the button contains the point (mouseX, mousey).
+		 */
+		bool is_pressed(const int mouseX, const int mouseY) const;
+
+		/**
+		 * Renders the button, differently if the mouse is over it.
+		 */
+		virtual void render(const int mouseX, const int mouseY);
+
+		/**
+		 * Renders the button.
+		 */
+		virtual void render() override;
 };
 
 class MainMenu : public State {
@@ -109,7 +135,5 @@ class MainMenu : public State {
 
 		bool exit;
 };
-
-
 
 #endif
