@@ -3,8 +3,19 @@
 #include <memory>
 #include <stack>
 #include <SDL.h>
+#include "util/exceptions.h"
 #include "texture.h"
 #include "engine.h"
+
+/**
+ * Game_exception, when creating a game fails (for example when one is already runnning).
+ */
+class game_exception : public base_exception {
+	public:
+		game_exception(std::string msg) : base_exception(msg) {};
+	
+};
+
 
 /**
  * Bases Game class, to be extended by a more specific game. On it's own is only a white window with a title that can be closed.

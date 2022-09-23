@@ -20,13 +20,13 @@ void LevelData::load_from_file(const std::string& path) {
 		!reader.read_next(img_tilecount) ||
 		!reader.read_string(img_path_cstr)
 	) {
-		throw game_exception("Could not read level file");
+		throw file_exception("Could not read level file");
 	}
 	img_path = std::string(img_path_cstr);
 	delete[] img_path_cstr;
 	data = std::make_unique<Uint16[]>(width * height);
 	if (!reader.read_many(data.get(), width * height)) {
-		throw game_exception("Could not read level file");
+		throw file_exception("Could not read level file");
 	}
 }
 
@@ -55,7 +55,7 @@ void Level::load_from_file(const std::string& path) {
 	level_data.load_from_file(path);
 	
 	if (level_data.width != window_width / TILE_SIZE || level_data.height % (window_width / TILE_SIZE) != 0) {
-		throw game_exception("Invalid level file");
+		throw file_exception("Invalid level file");
 	}
 	
 	std::unique_ptr<SDL_Surface, SurfaceDeleter> tiles(IMG_Load(level_data.img_path.c_str()));
@@ -89,7 +89,7 @@ void Level::load_from_file(const std::string& path) {
 			continue;
 		};
 		if (tile_index >= level_data.img_tilecount) {
-			throw game_exception("Invalid tile " + std::to_string(tile_index) + " in level file");
+			throw file_exception("Invalid tile " + std::to_string(tile_index) + " in level file");
 		}
 		
 		SDL_Rect source = {

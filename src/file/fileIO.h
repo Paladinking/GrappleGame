@@ -5,14 +5,13 @@
 #include <cstring>
 #include "util/exceptions.h"
 
-/*
-#include <exception>
-class file_exception : std::exception {
+/**
+ * file_exception, for when opening a file fails.
+ */
+class file_exception : public base_exception {
 	public:
-		file_exception(std::string msg) : msg(msg) {};
-		
-		const std::string msg;
-};*/
+		file_exception(std::string msg) : base_exception(msg) {};
+};
 
 
 template<class T>

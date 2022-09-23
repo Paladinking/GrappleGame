@@ -21,6 +21,17 @@ struct LevelData {
 	void write_to_file(const std::string& path);
 };
 
+class Corner {
+	public:
+		double x, y;
+		bool ignored = false;
+
+		Corner(double x, double y) : x(x), y(y) {}
+
+		Corner() {}
+
+};
+
 class Level : public TileMap {
 	public:
 		Level() {}

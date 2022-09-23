@@ -1,9 +1,16 @@
 #ifndef INPUT_00_H
 #define INPUT_00_H
 #include "file/json.h"
+#include "util/exceptions.h"
 #include <memory>
 #include <string>
 #include <SDL.h>
+
+class binding_exception : public base_exception {
+	public:
+		binding_exception(std::string msg) : base_exception(msg) {};
+	
+};
 
 namespace input {
 	const std::string // Default bindings

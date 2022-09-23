@@ -14,22 +14,6 @@ class base_exception : std::exception {
 };
 
 /**
- * json_exception, for when reading a json file fails.
- */
-class json_exception : public base_exception {
-	public:
-		json_exception(std::string msg) : base_exception(msg) {};
-};
-
-/**
- * file_exception, for when opening a file fails.
- */
- class file_exception : public base_exception {
-	 public:
-		file_exception(std::string msg) : base_exception(msg) {};
- };
-
-/**
  * image_load_exception, for when loading an image fails.
  */
 class image_load_exception : public base_exception {
@@ -44,15 +28,6 @@ class image_load_exception : public base_exception {
 class SDL_exception : public base_exception {
 	public:
 		SDL_exception(std::string msg) : base_exception(msg) {};
-	
-};
-
-/**
- * Game_exception, when creating a game fails (for example when one is already runnning).
- */
-class game_exception : public base_exception {
-	public:
-		game_exception(std::string msg) : base_exception(msg) {};
 	
 };
 

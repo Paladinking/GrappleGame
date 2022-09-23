@@ -3,6 +3,8 @@
 extern SDL_Renderer* gRenderer;
 extern SDL_Window* gWindow;
 
-
+struct SurfaceDeleter {
+	void operator()(SDL_Surface* s) {SDL_FreeSurface(s);}
+};
 
 #endif

@@ -5,6 +5,15 @@
 #include <unordered_map>
 #include <variant>
 #include <iostream>
+#include "util/exceptions.h"
+
+/**
+ * json_exception, for when reading a json file fails.
+ */
+class json_exception : public base_exception {
+	public:
+		json_exception(std::string msg) : base_exception(msg) {};
+};
 
 class JsonObject;
 

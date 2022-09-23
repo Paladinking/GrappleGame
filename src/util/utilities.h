@@ -3,18 +3,13 @@
 #include <memory>
 #include <cmath>
 #include <vector>
-#include <SDL.h>
-#include <SDL_image.h>
 #include <string>
-#include "exceptions.h"
 
 /**
  * Class containing a 2-dimensional vector using double.
  */
 class Vector2D {
 	public:
-	
-		
 		/**
 		 * Creates a new vector.
 		 */
@@ -128,17 +123,6 @@ class Vector2D {
 		double x, y;
 };
 
-class Corner {
-	public:
-		double x, y;
-		bool ignored = false;
-
-		Corner(double x, double y) : x(x), y(y) {}
-
-		Corner() {}
-
-};
-
 /**
  * A tilemap for collisions.
  */
@@ -147,56 +131,6 @@ class TileMap {
 		TileMap() {}
 
 		TileMap(const unsigned width, const unsigned height) : width(width), height(height) {} 
-
-		/**
-		 * Loads this tilemap from an immage, trowing an image_load_exception if something goes wrong.
-		 * White pixels are free, all others are filled.
-		 */
-		void load_from_image(std::string path) {
-			SDL_Surface* surface = IMG_Load(path.c_str());
-			if (surface == NULL) {
-				throw image_load_exception("Could not load tilemap image, " + std::string(IMG_GetError()));
-			}
-			SDL_Surface* converted = SDL_ConvertSurfaceFormat(surface, SDL_PIXELFORMAT_RGBA32, 0);
-			SDL_FreeSurface(surface);
-
-			SDL_LockSurface(converted);
-			width = converted->w;
-			height = converted->h;
-			map = std::make_unique<bool[]>(width * height);
-			SDL_PixelFormat* fmt = converted->format;
-
-			for (unsigned i = 0; i < width; i++) {
-				for (unsigned j = 0;j < height; j++) {
-					Uint32 temp;
-					
-					Uint32 pixel = ((Uint32*)surface->pixels)[i + j * width];
-					Uint8 red, green, blue, alpha;
-					/* Get Red component */
-					temp = pixel & fmt->Rmask;  /* Isolate red component */
-					temp = temp >> fmt->Rshift; /* Shift it down to 8-bit */
-					temp = temp << fmt->Rloss;  /* Expand to a full 8-bit number */
-					red = (Uint8)temp;
-					
-					/* Get Green component */
-					temp = pixel & fmt->Gmask;  /* Isolate green component */
-					temp = temp >> fmt->Gshift; /* Shift it down to 8-bit */
-					temp = temp << fmt->Gloss;  /* Expand to a full 8-bit number */
-					green = (Uint8)temp;
-					
-					/* Get Blue component */
-					temp = pixel & fmt->Bmask;  /* Isolate blue component */
-					temp = temp >> fmt->Bshift; /* Shift it down to 8-bit */
-					temp = temp << fmt->Bloss;  /* Expand to a full 8-bit number */
-					blue = (Uint8)temp;
-					
-					// White pixels are false, others true
-					map[i + j * width] = (red != 0xff || green != 0xff || blue != 0xff);
-				}
-			}
-			SDL_UnlockSurface(converted);
-			SDL_FreeSurface(converted);
-		}
 
 		/**
 		 * Returns true if a tile contained in the pixel rectangle (x, y, w, h) contains a blocked tile.
@@ -305,11 +239,6 @@ class TileMap {
 		
 		unsigned tile_size = 1;
 		
-};
-
-
-struct SurfaceDeleter {
-	void operator()(SDL_Surface* s) {SDL_FreeSurface(s);}
 };
 
 #endif
