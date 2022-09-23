@@ -45,10 +45,6 @@ extern int FULL_TILE_WIDTH;
 extern int CAMERA_PAN_REGION;
 extern double CAMERA_SPEED;
 
-// SDL globals
-extern SDL_Renderer* gRenderer;
-extern SDL_Window* gWindow;
-
 void load_globals();
 
 #endif

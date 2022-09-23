@@ -2,12 +2,13 @@
 #define BALL_GAME_00_H
 #include <vector>
 #include <memory>
-#include "game.h"
-#include "globals.h"
 #include "util/utilities.h"
+#include "engine/game.h"
+#include "engine/input.h"
+#include "globals.h"
 #include "level.h"
 #include "entity.h"
-#include "input.h"
+
 
 class ClimbGame : public State {
 	public:

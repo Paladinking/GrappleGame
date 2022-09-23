@@ -1,10 +1,10 @@
 #ifndef LEVEL_MAKER_00_H
 #define LEVEL_MAKER_00_H
 #include <memory>
-#include "texture.h"
-#include "game.h"
+#include "engine/texture.h"
+#include "engine/game.h"
 #include "globals.h"
-#include "input.h"
+#include "engine/input.h"
 #include "util/utilities.h"
 
 

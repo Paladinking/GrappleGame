@@ -1,4 +1,5 @@
 #include "entity.h"
+#include "engine/engine.h"
 #include "util/geometry.h"
 
 Entity::~Entity() {}

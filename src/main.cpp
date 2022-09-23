@@ -5,7 +5,7 @@
 #include <SDL_ttf.h>
 #include "globals.h"
 #include "util/exceptions.h"
-#include "game/game.h"
+#include "engine/game.h"
 #include "game/climbGame.h"
 #include "game/levelMaker.h"
 #include "game/menu.h"
@@ -80,7 +80,7 @@ int main(int argc, char* args[])
 	}
 	
 	try {
-		TextBox::init();
+		TextBox::init(ASSETS_ROOT + "font/OpenSans-Bold.ttf");
 	} catch (const base_exception &e) {
 		std::cout << e.msg << std::endl;
 		exit(-3);

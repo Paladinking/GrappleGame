@@ -6,7 +6,7 @@
 #include <stdio.h>
 #include "util/utilities.h"
 #include "level.h"
-#include "texture.h"
+#include "engine/texture.h"
 
 class Entity {
 	public:

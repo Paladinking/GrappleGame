@@ -2,6 +2,7 @@
 #include <SDL_image.h>
 #include <string>
 #include "level.h"
+#include "engine/engine.h"
 #include "file/fileIO.h"
 #include "file/json.h"
 #include "util/exceptions.h"

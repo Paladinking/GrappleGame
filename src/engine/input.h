@@ -5,7 +5,6 @@
 #include <string>
 #include <SDL.h>
 
-
 namespace input {
 	const std::string // Default bindings
 		//Regular game
