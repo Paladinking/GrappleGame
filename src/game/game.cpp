@@ -57,7 +57,7 @@ void Game::run() {
 	running = true;
 	Uint64 last_time = SDL_GetTicks64();
 	
-	while (running) {
+	while (true) {
 		SDL_Event e;
 		while (SDL_PollEvent(&e)) 
 		{
@@ -82,6 +82,7 @@ void Game::run() {
 		mouseButton = SDL_GetMouseState(&mouseX, &mouseY);
 		Uint64 cur_time = SDL_GetTicks64();
 		this->tick(cur_time - last_time);
+		if (!running) break;
 		last_time = cur_time;
 		
 		render();
@@ -142,7 +143,9 @@ void StateGame::tick(Uint64 delta) {
 			break;
 		case StateStatus::POP:
 			states.pop();
-			if (states.size() == 0) exit_game();
+			if (states.size() == 0) {
+				exit_game();
+			}
 			break;
 		case StateStatus::EXIT:
 			exit_game();
