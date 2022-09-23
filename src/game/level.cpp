@@ -6,6 +6,7 @@
 #include "file/fileIO.h"
 #include "file/json.h"
 #include "util/exceptions.h"
+#include "globals.h"
 
 
 void LevelData::load_from_file(const std::string& path) {

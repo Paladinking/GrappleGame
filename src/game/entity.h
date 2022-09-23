@@ -5,8 +5,9 @@
 #include <memory>
 #include <stdio.h>
 #include "util/utilities.h"
-#include "level.h"
 #include "engine/texture.h"
+#include "level.h"
+#include "globals.h"
 
 class Entity {
 	public:

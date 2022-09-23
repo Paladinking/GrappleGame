@@ -2,7 +2,6 @@
 #define EXCEPTIONS_00_H
 #include <exception>
 #include <string>
-#include <SDL.h>
 
 /**
  * Base exception class containing a message.
