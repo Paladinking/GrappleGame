@@ -88,18 +88,10 @@ class Button : public TextBox {
 		virtual void render() override;
 };
 
-class MainMenu : public State {
+class Menu : public State {
 	public:
-		/**
-		 * Constructs a MainMenu object.
-		 */
-		MainMenu() : State(SCREEN_WIDTH, SCREEN_HEIGHT, "Climbgame") {};
-
-		/**
-		 * Initializes the MainMenu, creating all buttons.
-		 */
-		virtual void init() override;
-
+		Menu(const int w, const int h, const std::string& title) : State(w, h, title) {};
+		
 		/**
 		 * Handles a down-event of keyboard or mouse.
 		 */
@@ -111,29 +103,67 @@ class MainMenu : public State {
 		virtual void handle_up(const SDL_Keycode key, const Uint8 mouse) override;
 
 		/**
+		 * Renders the full menu.
+		 */
+		virtual void render() override;
+
+		/**
 		 * Ticks the menu, deciding if to switch state.
 		 */
 		virtual void tick(const Uint64 delta, StateStatus& res) override;
 
+	protected:
+		std::vector<Button> buttons;
+		std::vector<TextBox> text;
+
+		// Set by subclasses to swap state
+		State* next_state = nullptr;	
+		bool exit = false;
+
 		/**
-		 * Renders the full menu.
+		 * Called when a button is pressed.
+	     * The int btn will contain the index of the button in the buttons vector.
 		 */
-		virtual void render() override;
+		virtual void button_press(const int btn) = 0;
+
+		/**
+		 * Called when the Menu_exit input is recieved (Typicly Escape).
+		 * This function allows most menu subclasses not to override handle_down or handle_up.
+		 */
+		virtual void menu_exit() {};
+
+	private:
+		int targeted_button;
+};
+
+class MainMenu : public Menu {
+	public:
+		/**
+		 * Constructs a MainMenu object.
+		 */
+		MainMenu() : Menu(SCREEN_WIDTH, SCREEN_HEIGHT, "Climbgame") {};
+
+		/**
+		 * Initializes the MainMenu, creating all buttons.
+		 */
+		virtual void init() override;
+
+
+
+	protected:
+
+		virtual void button_press(const int btn) override;
+		
+		virtual void menu_exit() override;
 
 	private:
 		static const int BUTTON_WIDTH = 180, BUTTON_HEIGHT = 90;
 
 		enum ButtonId {
-			START_GAME, LEVEL_MAKER, OPTIONS, TOTAL, NONE
-		} targeted_button = ButtonId::NONE;
+			START_GAME, LEVEL_MAKER, OPTIONS, TOTAL
+		};
 
 		static const std::string BUTTON_NAMES[ButtonId::TOTAL];
-
-		State* next_state = nullptr;
-
-		std::vector<Button> buttons;
-
-		bool exit;
 };
 
 #endif

@@ -85,6 +85,49 @@ void Button::render() {
 	render(x - 1, y - 1);
 }
 
+void Menu::handle_down(const SDL_Keycode key, const Uint8 mouse) {
+	if (mouse == SDL_BUTTON_LEFT) {
+		targeted_button = -1;
+		for (int i = 0; i < buttons.size(); ++i) {
+			if (buttons[i].is_pressed(mouseX, mouseY)) {
+				targeted_button = i;
+				break;
+			}
+		}
+	}
+}
+
+void Menu::handle_up(const SDL_Keycode key, const Uint8 mouse) {
+	if (mouse == SDL_BUTTON_LEFT) {
+		if (targeted_button >= 0 && buttons[targeted_button].is_pressed(mouseX, mouseY)) {
+			button_press(targeted_button);
+		}
+	}
+}
+
+void Menu::render() {
+	SDL_SetRenderDrawColor(gRenderer, 0xFF, 0xFF, 0xFF, 0xFF);
+	SDL_RenderClear(gRenderer);
+
+	for (auto& b : buttons) {
+		b.render(mouseX, mouseY);
+	}
+	for (auto& t : text) {
+		t.render();
+	}
+	SDL_RenderPresent(gRenderer);
+}
+
+void Menu::tick(const Uint64 delta, StateStatus& res) {
+	if (exit) {
+		res.action = StateStatus::POP;
+	} else if (next_state != nullptr) {
+		res.new_state = next_state;
+		res.action = StateStatus::PUSH;
+		next_state = nullptr;
+	}
+}
+
 const std::string MainMenu::BUTTON_NAMES[] = {"Start Game", "Level Maker", "Options"};
 
 void MainMenu::init() {
@@ -102,53 +145,13 @@ void MainMenu::init() {
 	exit = false;
 }
 
-void MainMenu::tick(const Uint64 delta, StateStatus& res) {
-	if (exit) {
-		res.action = StateStatus::POP;
-	} else if (next_state != nullptr) {
-		res.new_state = next_state;
-		res.action = StateStatus::PUSH;
-		next_state = nullptr;
+void MainMenu::button_press(const int btn) {
+	switch (btn) {
+		case START_GAME:
+			next_state = new ClimbGame();
+			break;
+		case LEVEL_MAKER:
+			next_state = new LevelMaker();
+			break;
 	}
 }
-
-void MainMenu::handle_down(const SDL_Keycode key, const Uint8 mouse) {
-	if (mouse == SDL_BUTTON_LEFT) {
-		targeted_button = ButtonId::NONE;
-		for (int i = 0; i < buttons.size(); ++i) {
-			if (buttons[i].is_pressed(mouseX, mouseY)) {
-				targeted_button = static_cast<ButtonId>(i);
-				break;
-			}
-		}
-	} else if (key == SDLK_ESCAPE) {
-		exit = true;
-	}
-}
-
-void MainMenu::handle_up(const SDL_Keycode key, const Uint8 mouse) {
-	if (mouse == SDL_BUTTON_LEFT) {
-		if (targeted_button != ButtonId::NONE && buttons[targeted_button].is_pressed(mouseX, mouseY)) {
-			switch (targeted_button) {
-				case ButtonId::START_GAME:
-					next_state = new ClimbGame();
-					break;
-				case ButtonId::LEVEL_MAKER:
-					next_state = new LevelMaker();
-					break;
-			}
-		}
-	}
-}
-
-void MainMenu::render() {
-	SDL_SetRenderDrawColor(gRenderer, 0xFF, 0xFF, 0xFF, 0xFF);
-	if (0 != SDL_RenderClear(gRenderer)) {
-		std::cout << SDL_GetError() << std::endl;
-	}
-	for (auto& b : buttons) {
-		b.render(mouseX, mouseY);
-	}
-	SDL_RenderPresent(gRenderer);
-}
-
