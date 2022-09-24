@@ -3,31 +3,60 @@
 #include "file/json.h"
 #include "globals.h"
 #include <unordered_map>
+#include <array>
 
 namespace bindings {
 	
+	struct Grouping {
+		const std::string key;
+		const std::unordered_map<std::string, const std::string> defaults;
+	};
+	
 	const std::string KEY_NAME = "BINDINGS";
 	
-	const std::unordered_map<std::string, const std::string> DEFAULTS = {
-		{"left", "A"},
-		{"right", "D"},
-		{"jump", "Space"},
-		{"pull", "Q"},
-		{"release", "E"},
-		{"return_grapple", "Left Shift"},
-		{"grapple", "Mouse Left"},
-
-		{"zoom_in", "+"},
-		{"zoom_out", "-"},
-		{"navigate_left", "Left"},
-		{"navigate_right", "Right"},
-		{"navigate_up", "Up"},
-		{"navigate_down", "Down"}
+	const Grouping CLIMBGAME = {
+		"CLIMBGAME",
+		{
+			{"left", "A"},
+			{"right", "D"},
+			{"jump", "Space"},
+			{"pull", "Q"},
+			{"release", "E"},
+			{"return_grapple", "Left Shift"},
+			{"grapple", "Mouse Left"}
+		}
 	};
+
+	const Grouping LEVELMAKER = {
+		"LEVELMAKER",
+		{
+			{"place_tile", "Mouse Left"},
+			{"clear_tile", "Mouse Right"},
+			{"zoom_in", "+"},
+			{"zoom_out", "-"},
+			{"navigate_left", "Left"},
+			{"navigate_right", "Right"},
+			{"navigate_up", "Up"},
+			{"navigate_down", "Down"}
+		}
+	};
+	
+	const Grouping GENERAL = {
+		"GENERAL",
+		{
+			{"exit_menu", "Escape"}
+		}
+	};
+	
+	const std::array<const Grouping*, 3> GROUPINGS = {&CLIMBGAME, &LEVELMAKER, &GENERAL}; 
 };
 
 namespace config {
 	JsonObject& get_options();
+	
+	JsonObject& get_bindings();
+	
+	JsonObject& get_bindings(const std::string& key);
 }
 
 

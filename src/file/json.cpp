@@ -441,13 +441,14 @@ void JsonObject::to_pretty_stream(std::ostream& os, int indentations) const {
 	}
 	os << '\n';
 	
-	for (auto &it = data.begin(); it != data.end(); ++it) {
-		if (it != data.begin()) os << ",\n";
+	for (auto &it = keys.begin(); it != keys.end(); ++it) {
+		if (it != keys.begin()) os << ",\n";
 		for (int i = 0; i < indentations + 1; i++) {
 			os << '\t';
 		}
-		os << "\"" << it->first << "\" : ";
-		::to_pretty_stream(os, it->second, indentations + 1);
+		os << "\"" << *it << "\" : ";
+		const json::Type& val = data.at(*it);
+		::to_pretty_stream(os, val, indentations + 1);
 	}
 	os << '\n';
 	for (int i = 0; i < indentations; i++) os << '\t';
@@ -456,10 +457,11 @@ void JsonObject::to_pretty_stream(std::ostream& os, int indentations) const {
 
 void JsonObject::to_stream(std::ostream& os) const {
 	os << '{';
-	for (auto it = data.begin(); it != data.end(); ++it) {
-		if (it != data.begin()) os << ',';
-		os << '"' << it->first << "\":";
-		json::to_stream(os, it->second);
+	for (auto it = keys.begin(); it != keys.end(); ++it) {
+		if (it != keys.begin()) os << ',';
+		os << '"' << *it << "\":";
+		const json::Type& val = data.at(*it);
+		json::to_stream(os, val);
 	}
 	os << '}';
 }

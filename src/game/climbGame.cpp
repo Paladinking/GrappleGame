@@ -111,8 +111,7 @@ void ClimbGame::init() {
 }
 
 void ClimbGame::create_inputs() {
-	JsonObject& options = config::get_options();
-	const JsonObject& controls = options.get<JsonObject>(bindings::KEY_NAME);
+	const JsonObject& controls = config::get_bindings(bindings::CLIMBGAME.key);
 
 	left_input = get_hold_input(controls.get<std::string>("left"), "None");
 	right_input = get_hold_input(controls.get<std::string>("right"), "None");

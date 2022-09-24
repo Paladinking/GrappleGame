@@ -9,15 +9,17 @@ void TextBox::init(const std::string& font_path) {
 	}
 }
 
+TextBox::TextBox(const int x, const int y, const int w, const int h, const std::string& text) : TextBox(x, y, w, h, text, 20) {};
+
 TextBox::TextBox(
-	const int x, const int y, const int w, const int h, const std::string& text) : x(x), y(y), w(w), h(h), text(text), texture(nullptr, 0, 0) {
+	const int x, const int y, const int w, const int h, const std::string& text, const int font_size) : x(x), y(y), w(w), h(h), text(text), font_size(font_size), texture(nullptr, 0, 0) {
 	generate_texture();
 }
 
 
 void TextBox::generate_texture() {
-	SDL_Color text_color = {0, 0, 0, 0};
-	SDL_Surface* text_surface = TTF_RenderUTF8_Solid(font, text.c_str(), text_color);
+	TTF_SetFontSize(font, font_size);
+	SDL_Surface* text_surface = TTF_RenderUTF8_Solid(font, text.c_str(), color);
 	if (text_surface == NULL) {
 		throw image_load_exception(std::string(TTF_GetError()));
 	}
@@ -43,6 +45,20 @@ void TextBox::set_position(const int x, const int y) {
 
 void TextBox::set_text(const std::string& text) {
 	this->text = text;
+	generate_texture();
+}
+
+void TextBox::set_text_color(const Uint8 r, const Uint8 g, const Uint8 b, const Uint8 a) {
+	color = {r, g, b, a};
+	generate_texture();
+}
+
+const SDL_Color& TextBox::get_text_color() const {
+	return color;
+}
+
+void TextBox::set_font_size(const int font_size) {
+	this->font_size = font_size;
 	generate_texture();
 }
 

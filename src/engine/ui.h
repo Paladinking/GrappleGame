@@ -14,10 +14,18 @@ class TextBox {
 
 		TextBox(const int x, const int y, const int w, const int h, const std::string& text);
 
+		TextBox(const int x, const int y, const int w, const int h, const std::string& text, const int font_size);
+
 		/**
 		 * Sets the text of the textbox.
 		 */
 		void set_text(const std::string& text);
+		
+		
+		/**
+		 * Sets the font size of the textbox.
+		 */
+		void set_font_size(const int font_size);
 
 		/**
 		 * Gets the text of the textbox.
@@ -25,14 +33,24 @@ class TextBox {
 		const std::string& get_text();
 
 		/**
-		 * Sets the position of the button (upper corner) to (x, y).
+		 * Sets the position of the textbox (upper corner) to (x, y).
 		 */
 		void set_position(const int x, const int y);
 
 		/**
-		 * Sets the dimensions of the button to (w, h).
+		 * Sets the dimensions of the textbox to (w, h).
 		 */
 		void set_dimensions(const int w, const int h);
+		
+		/**
+		 * Sets the color of the text.
+		 */
+		void set_text_color(const Uint8 r, const Uint8 g, const Uint8 b, const Uint8 a);
+
+		/**
+		 * Gets the color of the text;
+		 */
+		const SDL_Color& get_text_color() const;
 
 		/**
 		 * Renders the textbox.
@@ -46,6 +64,8 @@ class TextBox {
 
 	protected:
 		int x, y, w, h;
+		
+		int font_size;
 
 		int text_offset_x;
 
@@ -55,6 +75,8 @@ class TextBox {
 
 	private:
 		Texture texture;
+		
+		SDL_Color color = {0, 0, 0, 0};
 
 		/**
 		 * Generates the texture containing the text of the button. Called by constuctor and set_text.
@@ -75,6 +97,7 @@ class Button : public TextBox {
 		 * Constructs a button with given size and text positioned at given location.
 		 */
 		Button(const int x, const int y, const int w, const int h, const std::string& text) : TextBox(x, y, w, h, text){};
+		Button(const int x, const int y, const int w, const int h, const std::string& text, const int font_size) : TextBox(x, y, w, h, text, font_size){};
 
 		/**
 		 * Returns true if the button contains the point (mouseX, mousey).

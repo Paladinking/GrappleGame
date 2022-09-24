@@ -86,6 +86,7 @@ Texture::~Texture() {
 }
 
 Texture::Texture(Texture&& o) {
+	free();
 	texture = o.texture;
 	width = o.width;
 	height = o.height;
@@ -93,6 +94,7 @@ Texture::Texture(Texture&& o) {
 }
 
 Texture& Texture::operator=(Texture&& o) {
+	free();
 	texture = o.texture;
 	width = o.width;
 	height = o.height;

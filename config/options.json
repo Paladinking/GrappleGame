@@ -1,20 +1,26 @@
 {
 	"BINDINGS" : {
-		"grapple" : "Mouse Left",
-		"pull" : "Q",
-		"release" : "E",
-		"jump" : "Space",
-		"return_grapple" : "Left Shift",
-		"left" : "A",
-		"right" : "D",
-		
-		"place_tile" : "Mouse Left",
-		"clear_tile" : "Mouse Right",
-		"zoom_in" : "+",
-		"zoom_out" : "-",
-		"navigate_up" : "Up", 
-		"navigate_down" : "Down",
-		"navigate_left" : "Left", 
-		"navigate_right" : "Right"
+		"CLIMBGAME" : {
+			"grapple" : "Mouse Left",
+			"pull" : "Q",
+			"release" : "E",
+			"jump" : "Space",
+			"return_grapple" : "Left Shift",
+			"left" : "A",
+			"right" : "D"
+		},
+		"LEVELMAKER" : {
+			"place_tile" : "Mouse Left",
+			"clear_tile" : "Mouse Right",
+			"zoom_in" : "+",
+			"zoom_out" : "-",
+			"navigate_up" : "Up", 
+			"navigate_down" : "Down",
+			"navigate_left" : "Left", 
+			"navigate_right" : "Right"
+		},
+		"GENERAL" : {
+			"exit_menu" : "Escape"
+		}
 	}
 }

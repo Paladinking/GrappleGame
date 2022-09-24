@@ -77,24 +77,28 @@ class Game {
 		/**
 		 * Called every time a KEYDOWN-event happens.
 		 */
-		virtual void handle_keydown(SDL_KeyboardEvent e) {};
+		virtual void handle_keydown(SDL_KeyboardEvent &e) {};
 		
 		/**
 		 * Called every time a KEYUP-event happens.
 		 */
-		virtual void handle_keyup(SDL_KeyboardEvent e) {};
+		virtual void handle_keyup(SDL_KeyboardEvent &e) {};
 		
 		/**
 		 * Called every time a MOUSEDOWN-event happens.
 		 */
-		virtual void handle_mousedown(SDL_MouseButtonEvent e) {};
+		virtual void handle_mousedown(SDL_MouseButtonEvent &e) {};
 		
 		/**
 		 * Called every time a MOUSEUP-event happens.
 		 */
-		virtual void handle_mouseup(SDL_MouseButtonEvent e) {};
-	
+		virtual void handle_mouseup(SDL_MouseButtonEvent &e) {};
 		
+		/**
+		 * Called every time a MOUSEWHEEL-event happens.
+		 */
+		 virtual void handle_mousewheel(SDL_MouseWheelEvent &e) {};
+
 	private:
 		bool running = false;
 		bool destroyed = true;
@@ -128,6 +132,8 @@ class State {
 		virtual void handle_down(const SDL_Keycode key, const Uint8 mouse) {};
 
 		virtual void handle_up(const SDL_Keycode key, const Uint8 mouse) {};
+		
+		virtual void handle_wheel(const SDL_MouseWheelEvent &e) {};
 
 		const std::string& get_title() const;
 
@@ -157,13 +163,15 @@ class StateGame : public Game {
 
 		virtual void tick(Uint64 delta) override;
 
-		virtual void handle_keydown(SDL_KeyboardEvent e) override;
+		virtual void handle_keydown(SDL_KeyboardEvent &e) override;
 
-		virtual void handle_keyup(SDL_KeyboardEvent e) override;
+		virtual void handle_keyup(SDL_KeyboardEvent &e) override;
 
-		virtual void handle_mousedown(SDL_MouseButtonEvent e) override;
+		virtual void handle_mousedown(SDL_MouseButtonEvent &e) override;
 		
-		virtual void handle_mouseup(SDL_MouseButtonEvent e) override;
+		virtual void handle_mouseup(SDL_MouseButtonEvent &e) override;
+		
+		virtual void handle_mousewheel(SDL_MouseWheelEvent &e) override;
 
 		
 	private:

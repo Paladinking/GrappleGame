@@ -17,8 +17,8 @@ constexpr int ZOOM_MAX = 19;
 
 void LevelMaker::init() {
 	State::init();
-	JsonObject& options = config::get_options();
-	const JsonObject& controls = options.get<JsonObject>(bindings::KEY_NAME);
+
+	const JsonObject& controls = config::get_bindings(bindings::LEVELMAKER.key);
 	zoom_in_input = get_press_input(controls.get<std::string>("zoom_in"), "None");
 	zoom_out_input = get_press_input(controls.get<std::string>("zoom_out"), "None");
 	put_tile_input = get_press_input(controls.get<std::string>("place_tile"), "None");

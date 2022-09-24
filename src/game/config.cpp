@@ -2,13 +2,19 @@
 #include <iostream>
 
 static bool options_loaded = false;
-static JsonObject options;
+JsonObject options;
 
 void add_bindings() {
 	JsonObject& obj = options.get<JsonObject>(bindings::KEY_NAME);
-	for (auto& it : bindings::DEFAULTS) {
-		if (!obj.has_key_of_type<std::string>(it.first)) {
-			obj.set<std::string>(it.first, it.second);
+	for (auto& g : bindings::GROUPINGS) {
+		if (!obj.has_key_of_type<JsonObject>(g->key)) {
+			obj.set<JsonObject>(g->key, JsonObject());
+		}
+		JsonObject& group_bindings = obj.get<JsonObject>(g->key);
+		for (auto& it : g->defaults) {
+			if (!group_bindings.has_key_of_type<std::string>(it.first)) {
+				group_bindings.set<std::string>(it.first, it.second);
+			}
 		}
 	}
 }
@@ -30,5 +36,15 @@ JsonObject& config::get_options() {
 		add_bindings();
 		options_loaded = true;
 	}
+
 	return options;
+}
+
+JsonObject& config::get_bindings() {
+	return config::get_options().get<JsonObject>(bindings::KEY_NAME);
+}
+
+
+JsonObject& config::get_bindings(const std::string& key) {
+	return config::get_bindings().get<JsonObject>(key);
 }

@@ -2,6 +2,22 @@
 #include "util/exceptions.h"
 #include <iostream>
 
+std::string get_input_name(const SDL_Keycode key, const Uint32 mouse) {
+	if (mouse == SDL_BUTTON_LEFT) {
+		return "Mouse Left";
+	} else if (mouse == SDL_BUTTON_MIDDLE) {
+		return "Mouse Middle";
+	} else if (mouse == SDL_BUTTON_RIGHT) {
+		return "Mouse Right";
+	}
+	
+	const char* name = SDL_GetKeyName(key);
+	if (name != "") {
+		return std::string(name);
+	}
+	return "None";
+}
+
 std::unique_ptr<PressInput> get_press_input(const std::string& key_name, const std::string& default_name, const JsonObject& obj) {
 	return get_press_input(obj.get_default<std::string>(key_name, default_name), default_name);
 }

@@ -1,6 +1,7 @@
 #ifndef JSON_00_H
 #define JSON_00_H
 #include <vector>
+#include <list>
 #include <string>
 #include <unordered_map>
 #include <variant>
@@ -106,6 +107,7 @@ class JsonObject {
 		
 		template<class T>
 		void set(const std::string& key, const T& value) {
+			if (!has_key(key)) keys.push_back(key);
 			data[key] = value;
 		}
 		
@@ -123,6 +125,14 @@ class JsonObject {
 		
 		std::unordered_map<std::string, json::Type>::const_iterator end() const {
 			return data.end();
+		}
+		
+		std::list<std::string>::const_iterator keys_begin() const {
+			return keys.begin();
+		}
+		
+		std::list<std::string>::const_iterator keys_end() const {
+			return keys.end();
 		}
 		
 		bool has_key(const std::string& key) const {
@@ -143,6 +153,7 @@ class JsonObject {
 		
 		void clear() {
 			data.clear();
+			keys.clear();
 		}
 		
 		void to_pretty_stream(std::ostream& os, int indentations) const;
@@ -151,6 +162,8 @@ class JsonObject {
 	
 	private:
 		std::unordered_map<std::string, json::Type> data;
+
+		std::list<std::string> keys;
 };
 
 class JsonList {

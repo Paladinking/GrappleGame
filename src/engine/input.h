@@ -84,6 +84,8 @@ class KeyHoldInput : public HoldInput {
 		const SDL_Scancode key;
 };
 
+std::string get_input_name(const SDL_Keycode key, const Uint32 mouse);
+
 std::unique_ptr<PressInput> get_press_input(const std::string& name);
 
 std::unique_ptr<HoldInput> get_hold_input(const std::string& name);

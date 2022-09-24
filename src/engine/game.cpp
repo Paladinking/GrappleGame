@@ -42,6 +42,7 @@ void Game::create() {
 		throw SDL_exception("Renderer could not be created, " + std::string(SDL_GetError()));
 	}
 	
+	SDL_SetRenderDrawBlendMode(gRenderer, SDL_BLENDMODE_BLEND);
 	SDL_SetRenderDrawColor(gRenderer, 0xFF, 0xFF, 0xFF, 0xFF);
 	
 	destroyed = false;
@@ -75,6 +76,9 @@ void Game::run() {
 					break;
 				case SDL_MOUSEBUTTONUP:
 					handle_mouseup(e.button);
+					break;
+				case SDL_MOUSEWHEEL:
+					handle_mousewheel(e.wheel);
 					break;
 			}
 		}
@@ -191,18 +195,22 @@ void StateGame::tick(Uint64 delta) {
 	}			
 }
 
-void StateGame::handle_keydown(SDL_KeyboardEvent e) {
+void StateGame::handle_keydown(SDL_KeyboardEvent &e) {
 	states.top()->handle_down(e.keysym.sym, 0);
 }
 
-void StateGame::handle_keyup(SDL_KeyboardEvent e) {
+void StateGame::handle_keyup(SDL_KeyboardEvent &e) {
 	states.top()->handle_up(e.keysym.sym, 0);
 }
 
-void StateGame::handle_mousedown(SDL_MouseButtonEvent e) {
+void StateGame::handle_mousedown(SDL_MouseButtonEvent &e) {
 	states.top()->handle_down(SDLK_UNKNOWN, e.button);
 }
 
-void StateGame::handle_mouseup(SDL_MouseButtonEvent e) {
+void StateGame::handle_mouseup(SDL_MouseButtonEvent &e) {
 	states.top()->handle_up(SDLK_UNKNOWN, e.button);
+}
+
+void StateGame::handle_mousewheel(SDL_MouseWheelEvent &e) {
+	states.top()->handle_wheel(e);
 }
