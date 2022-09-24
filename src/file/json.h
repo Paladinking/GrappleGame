@@ -71,7 +71,7 @@ class JsonObject {
 		
 		template<class T>
 		const T& get(const std::string& key) const {
-			return std::get<T>(data[key]);
+			return std::get<T>(data.at(key));
 		}
 		
 		template<class T>
@@ -117,6 +117,14 @@ class JsonObject {
 			return data.end();
 		}
 		
+		std::unordered_map<std::string, json::Type>::const_iterator begin() const {
+			return data.begin();
+		}
+		
+		std::unordered_map<std::string, json::Type>::const_iterator end() const {
+			return data.end();
+		}
+		
 		bool has_key(const std::string& key) const {
 			return data.count(key) != 0;
 		}
@@ -129,8 +137,12 @@ class JsonObject {
 			return std::get_if<T>(&val) != nullptr;
 		}
 		
-		size_t get_size() const {
+		size_t size() const {
 			return data.size();
+		}
+		
+		void clear() {
+			data.clear();
 		}
 		
 		void to_pretty_stream(std::ostream& os, int indentations) const;
@@ -179,8 +191,12 @@ class JsonList {
 			return data.end();
 		}
 		
-		size_t get_size() const {
+		size_t size() const {
 			return data.size();
+		}
+		
+		void clear() {
+			data.clear();
 		}
 		
 		void to_pretty_stream(std::ostream& os, int indentations) const;

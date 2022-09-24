@@ -59,7 +59,7 @@ void TextBox::set_dimensions(const int w, const int h) {
 }
 
 void TextBox::render() {
-	texture.render(x + text_offset_x, y + text_offset_x);
+	texture.render(x + text_offset_x, y + text_offset_y);
 }
 
 bool Button::is_pressed(const int mouseX, const int mouseY) const {

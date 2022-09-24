@@ -1,6 +1,7 @@
 #include "levelMaker.h"
 #include "file/Json.h"
 #include "util/exceptions.h"
+#include "config.h"
 #include <algorithm>
 
 constexpr int TILE_IMG_SIZE = 32;
@@ -16,28 +17,17 @@ constexpr int ZOOM_MAX = 19;
 
 void LevelMaker::init() {
 	State::init();
-	JsonObject options, controls;
-	try {
-		options = json::read_from_file(CONFIG_ROOT + OPTIONS_FILE);
-		if (options.has_key_of_type<JsonObject>("CONTROLS")) {
-			controls = options.get<JsonObject>("CONTROLS");
-		} else {
-			std::cout << "No controls in options\nUsing default bindings" << std::endl;
-		}
-	} catch (base_exception &e) {
-		std::cout << e.msg << "Using default bindings" << std::endl;
-	}
-	
-	zoom_in_input = get_press_input("zoom_in", input::ZOOM_IN, controls);
-	zoom_out_input = get_press_input("zoom_out", input::ZOOM_OUT, controls);
-	put_tile_input = get_press_input("place_tile", input::PLACE_TILE, controls);
-	clear_tile_input = get_press_input("clear, tile", input::CLEAR_TILE, controls);
-	
-	left_input = get_press_input("navigate_left", input::LM_LEFT, controls);
-	right_input = get_press_input("navigate_right", input::LM_RIGHT, controls);
-	up_input = get_press_input("navigate_up", input::LM_UP, controls);
-	down_input = get_press_input("navigate_down", input::LM_DOWN, controls);
-	
+	JsonObject& options = config::get_options();
+	const JsonObject& controls = options.get<JsonObject>(bindings::KEY_NAME);
+	zoom_in_input = get_press_input(controls.get<std::string>("zoom_in"), "None");
+	zoom_out_input = get_press_input(controls.get<std::string>("zoom_out"), "None");
+	put_tile_input = get_press_input(controls.get<std::string>("place_tile"), "None");
+	clear_tile_input = get_press_input(controls.get<std::string>("clear_tile"), "None");
+
+	left_input = get_press_input(controls.get<std::string>("navigate_left"), "None");
+	right_input = get_press_input(controls.get<std::string>("navigate_right"), "None");
+	up_input = get_press_input(controls.get<std::string>("navigate_up"), "None");
+	down_input = get_press_input(controls.get<std::string>("navigate_down"), "None");
 	editor_width = window_width / 2;
 
 	data = std::make_unique<Uint16[]>(width * height);

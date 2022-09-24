@@ -12,28 +12,6 @@ class binding_exception : public base_exception {
 	
 };
 
-namespace input {
-	const std::string // Default bindings
-		//Regular game
-		LEFT = "A",
-		RIGHT = "D", 
-		JUMP = "Space", 
-		PULL = "Q", 
-		RELEASE = "E", 
-		RETURN = "Left Shift",
-		GRAPPLE = "Mouse Left",
-		
-		//Level maker controlls
-		ZOOM_IN = "+",
-		ZOOM_OUT = "-",
-		PLACE_TILE = "Mouse Left",
-		CLEAR_TILE = "Mouse Right",
-		LM_LEFT = "Left",
-		LM_RIGHT = "Right",
-		LM_UP = "Up",
-		LM_DOWN = "Down";
-};
-
 class PressInput {
 	public:
 		virtual bool is_targeted(const SDL_Keycode key, const Uint32 mouseButton) = 0;

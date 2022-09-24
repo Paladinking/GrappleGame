@@ -2,6 +2,7 @@
 #include <iostream>
 #include "climbGame.h"
 #include "file/json.h"
+#include "config.h"
 
 void ClimbGame::tick(const Uint64 delta, StateStatus& res) {
 	if (delta == 0) return;
@@ -110,24 +111,16 @@ void ClimbGame::init() {
 }
 
 void ClimbGame::create_inputs() {
-	JsonObject options, controls;
-	try {
-		options = json::read_from_file(CONFIG_ROOT + OPTIONS_FILE);
-		if (options.has_key_of_type<JsonObject>("CONTROLS")) {
-			controls = options.get<JsonObject>("CONTROLS");
-		} else {
-			std::cout << "No controls in options\nUsing default bindings" << std::endl;
-		}
-	} catch (base_exception &e){
-		std::cout << e.msg << '\n' << "Using default bindings" << std::endl;
-	}
-	left_input = get_hold_input("left", input::LEFT, controls);
-	right_input = get_hold_input("right", input::RIGHT, controls);
-	grapple_input = get_press_input("grapple", input::GRAPPLE, controls);
-	pull_input = get_press_input("pull", input::PULL, controls);
-	release_input = get_press_input("release", input::RELEASE, controls);
-	jump_input = get_press_input("jump", input::JUMP, controls);
-	return_input = get_press_input("return", input::RETURN, controls);
+	JsonObject& options = config::get_options();
+	const JsonObject& controls = options.get<JsonObject>(bindings::KEY_NAME);
+
+	left_input = get_hold_input(controls.get<std::string>("left"), "None");
+	right_input = get_hold_input(controls.get<std::string>("right"), "None");
+	grapple_input = get_press_input(controls.get<std::string>("grapple"), "None");
+	pull_input = get_press_input(controls.get<std::string>("pull"), "None");
+	release_input = get_press_input(controls.get<std::string>("release"), "None");
+	jump_input = get_press_input(controls.get<std::string>("jump"), "None");
+	return_input = get_press_input(controls.get<std::string>("return_grapple"), "None");
 }
 
 void ClimbGame::handle_down(const SDL_Keycode key, const Uint8 mouse) {

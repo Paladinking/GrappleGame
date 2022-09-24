@@ -40,9 +40,12 @@ void run_game(Game &game, int& exit_status) {
 	try {
 		game.create();
 		game.run();
-	} catch (base_exception &e) {
+	} catch (const base_exception &e) {
 		std::cout << e.msg << std::endl;
 		exit_status = -1;
+	} catch (const std::logic_error &e) {
+		std::cout << e.what() << std::endl;
+		exit_status = -2;
 	}
 	game.destroy_game();
 }

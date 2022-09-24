@@ -93,7 +93,7 @@ class Button : public TextBox {
 };
 
 class Menu : public State {
-	public:
+	public:	
 		Menu(const int w, const int h, const std::string& title);
 		
 		Menu(const int w, const int h, const std::string& title, const std::string& exit_input);
