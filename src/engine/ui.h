@@ -6,6 +6,7 @@
 #include <string>
 #include "util/exceptions.h"
 #include "game.h"
+#include "input.h"
 
 class TextBox {
 	public:
@@ -93,8 +94,9 @@ class Button : public TextBox {
 
 class Menu : public State {
 	public:
-		Menu(const int w, const int h, const std::string& title) : State(w, h, title) {};
+		Menu(const int w, const int h, const std::string& title);
 		
+		Menu(const int w, const int h, const std::string& title, const std::string& exit_input);
 		/**
 		 * Handles a down-event of keyboard or mouse.
 		 */
@@ -118,6 +120,8 @@ class Menu : public State {
 	protected:
 		std::vector<Button> buttons;
 		std::vector<TextBox> text;
+		
+
 
 		// Set by subclasses to swap state
 		State* next_state = nullptr;	
@@ -133,10 +137,12 @@ class Menu : public State {
 		 * Called when the Menu_exit input is recieved (Typicly Escape).
 		 * This function allows most menu subclasses not to override handle_down or handle_up.
 		 */
-		virtual void menu_exit() {};
+		virtual void menu_exit();
 
 	private:
 		int targeted_button;
+
+		std::unique_ptr<PressInput> exit_input;
 };
 
 #endif

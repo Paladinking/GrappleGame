@@ -43,12 +43,19 @@ class MousePressInput : public PressInput {
 	public:
 		MousePressInput(const Uint32 mouse_button) : mouse_button(mouse_button) {}
 		
-		virtual bool is_targeted(const SDL_Keycode key, const Uint32 mouseButton) override {
-			return mouseButton == mouse_button;
+		virtual bool is_targeted(const SDL_Keycode key, const Uint32 mouse) override {
+			return mouse == mouse_button;
 		}
 
 	private:
 		const Uint32 mouse_button;
+};
+
+class EmptyPressInput : public PressInput {
+	public:
+		virtual bool is_targeted(const SDL_Keycode key, const Uint32 mouse) override {
+			return false;
+		}
 };
 
 class KeyPressInput : public PressInput {
@@ -78,6 +85,13 @@ class MouseHoldInput : public HoldInput {
 
 	private:
 		const Uint32 mouse_mask;
+};
+
+class EmptyHoldInput : public HoldInput {
+	public:
+		virtual bool is_pressed(const Uint8* keys, const Uint32 mouseButton) override {
+			return false;
+		}
 };
 
 class KeyHoldInput : public HoldInput {

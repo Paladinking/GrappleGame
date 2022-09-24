@@ -36,8 +36,9 @@ std::unique_ptr<PressInput> get_press_input(const std::string& name) {
 		return std::unique_ptr<PressInput>(new MousePressInput(SDL_BUTTON_MIDDLE));
 	} else if (name == "Mouse Right") {
 		return std::unique_ptr<PressInput>(new MousePressInput(SDL_BUTTON_RIGHT));
+	} else if (name == "None") {
+		return std::unique_ptr<PressInput>(new EmptyPressInput());
 	}
-	
 	SDL_Keycode keycode = SDL_GetKeyFromName(name.c_str());
 	if (keycode == SDLK_UNKNOWN) {
 		throw binding_exception("Invalid key name \"" + name + "\"");
@@ -53,6 +54,8 @@ std::unique_ptr<HoldInput> get_hold_input(const std::string& name) {
 		return std::unique_ptr<HoldInput>(new MouseHoldInput(SDL_BUTTON_MMASK));
 	} else if (name == "Mouse Right") {
 		return std::unique_ptr<HoldInput>(new MouseHoldInput(SDL_BUTTON_RMASK));
+	} else if (name == "None") {
+		return std::unique_ptr<HoldInput>(new EmptyHoldInput());
 	}
 	
 	SDL_Scancode scancode = SDL_GetScancodeFromName(name.c_str());

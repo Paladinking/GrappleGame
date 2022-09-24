@@ -16,8 +16,6 @@ class MainMenu : public Menu {
 		 */
 		virtual void init() override;
 
-
-
 	protected:
 
 		virtual void button_press(const int btn) override;

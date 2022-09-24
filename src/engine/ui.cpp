@@ -81,6 +81,15 @@ void Button::render() {
 	render(x - 1, y - 1);
 }
 
+Menu::Menu(const int w, const int h, const std::string& title) : State(w, h, title) {
+	// Since get_press_input can throw exceptions...
+	exit_input = std::unique_ptr<PressInput>(new KeyPressInput(SDLK_ESCAPE));
+}
+
+Menu::Menu(const int w, const int h, const std::string& title, const std::string& exit_input) : State(w, h, title) {
+	this->exit_input = get_press_input(exit_input, "Escape");
+}
+
 void Menu::handle_down(const SDL_Keycode key, const Uint8 mouse) {
 	if (mouse == SDL_BUTTON_LEFT) {
 		targeted_button = -1;
@@ -90,6 +99,9 @@ void Menu::handle_down(const SDL_Keycode key, const Uint8 mouse) {
 				break;
 			}
 		}
+	}
+	if (exit_input->is_targeted(key, mouse)) {
+		menu_exit();
 	}
 }
 
@@ -122,4 +134,8 @@ void Menu::tick(const Uint64 delta, StateStatus& res) {
 		res.action = StateStatus::PUSH;
 		next_state = nullptr;
 	}
+}
+
+void Menu::menu_exit() {
+	exit = true;
 }
