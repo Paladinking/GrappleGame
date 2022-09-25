@@ -55,7 +55,7 @@ class TextBox {
 		/**
 		 * Renders the textbox.
 		 */
-		virtual void render();
+		virtual void render(const int x_offset, const int y_offset);
 
 		/**
 		 * Initializes the button class, loading the font used for the button text.
@@ -105,14 +105,17 @@ class Button : public TextBox {
 		bool is_pressed(const int mouseX, const int mouseY) const;
 
 		/**
-		 * Renders the button, differently if the mouse is over it.
+		 * Sets the hover state of this button.
 		 */
-		virtual void render(const int mouseX, const int mouseY);
+		void set_hover(const bool hover);
 
 		/**
 		 * Renders the button.
 		 */
-		virtual void render() override;
+		virtual void render(const int x_offset, const int y_offset) override;
+
+	private:
+		bool hover;
 };
 
 class Menu : public State {

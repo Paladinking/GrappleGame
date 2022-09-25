@@ -19,7 +19,7 @@ TextBox::TextBox(
 
 void TextBox::generate_texture() {
 	TTF_SetFontSize(font, font_size);
-	SDL_Surface* text_surface = TTF_RenderUTF8_Solid(font, text.c_str(), color);
+	SDL_Surface* text_surface = TTF_RenderUTF8_Blended(font, text.c_str(), color);
 	if (text_surface == NULL) {
 		throw image_load_exception(std::string(TTF_GetError()));
 	}
@@ -74,27 +74,27 @@ void TextBox::set_dimensions(const int w, const int h) {
 	this->h = h;
 }
 
-void TextBox::render() {
-	texture.render(x + text_offset_x, y + text_offset_y);
+void TextBox::render(const int x_offset, const int y_offset) {
+	texture.render(x_offset + x + text_offset_x, y_offset + y + text_offset_y);
 }
 
 bool Button::is_pressed(const int mouseX, const int mouseY) const {
 	return mouseX >= x && mouseX < x + w && mouseY >= y && mouseY < y + h;
 }
 
-void Button::render(const int mouseX, const int mouseY) {
-	if (is_pressed(mouseX, mouseY)) {
+void Button::set_hover(const bool hover) {
+	this->hover = hover;
+}
+
+void Button::render(const int x_offset, const int y_offset) {
+	if (hover) {
 		SDL_SetRenderDrawColor(gRenderer, 200, 200, 240, 0xFF);
 	} else {
 		SDL_SetRenderDrawColor(gRenderer, 100, 100, 220, 0xFF);
 	}
-	SDL_Rect r = {x, y, w, h};
+	SDL_Rect r = {x + x_offset, y + y_offset, w, h};
 	SDL_RenderFillRect(gRenderer, &r);
-	TextBox::render();
-}
-
-void Button::render() {
-	render(x - 1, y - 1);
+	TextBox::render(x_offset, y_offset);
 }
 
 Menu::Menu(const int w, const int h, const std::string& title) : State(w, h, title) {
@@ -134,10 +134,11 @@ void Menu::render() {
 	SDL_RenderClear(gRenderer);
 
 	for (auto& b : buttons) {
-		b.render(mouseX, mouseY);
+		b.set_hover(b.is_pressed(mouseX, mouseY));
+		b.render(0, 0);
 	}
 	for (auto& t : text) {
-		t.render();
+		t.render(0, 0);
 	}
 	SDL_RenderPresent(gRenderer);
 }

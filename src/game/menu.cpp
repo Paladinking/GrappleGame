@@ -87,7 +87,7 @@ void OptionsMenu::init() {
 }
 
 void OptionsMenu::handle_wheel(const SDL_MouseWheelEvent &e) {
-	camera_y += e.y;
+	camera_y -= 25 * e.y;
 	if (camera_y < 0 ) camera_y = 0;
 	if (camera_y > full_height - window_height) {
 		camera_y = full_height - window_height;
@@ -140,19 +140,23 @@ void OptionsMenu::button_press(const int btn) {
 }
 
 void OptionsMenu::render() {
+	// A bit hacky... the game updates the mouse position after handling events, 
+	// 	so mouseY will still be offset when potential clicks get handled.
+	mouseY += camera_y; 
 	SDL_SetRenderDrawColor(gRenderer, 0xFF, 0xFF, 0xFF, 0xFF);
 	SDL_RenderClear(gRenderer);
 	int mx = waiting_for_input ? -1 : mouseX;
 	for (auto& b : buttons) {
-		b.render(mx, mouseY);
+		b.set_hover(!waiting_for_input && b.is_pressed(mouseX, mouseY));
+		b.render(0, -camera_y);
 	}
 	for (auto& t : text) {
-		t.render();
+		t.render(0, -camera_y);
 	}
 	if (waiting_for_input) {
 		SDL_SetRenderDrawColor(gRenderer, 0x00, 0x00, 0x00, 0x50);
 		SDL_RenderFillRect(gRenderer, NULL);
-		input_promt.render();
+		input_promt.render(0, 0);
 	}
 	SDL_RenderPresent(gRenderer);
 }
