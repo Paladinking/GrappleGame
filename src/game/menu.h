@@ -51,19 +51,24 @@ class OptionsMenu : public Menu {
 		virtual void render() override;
 		
 		virtual void handle_wheel(const SDL_MouseWheelEvent &e) override;
+		
+		virtual void menu_exit() override;
 
 	private:
 		bool waiting_for_input;
 
 		TextBox input_promt;
 
-		std::vector<std::pair<const std::string*, std::string>> button_data;
+		//(Key to grouping, key to binding)
+		std::vector<std::pair<const std::string, std::string>> button_data;
+
+		int last_input_button;
 
 		int btn;
 		
 		int full_height, camera_y;
 		
-		void color_matching(const int start, const int index, const std::string& cur, const std::string& old);
+		void color_matching(const int index, const std::string& cur, const std::string& old);
 
 };
 

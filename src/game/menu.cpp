@@ -44,7 +44,7 @@ void OptionsMenu::init() {
 	int h_offset = MARGIN_Y;
 	int group_start = 0;
 	for (auto& it = bindings.keys_begin(); it != bindings.keys_end(); ++it) {
-		text.emplace_back((window_width - 60) / 2, h_offset, 120, 60, *it, 25);
+		text.emplace_back((window_width - 120) / 2, h_offset, 120, 60, *it, 25);
 		const JsonObject& group = bindings.get<JsonObject>(*it);
 		h_offset += 60 + MARGIN_Y;
 		int index = 0;
@@ -58,21 +58,22 @@ void OptionsMenu::init() {
 				x = window_width / 2 + MARGIN_X + MARGIN_X / 2 + BUTTON_WIDTH;
 			}
 			buttons.emplace_back(x, h_offset, BUTTON_WIDTH, BUTTON_HEIGHT, val, 15);
-			button_data.emplace_back(&(*it), key);
+			button_data.emplace_back(*it, key);
 			text.emplace_back(x - BUTTON_WIDTH - MARGIN_X / 2, h_offset, BUTTON_WIDTH, BUTTON_HEIGHT, key + ":", 15);
 			if (index % 2 == 1) {
 				h_offset += BUTTON_HEIGHT + MARGIN_Y;
 			}
 			bool duplicate_binding = false;
-			for (int i = group_start; i < index; ++i) {
-				if (buttons[i].get_text() == buttons[index].get_text()) {
+			for (int i = group_start; i < index + group_start; ++i) {
+				if (buttons[i].get_text() == buttons[index + group_start].get_text()) {
+					
 					duplicate_binding = true;
 					if (buttons[i].get_text_color().r != 0xFF) {
 						buttons[i].set_text_color(0xFF, 0x00, 0x00, 0xFF);
 					}
 				}
 			}
-			if (duplicate_binding) buttons[index].set_text_color(0xFF, 0x00, 0x00, 0xFF);
+			if (duplicate_binding) buttons[index + group_start].set_text_color(0xFF, 0x00, 0x00, 0xFF);
 			++index;
 		}
 		if (index % 2 == 1) {
@@ -80,8 +81,12 @@ void OptionsMenu::init() {
 		}
 		group_start += index;
 	}
+	
+	last_input_button = buttons.size() - 1;
+	buttons.emplace_back((window_width - 120) / 2, h_offset, 120, 60, "Reset", 25);
+	h_offset += 60 + MARGIN_Y;
+	
 	full_height = h_offset;
-
 	input_promt = TextBox(0, 0, window_width, window_height, "Press any button: ", 50);
 	waiting_for_input = false;
 }
@@ -106,37 +111,68 @@ void OptionsMenu::handle_up(const SDL_Keycode key,const Uint8 mouse) {
 		
 		std::string old_input = buttons[btn].get_text();
 		std::string new_input = get_input_name(key, mouse);
-		JsonObject& bindings = config::get_bindings(*(button_data[btn].first));
+		JsonObject& bindings = config::get_bindings(button_data[btn].first);
 
 		bindings.set<std::string>(button_data[btn].second, new_input);
 		buttons[btn].set_text(new_input);
-		color_matching(0, btn, new_input, old_input);
+		color_matching(btn, new_input, old_input);
 	} else {
 		Menu::handle_up(key, mouse);
 	}
 }
 
-void OptionsMenu::color_matching(const int start, const int index, const std::string& cur, const std::string& old) {
+void OptionsMenu::color_matching(const int index, const std::string& cur, const std::string& old) {
 	bool taken_input = false;
-	for (int i = start; i < buttons.size(); ++i) {
+	bool single_old = false;
+	Button* old_match = nullptr;
+	for (int i = 0; i <= last_input_button; ++i) {
 		if (i == index || button_data[index].first != button_data[i].first) continue;
-		if (buttons[i].get_text() == old && buttons[i].get_text_color().r == 0xFF) {
-			buttons[i].set_text_color(0x00, 0x00, 0x00, 0xFF);
-		} else if (buttons[i].get_text() == cur && buttons[i].get_text_color().r == 0x00) {
-			buttons[i].set_text_color(0xFF, 0x00, 0x00, 0xFF);
+		if (buttons[i].get_text() == old) {
+			if (old_match == nullptr) {
+				old_match = &buttons[i];
+				single_old = true;
+			} else {
+				single_old = false;
+			}
+		}
+		if (buttons[i].get_text() == cur) {
+			if (buttons[i].get_text_color().r == 0x00) {
+				buttons[i].set_text_color(0xFF, 0x00, 0x00, 0xFF);
+			}
 			taken_input = true;
 		}
 	}
-	if (taken_input && buttons[index].get_text_color().r == 0x00) {
-		buttons[index].set_text_color(0xFF, 0x00, 0x00, 0xFF);
+	if (single_old) {
+		old_match->set_text_color(0x00, 0x00, 0x00, 0xFF);
+	}
+	if (taken_input) {
+		if (buttons[index].get_text_color().r == 0x00) {
+			buttons[index].set_text_color(0xFF, 0x00, 0x00, 0xFF);
+		}
 	} else if (buttons[index].get_text_color().r == 0xFF) {
 		buttons[index].set_text_color(0x00, 0x00, 0x00, 0xFF);
 	}
 }
 
 void OptionsMenu::button_press(const int btn) {
-	waiting_for_input = true;
-	this->btn = btn;
+	if (btn > last_input_button) {
+		config::reset_bindings();
+		const JsonObject& binds = config::get_bindings();
+		for (int i = 0; i < last_input_button; ++i) { 
+			buttons[i].set_text(binds.get<JsonObject>(button_data[i].first).get<std::string>(button_data[i].second));
+			if (buttons[i].get_text_color().r == 0xFF) {// Default bindings have no duplicates
+				buttons[i].set_text_color(0x00, 0x00, 0x00, 0xFF);
+			}
+		}
+	} else {
+		waiting_for_input = true;
+		this->btn = btn;
+	}
+}
+
+void OptionsMenu::menu_exit() {
+	config::write_options();
+	Menu::menu_exit();
 }
 
 void OptionsMenu::render() {
@@ -145,7 +181,7 @@ void OptionsMenu::render() {
 	mouseY += camera_y; 
 	SDL_SetRenderDrawColor(gRenderer, 0xFF, 0xFF, 0xFF, 0xFF);
 	SDL_RenderClear(gRenderer);
-	int mx = waiting_for_input ? -1 : mouseX;
+
 	for (auto& b : buttons) {
 		b.set_hover(!waiting_for_input && b.is_pressed(mouseX, mouseY));
 		b.render(0, -camera_y);

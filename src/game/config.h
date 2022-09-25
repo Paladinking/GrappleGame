@@ -17,13 +17,13 @@ namespace bindings {
 	const Grouping CLIMBGAME = {
 		"CLIMBGAME",
 		{
-			{"left", "A"},
-			{"right", "D"},
-			{"jump", "Space"},
+			{"grapple", "Mouse Left"},
 			{"pull", "Q"},
 			{"release", "E"},
 			{"return_grapple", "Left Shift"},
-			{"grapple", "Mouse Left"}
+			{"jump", "Space"},
+			{"left", "A"},
+			{"right", "D"}
 		}
 	};
 
@@ -34,10 +34,10 @@ namespace bindings {
 			{"clear_tile", "Mouse Right"},
 			{"zoom_in", "+"},
 			{"zoom_out", "-"},
-			{"navigate_left", "Left"},
-			{"navigate_right", "Right"},
 			{"navigate_up", "Up"},
 			{"navigate_down", "Down"}
+			{"navigate_left", "Left"},
+			{"navigate_right", "Right"},
 		}
 	};
 	
@@ -57,6 +57,10 @@ namespace config {
 	JsonObject& get_bindings();
 	
 	JsonObject& get_bindings(const std::string& key);
+	
+	void write_options();
+	
+	void reset_bindings();
 }
 
 

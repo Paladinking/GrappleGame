@@ -48,3 +48,16 @@ JsonObject& config::get_bindings() {
 JsonObject& config::get_bindings(const std::string& key) {
 	return config::get_bindings().get<JsonObject>(key);
 }
+
+void config::write_options() {
+	try {
+		json::write_to_file(CONFIG_ROOT + OPTIONS_FILE, options);
+	} catch(const base_exception& e) {
+		std::cout << e.msg << std::endl;
+	}
+}
+
+void config::reset_bindings() {
+	options.set<JsonObject>(bindings::KEY_NAME, JsonObject());
+	add_bindings();
+}
