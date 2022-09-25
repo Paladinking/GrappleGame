@@ -2,14 +2,14 @@
 #define CONFIG_00_H
 #include "file/json.h"
 #include "globals.h"
-#include <unordered_map>
+#include <vector>
 #include <array>
 
 namespace bindings {
 	
 	struct Grouping {
 		const std::string key;
-		const std::unordered_map<std::string, const std::string> defaults;
+		const std::vector<std::pair<std::string, const std::string>> defaults;
 	};
 	
 	const std::string KEY_NAME = "BINDINGS";
@@ -35,9 +35,9 @@ namespace bindings {
 			{"zoom_in", "+"},
 			{"zoom_out", "-"},
 			{"navigate_up", "Up"},
-			{"navigate_down", "Down"}
+			{"navigate_down", "Down"},
 			{"navigate_left", "Left"},
-			{"navigate_right", "Right"},
+			{"navigate_right", "Right"}
 		}
 	};
 	

@@ -4,8 +4,8 @@
 			"grapple" : "Mouse Left",
 			"pull" : "Q",
 			"release" : "E",
-			"jump" : "Space",
 			"return_grapple" : "Left Shift",
+			"jump" : "Space",
 			"left" : "A",
 			"right" : "D"
 		},
@@ -14,9 +14,9 @@
 			"clear_tile" : "Mouse Right",
 			"zoom_in" : "+",
 			"zoom_out" : "-",
-			"navigate_up" : "Up", 
+			"navigate_up" : "Up",
 			"navigate_down" : "Down",
-			"navigate_left" : "Left", 
+			"navigate_left" : "Left",
 			"navigate_right" : "Right"
 		},
 		"GENERAL" : {
