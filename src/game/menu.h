@@ -72,4 +72,17 @@ class OptionsMenu : public Menu {
 
 };
 
+class LevelMakerStartup : public Menu {
+	public:
+		LevelMakerStartup() : Menu(-1, -1, "") {};
+
+		virtual void init() override;
+
+	protected:
+
+		virtual void button_press(const int btn) override;
+
+	
+};
+
 #endif

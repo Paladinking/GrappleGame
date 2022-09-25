@@ -169,6 +169,13 @@ class JsonObject {
 class JsonList {
 	public:
 		template<class T>
+		bool has_index_of_type(const unsigned index) const {
+			if (index >= data.size()) return false;
+			const json::Type& t = data[index];
+			return std::get_if<T>(&t) != nullptr;
+		}
+	
+		template<class T>
 		T& get(const unsigned index) {
 			return std::get<T>(data[index]);
 		}

@@ -17,13 +17,10 @@ void LevelData::load_from_file(const std::string& path) {
 		!reader.read_next(height) ||
 		!reader.read_next(img_tilesize) ||
 		!reader.read_next(img_tilewidth) ||
-		!reader.read_next(img_tilecount) ||
-		!reader.read_string(img_path_cstr)
+		!reader.read_next(img_tilecount)
 	) {
 		throw file_exception("Could not read level file");
 	}
-	img_path = std::string(img_path_cstr);
-	delete[] img_path_cstr;
 	data = std::make_unique<Uint16[]>(width * height);
 	if (!reader.read_many(data.get(), width * height)) {
 		throw file_exception("Could not read level file");
@@ -38,7 +35,6 @@ void LevelData::write_to_file(const std::string& path) {
 		!writer.write(img_tilesize) ||
 		!writer.write(img_tilewidth) ||
 		!writer.write(img_tilecount) ||
-		!writer.write(img_path.c_str(), img_path.length()) ||
 		!writer.write_many(data.get(), width * height)
 	) {
 		throw file_exception("Could not write to level file");
@@ -50,7 +46,7 @@ void Level::set_window_size(const int win_width, const int win_height) {
 	window_height = win_height;
 }
 
-void Level::load_from_file(const std::string& path) {
+void Level::load_from_file(const std::string& path, const std::string& img_path) {
 	LevelData level_data;
 	level_data.load_from_file(path);
 	
@@ -58,7 +54,7 @@ void Level::load_from_file(const std::string& path) {
 		throw file_exception("Invalid level file");
 	}
 	
-	std::unique_ptr<SDL_Surface, SurfaceDeleter> tiles(IMG_Load(level_data.img_path.c_str()));
+	std::unique_ptr<SDL_Surface, SurfaceDeleter> tiles(IMG_Load(img_path.c_str()));
 	
 	if (tiles == nullptr) {
 		throw image_load_exception(std::string(IMG_GetError()));

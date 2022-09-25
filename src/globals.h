@@ -34,7 +34,9 @@ extern std::string MAP_IMG;
 extern std::string HOOK_IMG;
 
 extern std::string CONFIG_ROOT;
-extern std::string OPTIONS_FILE;
+extern std::string OPTION_FILE;
+extern std::string LEVELS_ROOT;
+extern std::string LEVELS_FILE;
 
 constexpr double PI = 3.141592654;
 constexpr double PI_HALF = PI / 2;

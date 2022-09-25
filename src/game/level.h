@@ -13,7 +13,6 @@ struct LevelData {
 	Uint32 img_tilesize;
 	Uint32 img_tilewidth;
 	Uint32 img_tilecount;
-	std::string img_path;
 	std::unique_ptr<Uint16[]> data;
 
 	void load_from_file(const std::string& path);
@@ -36,7 +35,7 @@ class Level : public TileMap {
 	public:
 		Level() {}
 
-		void load_from_file(const std::string& path);
+		void load_from_file(const std::string& path, const std::string& img_path);
 
 		void render(int cameraY);
 

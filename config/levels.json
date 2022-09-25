@@ -1,0 +1,9 @@
+{
+	"LEVELS" : [
+		{
+			"file" : "level1",
+			"tiles" : "tiles/tiles.png"
+		}
+	
+	]
+}

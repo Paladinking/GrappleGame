@@ -49,7 +49,7 @@ namespace bindings {
 	};
 	
 	const std::array<const Grouping*, 3> GROUPINGS = {&CLIMBGAME, &LEVELMAKER, &GENERAL}; 
-};
+}
 
 namespace config {
 	JsonObject& get_options();
@@ -58,6 +58,8 @@ namespace config {
 	
 	JsonObject& get_bindings(const std::string& key);
 	
+	std::pair<std::string, std::string> get_level(const int index);
+
 	void write_options();
 	
 	void reset_bindings();

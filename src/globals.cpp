@@ -36,7 +36,9 @@ std::string MAP_IMG = "map.png";
 std::string HOOK_IMG = "ball.png";
 
 std::string CONFIG_ROOT = "config/";
-std::string OPTIONS_FILE = "options.json";
+std::string LEVELS_ROOT = "assets/levels/";
+std::string OPTION_FILE = "options.json";
+std::string LEVELS_FILE = "levels.json";
 
 #define SET_IF_EXISTS(obj, T, S) if (obj.has_key_of_type<T>(#S)) S = obj.get<T>(#S)
 
@@ -76,7 +78,9 @@ void load_globals() {
 	SET_IF_EXISTS(obj, std::string, HOOK_IMG);
 
 	SET_IF_EXISTS(obj, std::string, CONFIG_ROOT);
-	SET_IF_EXISTS(obj, std::string, OPTIONS_FILE);
+	SET_IF_EXISTS(obj, std::string, LEVELS_ROOT);
+	SET_IF_EXISTS(obj, std::string, OPTION_FILE);
+	SET_IF_EXISTS(obj, std::string, LEVELS_FILE);
 
 	if (!VERBOSE) return;
 	
@@ -108,6 +112,8 @@ void load_globals() {
 	std::cout << "MAP_IMG: " 				<< MAP_IMG << '\n';
 	std::cout << "HOOK_IMG: " 				<< HOOK_IMG << '\n';
 	std::cout << "CONFIG_ROOT: " 			<< CONFIG_ROOT << '\n';
-	std::cout << "OPTIONS_FILE: " 			<< OPTIONS_FILE << '\n';
+	std::cout << "LEVELS_ROOT: " 			<< LEVELS_ROOT << '\n';
+	std::cout << "OPTION_FILE: " 			<< OPTION_FILE << '\n';
+	std::cout << "LEVELS_FILE: " 			<< LEVELS_FILE << '\n';
 	std::cout << std::flush;
 }

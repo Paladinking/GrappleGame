@@ -81,9 +81,9 @@ void ClimbGame::render_tilemap() {
 void ClimbGame::init() {
 	State::init();
 	create_inputs();
+	std::pair<std::string, std::string> lvl1 = config::get_level(0);
 	level.set_window_size(window_width, window_height);
-	level.load_from_file("config/level1");
-	//tilemap.load_from_image(ASSETS_ROOT + MAP_IMG);
+	level.load_from_file(lvl1.first, lvl1.second);
 	
 	level.set_tilesize(TILE_SIZE);
 
