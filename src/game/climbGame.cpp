@@ -4,6 +4,18 @@
 #include "file/json.h"
 #include "config.h"
 
+constexpr double MAX_MOVEMENT_VEL = 350.0;
+constexpr double MOVEMENT_ACCELERATION = 2200.0;
+constexpr double JUMP_VEL = 800.0;
+
+constexpr int PLAYER_FULL_WIDTH = 24;
+constexpr int PLAYER_FULL_HEIGHT = 40;
+constexpr int PLAYER_START_X = 320;
+constexpr int PLAYER_START_Y = 960;
+
+constexpr int CAMERA_PAN_REGION = 200;
+constexpr double CAMERA_SPEED = 1000.0;
+
 void ClimbGame::tick(const Uint64 delta, StateStatus& res) {
 	if (delta == 0) return;
 	double dDelta = delta / 1000.0;
@@ -18,7 +30,7 @@ void ClimbGame::tick(const Uint64 delta, StateStatus& res) {
 		camera_y -= CAMERA_SPEED * dDelta;
 		if (camera_y < camera_y_min) camera_y = camera_y_min;
 	}
-	else if (camera_y_delta > window_height - 250) {
+	else if (camera_y_delta > window_height - CAMERA_PAN_REGION) {
 		camera_y += CAMERA_SPEED * dDelta;
 		if (camera_y > camera_y_max) camera_y = camera_y_max;
 	}
@@ -50,7 +62,7 @@ void ClimbGame::handle_input(double delta, StateStatus& res) {
 void ClimbGame::render() {
 	SDL_SetRenderDrawColor(gRenderer, 0xFF, 0xFF, 0xFF, 0xFF);
 	SDL_RenderClear(gRenderer);
-	int camera_y_tile = (static_cast<int>(camera_y)) / TILE_SIZE;
+	int camera_y_tile = (static_cast<int>(camera_y)) / level.get_tilesize();
 	//tilemapTexture.render(0, 0, 0, camera_y, window_width, window_height);
 	level.render(static_cast<int>(camera_y));
 	//render_tilemap();
@@ -60,7 +72,8 @@ void ClimbGame::render() {
 }
 
 void ClimbGame::render_tilemap() {
-	int camera_y_tile = static_cast<int>(camera_y) / TILE_SIZE;
+	const int tile_size = level.get_tilesize();
+	int camera_y_tile = static_cast<int>(camera_y) / tile_size;
 	for (int x = 0; x < visible_tiles_x; x++) {
 		for (int y = camera_y_tile - 1; y < camera_y_tile + visible_tiles_y + 1; y++) {
 			if (level.is_blocked(x, y)) {
@@ -68,14 +81,10 @@ void ClimbGame::render_tilemap() {
 			} else {
 				SDL_SetRenderDrawColor( gRenderer, 0xFF, 0xFF, 0xFF, 0xFF );
 			}
-			SDL_Rect fillRect = {x * TILE_SIZE, y * TILE_SIZE - static_cast<int>(camera_y), TILE_SIZE, TILE_SIZE};
+			SDL_Rect fillRect = {x * tile_size, y * tile_size - static_cast<int>(camera_y), tile_size, tile_size};
 			SDL_RenderFillRect( gRenderer, &fillRect );
 		}
 	}
-	
-	/*for (const std::shared_ptr<Corner> &corner : corners) {
-		ball.render(corner->x - 2, corner->y -2 - camera_y);
-	}*/
 }
 
 void ClimbGame::init() {
@@ -85,21 +94,17 @@ void ClimbGame::init() {
 	level.set_window_size(window_width, window_height);
 	level.load_from_file(lvl1.first, lvl1.second);
 	
-	level.set_tilesize(TILE_SIZE);
+	const int tile_size = level.get_tilesize();
 
-	if (level.get_width() != FULL_TILE_WIDTH || level.get_height() != FULL_TILE_HEIGHT) 
-	{
-		throw game_exception("Map image has wrong dimensions.");
-	}
-	visible_tiles_x = window_width / TILE_SIZE;
-	visible_tiles_y = window_height / TILE_SIZE;
+	visible_tiles_x = window_width / tile_size;
+	visible_tiles_y = window_height / tile_size;
 	camera_y = PLAYER_START_Y;
-	camera_y_max = TILE_SIZE * (FULL_TILE_HEIGHT - visible_tiles_y);
+	camera_y_max = tile_size * (level.get_height() - visible_tiles_y);
 	camera_y_min = 0;
 	if (camera_y < camera_y_min) camera_y = camera_y_min;
 	if (camera_y > camera_y_max) camera_y = camera_y_max;
 	
-	tilemapTexture.load_from_file("assets/mapImage.png", FULL_TILE_WIDTH * TILE_SIZE, FULL_TILE_HEIGHT * TILE_SIZE);
+	tilemapTexture.load_from_file("assets/mapImage.png", level.get_width() * tile_size, level.get_height() * tile_size);
 	tilemapTexture.set_dimensions(window_width, window_height);
 	
 	Player* p = new Player();

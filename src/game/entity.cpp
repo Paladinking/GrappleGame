@@ -2,6 +2,16 @@
 #include "engine/engine.h"
 #include "util/geometry.h"
 
+constexpr double MAX_GRAVITY_VEL = 700.0;
+constexpr double GRAVITY_ACCELERATION = 3000.0;
+constexpr double FRICTION_FACTOR = 700.0;
+constexpr double AIR_RES_FACTOR = 0.004;
+
+constexpr int GRAPPLE_LENGTH = 600;
+constexpr double GRAPPLE_SPEED = 1300.0;
+constexpr double GRAPPLE_PULL = 5000.0;
+constexpr double GRAPPLE_RELEASE = 200.0;
+
 Entity::~Entity() {}
 
 void Entity::load_texture(std::string texture_path) 
@@ -103,6 +113,7 @@ void Player::init(const double x, const double y, const int w, const int h)
 	vel.y = 0;
 	width = w;
 	height = h;
+	grapple_max_len = GRAPPLE_LENGTH;
 	load_texture(ASSETS_ROOT + PLAYER_IMG);
 	grapple_hook.load_from_file(ASSETS_ROOT + HOOK_IMG);
 	grapple_hook.set_dimensions(4, 4);

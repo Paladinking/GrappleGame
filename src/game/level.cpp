@@ -8,6 +8,7 @@
 #include "util/exceptions.h"
 #include "globals.h"
 
+constexpr int TILE_SIZE = 8;
 
 void LevelData::load_from_file(const std::string& path) {
 	FileReader reader = FileReader(path, true);
@@ -49,8 +50,10 @@ void Level::set_window_size(const int win_width, const int win_height) {
 void Level::load_from_file(const std::string& path, const std::string& img_path) {
 	LevelData level_data;
 	level_data.load_from_file(path);
-	
-	if (level_data.width != window_width / TILE_SIZE || level_data.height % (window_width / TILE_SIZE) != 0) {
+
+	const int tile_size = TILE_SIZE;
+	this->tile_size = TILE_SIZE;
+	if (level_data.width != window_width / tile_size || level_data.height % (window_width / tile_size) != 0) {
 		throw file_exception("Invalid level file");
 	}
 	
@@ -60,7 +63,7 @@ void Level::load_from_file(const std::string& path, const std::string& img_path)
 		throw image_load_exception(std::string(IMG_GetError()));
 	}
 
-	int visible_screens = level_data.height / (window_height / TILE_SIZE);
+	int visible_screens = level_data.height / (window_height / tile_size);
 	
 	std::unique_ptr<std::unique_ptr<SDL_Surface, SurfaceDeleter>[]> surfaces = 
 		std::make_unique<std::unique_ptr<SDL_Surface, SurfaceDeleter>[]>(visible_screens);
@@ -96,12 +99,12 @@ void Level::load_from_file(const std::string& path, const std::string& img_path)
 		};
 		
 		SDL_Rect dest = {
-			(i % static_cast<int>(level_data.width)) * TILE_SIZE,
-			((i / static_cast<int>(level_data.width)) * TILE_SIZE) % window_height,
-			TILE_SIZE, TILE_SIZE
+			(i % static_cast<int>(level_data.width)) * tile_size,
+			((i / static_cast<int>(level_data.width)) * tile_size) % window_height,
+			tile_size, tile_size
 		};
 
-		const int surface_index = ((i / level_data.width)) / (window_height / TILE_SIZE);
+		const int surface_index = ((i / level_data.width)) / (window_height / tile_size);
 
 		SDL_BlitScaled(tiles.get(), &source, surfaces[surface_index].get(), &dest);
 	}
@@ -111,9 +114,9 @@ void Level::load_from_file(const std::string& path, const std::string& img_path)
 		SDL_Texture* texture = SDL_CreateTextureFromSurface(gRenderer, surfaces[i].get());
 		level_textures.emplace_back(texture, window_width, window_height);
 	}
-	
-	
-	tile_size = TILE_SIZE;
+
+
+
 	this->width = level_data.width;
 	this->height = level_data.height;
 	create_corners();
