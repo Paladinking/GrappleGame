@@ -34,3 +34,18 @@ State:
 	
 	data:
 		mouseX, mouseY
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+Jag vill fucking använda mig av nativefiledialog för att be användaren välja en fil i level_makern.
+Men, den för windows använder sig den av Common Item Dialog för att öppna en fil-öppningsdialog.
+För att den skala ordentligt med aktuell DPI måste tråden som öppnar dialogen var DPI-aware. 
+SDL vill dock inte vara DPI-aware, då blir fönstret väldigt litet. Men DPI-awareness kan bara sättas
+på en thread-nivå. Öppna dialogen i en separat tråd? Ändra DPI-awereness fram och sedan tillbaka?
