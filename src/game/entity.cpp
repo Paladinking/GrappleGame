@@ -1,9 +1,8 @@
 #include "entity.h"
 #include "engine/engine.h"
-#include <iostream>
 #include "util/geometry.h"
 
-constexpr double MAX_GRAVITY_VEL = 700.0;
+//constexpr double MAX_GRAVITY_VEL = 700.0;
 constexpr double GRAVITY_ACCELERATION = 3000.0;
 constexpr double FRICTION_FACTOR = 700.0;
 constexpr double AIR_RES_FACTOR = 0.004;
@@ -148,8 +147,7 @@ void Player::render(const int cameraY)
 	}
 
 	grapple_hook.render(static_cast<int>(hook->x) - 2, static_cast<int>(hook->y - cameraY) - 2);
-	
-	
+
 }
 
 
@@ -166,9 +164,7 @@ void Player::tick(const double delta, Level &level)
 			acc.x += factor > -vel.x ? -vel.x : FRICTION_FACTOR;
 		}
 	}
-	if (vel.y < MAX_GRAVITY_VEL) {
-		acc.y += GRAVITY_ACCELERATION;
-	}
+	acc.y += GRAVITY_ACCELERATION;
 	acc.x -= vel.x * std::abs(vel.x) * AIR_RES_FACTOR;
 	acc.y -= vel.y * std::abs(vel.y) * AIR_RES_FACTOR;
 	
@@ -201,20 +197,16 @@ void Player::tick(const double delta, Level &level)
 		if (len >= grapple_max_len) {	
 			double angle = get_angle(line_vector.x, line_vector.y, to_move.x, to_move.y);
 			if (angle > PI_HALF) {
-				double rotated_x = -line_vector.y, rotated_y = line_vector.x;
-				double to_move_scalar = (rotated_x * to_move.x + rotated_y * to_move.y) /
+				const double rotated_x = -line_vector.y, rotated_y = line_vector.x;
+				const double vel_scalar = (rotated_x * vel.x + rotated_y * vel.y) /
 						(rotated_x * rotated_x + rotated_y * rotated_y);
-				double vel_scalar = (rotated_x * vel.x + rotated_y * vel.y) / (rotated_x * rotated_x + rotated_y * rotated_y);
-
-				Vector2D new_to_move = {to_move_scalar * rotated_x, to_move_scalar * rotated_y};
 				vel.x = vel_scalar * rotated_x;
 				vel.y = vel_scalar * rotated_y;
 				const double desired_length = grapple_max_len - grapple_length + prev_len;
 
 				to_move.x = -(center_point->x + (new_line_vector.x / new_len) * desired_length - anchor->x);
 				to_move.y = -(center_point->y + (new_line_vector.y / new_len) * desired_length - anchor->y);
-
-			} 
+			}
 		}
 	}
 
