@@ -75,13 +75,9 @@ int main(int argc, char* args[])
 			} 
 		}
 	}
-	
-	try {
-		load_globals();
-	} catch (base_exception &e) {
-		std::cout << e.msg << '\n' << "Using default globals" << std::endl;
-	}
-	
+
+	load_globals();
+
 	try {
 		TextBox::init(ASSETS_ROOT + "font/OpenSans-Bold.ttf");
 	} catch (const base_exception &e) {

@@ -37,7 +37,6 @@ class ClimbGame : public State {
 		int visible_tiles_x, visible_tiles_y;
 
 		Level level;
-		Texture tilemapTexture;
 		
 		std::shared_ptr<Player> player;
 		

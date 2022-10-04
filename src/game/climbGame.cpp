@@ -64,28 +64,10 @@ void ClimbGame::render() {
 	SDL_SetRenderDrawColor(gRenderer, 0xFF, 0xFF, 0xFF, 0xFF);
 	SDL_RenderClear(gRenderer);
 	int camera_y_tile = (static_cast<int>(camera_y)) / level.get_tilesize();
-	//tilemapTexture.render(0, 0, 0, camera_y, window_width, window_height);
 	level.render(static_cast<int>(camera_y));
-	//render_tilemap();
 	player->render(static_cast<int>(camera_y));
 	
 	SDL_RenderPresent(gRenderer);
-}
-
-void ClimbGame::render_tilemap() {
-	const int tile_size = level.get_tilesize();
-	int camera_y_tile = static_cast<int>(camera_y) / tile_size;
-	for (int x = 0; x < visible_tiles_x; x++) {
-		for (int y = camera_y_tile - 1; y < camera_y_tile + visible_tiles_y + 1; y++) {
-			if (level.is_blocked(x, y)) {
-				SDL_SetRenderDrawColor( gRenderer, 0x00, 0x00, 0x00, 0xFF );
-			} else {
-				SDL_SetRenderDrawColor( gRenderer, 0xFF, 0xFF, 0xFF, 0xFF );
-			}
-			SDL_Rect fillRect = {x * tile_size, y * tile_size - static_cast<int>(camera_y), tile_size, tile_size};
-			SDL_RenderFillRect( gRenderer, &fillRect );
-		}
-	}
 }
 
 void ClimbGame::init() {
@@ -104,10 +86,7 @@ void ClimbGame::init() {
 	camera_y_min = 0;
 	if (camera_y < camera_y_min) camera_y = camera_y_min;
 	if (camera_y > camera_y_max) camera_y = camera_y_max;
-	
-	tilemapTexture.load_from_file("assets/mapImage.png", level.get_width() * tile_size, level.get_height() * tile_size);
-	tilemapTexture.set_dimensions(window_width, window_height);
-	
+
 	Player* p = new Player();
 	
 	player.reset(p);

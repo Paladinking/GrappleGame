@@ -20,24 +20,28 @@ std::string LEVELS_FILE = "levels.json";
 #define SET_IF_EXISTS(obj, T, S) if (obj.has_key_of_type<T>(#S)) S = obj.get<T>(#S)
 
 void load_globals() {
-	JsonObject obj = json::read_from_file(GLOBALS_PATH);
-
-	SET_IF_EXISTS(obj, int, SCREEN_WIDTH);
-	SET_IF_EXISTS(obj, int, SCREEN_HEIGHT);
-
-	SET_IF_EXISTS(obj, bool, VERBOSE);
-
-	SET_IF_EXISTS(obj, std::string, ASSETS_ROOT);
-	SET_IF_EXISTS(obj, std::string, PLAYER_IMG);
-	SET_IF_EXISTS(obj, std::string, MAP_IMG);
-	SET_IF_EXISTS(obj, std::string, HOOK_IMG);
-	SET_IF_EXISTS(obj, std::string, CONFIG_ROOT);
-	SET_IF_EXISTS(obj, std::string, LEVELS_ROOT);
-	SET_IF_EXISTS(obj, std::string, OPTION_FILE);
-	SET_IF_EXISTS(obj, std::string, LEVELS_FILE);
+	try {
+		JsonObject obj = json::read_from_file(GLOBALS_PATH);
+		SET_IF_EXISTS(obj, int, SCREEN_WIDTH);
+		SET_IF_EXISTS(obj, int, SCREEN_HEIGHT);
+		SET_IF_EXISTS(obj, bool, VERBOSE);
+		SET_IF_EXISTS(obj, std::string, ASSETS_ROOT);
+		SET_IF_EXISTS(obj, std::string, PLAYER_IMG);
+		SET_IF_EXISTS(obj, std::string, MAP_IMG);
+		SET_IF_EXISTS(obj, std::string, HOOK_IMG);
+		SET_IF_EXISTS(obj, std::string, CONFIG_ROOT);
+		SET_IF_EXISTS(obj, std::string, LEVELS_ROOT);
+		SET_IF_EXISTS(obj, std::string, OPTION_FILE);
+		SET_IF_EXISTS(obj, std::string, LEVELS_FILE);
+	} catch(const base_exception& e) {
+		std::cout << e.msg << '\n' << "Using default globals" << std::endl;
+	}
+	ASSETS_ROOT = PROJECT_ROOT + ASSETS_ROOT;
+	CONFIG_ROOT = PROJECT_ROOT + CONFIG_ROOT;
+	LEVELS_ROOT = PROJECT_ROOT + LEVELS_ROOT;
 
 	if (!VERBOSE) return;
-	
+
 	std::cout << "SCREEN_WIDTH: " 			<< SCREEN_WIDTH << '\n';
 	std::cout << "SCREEN_HEIGHT: " 			<< SCREEN_HEIGHT << '\n';
 	std::cout << "ASSETS_ROOT: " 			<< ASSETS_ROOT << '\n';

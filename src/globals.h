@@ -3,7 +3,12 @@
 #include <SDL.h>
 #include <string>
 
-const std::string GLOBALS_PATH = "globals.json";
+#ifdef ROOT_BUILD
+const std::string PROJECT_ROOT = "./";
+#else
+const std::string PROJECT_ROOT = "../../";
+#endif
+const std::string GLOBALS_PATH = PROJECT_ROOT + "globals.json";
 
 //Screen dimension constants
 extern int SCREEN_WIDTH;

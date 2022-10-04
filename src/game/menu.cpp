@@ -38,6 +38,7 @@ void MainMenu::button_press(const int btn) {
 
 void OptionsMenu::init() {
 	Menu::init();
+
 	const JsonObject& bindings = config::get_bindings();
 
 	camera_y = 0;
