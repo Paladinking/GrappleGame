@@ -26,12 +26,13 @@ void ClimbGame::tick(const Uint64 delta, StateStatus& res) {
 	}
 	const Vector2D &pos = player->get_position();
 	double camera_y_delta = pos.y - camera_y;
+
 	if (camera_y_delta < CAMERA_PAN_REGION) {
-		camera_y -= CAMERA_SPEED * dDelta;
+		camera_y -= std::min(CAMERA_SPEED * dDelta, CAMERA_PAN_REGION - camera_y_delta);
 		if (camera_y < camera_y_min) camera_y = camera_y_min;
 	}
 	else if (camera_y_delta > window_height - CAMERA_PAN_REGION) {
-		camera_y += CAMERA_SPEED * dDelta;
+		camera_y += std::min(CAMERA_SPEED * dDelta, camera_y_delta - window_height + CAMERA_PAN_REGION);
 		if (camera_y > camera_y_max) camera_y = camera_y_max;
 	}
 }
@@ -40,11 +41,11 @@ void ClimbGame::handle_input(double delta, StateStatus& res) {
 	const Uint8* currentKeyStates = SDL_GetKeyboardState(NULL);
 	const Vector2D &vel = player->get_velocity(); 
 	if (left_input->is_pressed(currentKeyStates, mouseButton) && vel.x > -MAX_MOVEMENT_VEL) {
-		player->add_velocity(-MOVEMENT_ACCELERATION * delta, 0);
+		player->add_acceleration(-MOVEMENT_ACCELERATION, 0);
 	}
 	if (right_input->is_pressed(currentKeyStates, mouseButton) && vel.x < MAX_MOVEMENT_VEL) 
 	{
-		player->add_velocity(MOVEMENT_ACCELERATION * delta, 0);
+		player->add_acceleration(MOVEMENT_ACCELERATION, 0);
 	}
 
 

@@ -42,6 +42,7 @@ void Game::create() {
 		throw SDL_exception("Renderer could not be created, " + std::string(SDL_GetError()));
 	}
 	
+	SDL_RenderSetVSync(gRenderer, 1);
 	SDL_SetRenderDrawBlendMode(gRenderer, SDL_BLENDMODE_BLEND);
 	SDL_SetRenderDrawColor(gRenderer, 0xFF, 0xFF, 0xFF, 0xFF);
 	

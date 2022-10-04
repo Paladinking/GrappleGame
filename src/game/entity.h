@@ -37,6 +37,11 @@ class Entity {
 		virtual void render(const int cameraY);
 		
 		/**
+		 * Adds (dx, dy) to the acceleration of this entity.
+		 */
+		void add_acceleration(const double dx, const double dy);
+		
+		/**
 		 * Adds (dx, dy) to the velocity of this entity.
 		 */
 		void add_velocity(const double dx, const double dy);
@@ -69,6 +74,7 @@ class Entity {
 		
 		Vector2D pos;
 		Vector2D vel;
+		Vector2D acc;
 		
 		int width, height;
 	

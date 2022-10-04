@@ -1,5 +1,6 @@
 #include "entity.h"
 #include "engine/engine.h"
+#include <iostream>
 #include "util/geometry.h"
 
 constexpr double MAX_GRAVITY_VEL = 700.0;
@@ -23,7 +24,11 @@ void Entity::load_texture(std::string texture_path)
 void Entity::tick(const double delta, Level& level) 
 {
 	int tilesize = level.get_tilesize();
+	vel.x += acc.x * delta;
+	vel.y += acc.y * delta;
 	Vector2D to_move = {vel.x * delta, vel.y * delta};
+	acc.x = 0.0;
+	acc.y = 0.0;
 	double len = to_move.length();
 	if (len > 0) 
 	{
@@ -73,8 +78,13 @@ void Entity::try_move(const double dx, const double dy, int tilesize, const Leve
 	pos.y = new_y;
 }
 
-void Entity::add_velocity(const double dx, const double dy) 
+void Entity::add_acceleration(const double dx, const double dy) 
 {
+	acc.x += dx;
+	acc.y += dy;
+}
+
+void Entity::add_velocity(const double dx, const double dy) {
 	vel.x += dx;
 	vel.y += dy;
 }
@@ -138,7 +148,10 @@ void Player::render(const int cameraY)
 	}
 
 	grapple_hook.render(static_cast<int>(hook->x) - 2, static_cast<int>(hook->y - cameraY) - 2);
+	
+	
 }
+
 
 
 void Player::tick(const double delta, Level &level)
@@ -148,49 +161,63 @@ void Player::tick(const double delta, Level &level)
 	if (is_on_ground) {
 		double factor = delta * FRICTION_FACTOR;
 		if (vel.x > 0) {
-			vel.x -= factor > vel.x ? vel.x : factor;
+			acc.x += factor > vel.x ? -vel.x : -FRICTION_FACTOR;
 		} else {
-			vel.x += factor > -vel.x ? -vel.x : factor;
+			acc.x += factor > -vel.x ? -vel.x : FRICTION_FACTOR;
 		}
-		
-	} else if (vel.y < MAX_GRAVITY_VEL) {
-		vel.y += GRAVITY_ACCELERATION * delta;
 	}
-
-	vel.x -= vel.x * std::abs(vel.x) * AIR_RES_FACTOR * delta;
-	vel.y -= vel.y * std::abs(vel.y) * AIR_RES_FACTOR * delta;
+	if (vel.y < MAX_GRAVITY_VEL) {
+		acc.y += GRAVITY_ACCELERATION;
+	}
+	acc.x -= vel.x * std::abs(vel.x) * AIR_RES_FACTOR;
+	acc.y -= vel.y * std::abs(vel.y) * AIR_RES_FACTOR;
 	
-	Vector2D to_move = {vel.x * delta, vel.y * delta};
-	
-	if (grappling_mode == PLACED) {
+	if (grappling_mode == PLACED && pull) {
 		const std::shared_ptr<Corner> &anchor = grapple_points[grapple_points.size() - 2].corner;
 		Vector2D line_vector = {anchor->x - center_point->x, anchor->y - center_point->y};
-		if (pull) {
-			double line_vec_len = line_vector.length();
-			vel.x += line_vector.x / line_vec_len * GRAPPLE_PULL * delta;
-			vel.y += line_vector.y / line_vec_len * GRAPPLE_PULL * delta;
-			to_move.x = vel.x * delta;
-			to_move.y = vel.y * delta;
-		}
-		if(grapple_length > grapple_max_len && (vel.x != 0 || vel.y != 0)) {
-			double angle = get_angle(line_vector.x, line_vector.y, vel.x, vel.y);
+		double line_vec_len = line_vector.length();
+		acc.x += line_vector.x / line_vec_len * GRAPPLE_PULL;
+		acc.y += line_vector.y / line_vec_len * GRAPPLE_PULL;
+	}
+
+
+	vel.x += delta * acc.x;
+	vel.y += delta * acc.y;
+	acc.x = 0.0;
+	acc.y = 0.0;
+
+	const double delta_sq = delta * delta;
+
+	Vector2D to_move = {vel.x * delta + 0.5 * acc.x * delta_sq, vel.y * delta + 0.5 * acc.y * delta_sq};
+	
+	if (grappling_mode == PLACED && (to_move.x != 0 || to_move.y != 0)) {
+		const std::shared_ptr<Corner> &anchor = grapple_points[grapple_points.size() - 2].corner;
+		Vector2D line_vector = {anchor->x - center_point->x, anchor->y - center_point->y};
+		Vector2D new_line_vector = {anchor->x - (center_point->x + to_move.x), anchor->y - (center_point->y + to_move.y)};
+		const double prev_len = line_vector.length();
+		const double new_len = new_line_vector.length();
+		const double len = grapple_length - prev_len + new_len;
+
+		if (len >= grapple_max_len) {	
+			double angle = get_angle(line_vector.x, line_vector.y, to_move.x, to_move.y);
 			if (angle > PI_HALF) {
 				double rotated_x = -line_vector.y, rotated_y = line_vector.x;
-				double proj_scalar = (rotated_x * vel.x + rotated_y * vel.y)
-							/ (rotated_x * rotated_x + rotated_y * rotated_y);
-				vel.x = proj_scalar * rotated_x;
-				vel.y = proj_scalar * rotated_y;
-				
-				double prev_len = line_vector.length();
-				line_vector.x = anchor->x - (center_point->x + vel.x * delta);
-				line_vector.y = anchor->y - (center_point->y + vel.y * delta);
-				double new_len = line_vector.length();
-	
-				to_move.x = -(center_point->x + (line_vector.x / new_len) * (grapple_max_len - (grapple_length - prev_len)) - anchor->x);
-				to_move.y = -(center_point->y + (line_vector.y / new_len) * (grapple_max_len - (grapple_length - prev_len)) - anchor->y);
+				double to_move_scalar = (rotated_x * to_move.x + rotated_y * to_move.y) /
+						(rotated_x * rotated_x + rotated_y * rotated_y);
+				double vel_scalar = (rotated_x * vel.x + rotated_y * vel.y) / (rotated_x * rotated_x + rotated_y * rotated_y);
+
+				Vector2D new_to_move = {to_move_scalar * rotated_x, to_move_scalar * rotated_y};
+				vel.x = vel_scalar * rotated_x;
+				vel.y = vel_scalar * rotated_y;
+				const double desired_length = grapple_max_len - grapple_length + prev_len;
+
+				to_move.x = -(center_point->x + (new_line_vector.x / new_len) * desired_length - anchor->x);
+				to_move.y = -(center_point->y + (new_line_vector.y / new_len) * desired_length - anchor->y);
+
 			} 
 		}
 	}
+
 
 	int tilesize = level.get_tilesize();
 	double len = to_move.length();
