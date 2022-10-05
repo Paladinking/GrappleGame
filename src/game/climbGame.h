@@ -2,6 +2,7 @@
 #define BALL_GAME_00_H
 #include <vector>
 #include <memory>
+#include <unordered_map>
 #include "util/utilities.h"
 #include "engine/game.h"
 #include "engine/input.h"
@@ -45,6 +46,7 @@ class ClimbGame : public State {
 		bool do_grapple = false;
 		
 		std::vector<std::shared_ptr<Entity>> entities;
+		std::unique_ptr<EntityTemplate> player_template;
 };
 
 

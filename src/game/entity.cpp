@@ -1,6 +1,7 @@
 #include "entity.h"
 #include "engine/engine.h"
 #include "util/geometry.h"
+#include "config.h"
 
 //constexpr double MAX_GRAVITY_VEL = 700.0;
 constexpr double GRAVITY_ACCELERATION = 3000.0;
@@ -12,12 +13,55 @@ constexpr double GRAPPLE_SPEED = 1300.0;
 constexpr double GRAPPLE_PULL = 5000.0;
 constexpr double GRAPPLE_RELEASE = 200.0;
 
+void texture_form_template(Texture& t, const JsonObject& text) {
+	if (
+		!text.has_key_of_type<std::string>("Path") ||
+		!text.has_key_of_type<int>("Width") || 
+		!text.has_key_of_type<int>("Height")
+	) {
+		throw json_exception("Bad entity template texture");
+	}
+	t.load_from_file(config::get_asset_path(text.get<std::string>("Path")));
+	t.set_dimensions(
+		text.get<int>("Width"),
+		text.get<int>("Height")
+	);
+}
+
+EntityTemplate* EntityTemplate::from_json(const JsonObject& obj) {
+	if (
+		!obj.has_key_of_type<std::string>("Type") || 
+		!obj.has_key_of_type<JsonObject>("Texture") || 
+		!obj.has_key_of_type<int>("Width") || 
+		!obj.has_key_of_type<int>("Height")
+	) {
+		throw json_exception("Bad entity template");
+	}
+	const JsonObject& text = obj.get<JsonObject>("Texture");
+	int width = obj.get<int>("Width");
+	int height = obj.get<int>("Height");
+
+	const std::string& type = obj.get<std::string>("Type");
+	if (type == "Player") {
+		if (!obj.has_key_of_type<JsonObject>("HookTexture")) throw json_exception("Bad player template");
+		Texture grappleTexture, texture;
+		texture_form_template(texture, text);
+		texture_form_template(grappleTexture, obj.get<JsonObject>("HookTexture"));
+		return new PlayerTemplate(width, height, std::move(texture), std::move(grappleTexture));
+	} else {
+		Texture texture;
+		texture_form_template(texture, text);
+		return new EntityTemplate(width, height, std::move(texture));
+	}
+}
+
 Entity::~Entity() {}
 
-void Entity::load_texture(std::string texture_path) 
-{
-	texture.load_from_file(texture_path.c_str());
-	texture.set_dimensions(width, height);
+
+void Entity::init(const EntityTemplate& entity_template) {
+	width = entity_template.w;
+	height = entity_template.h;
+	texture = &entity_template.texture;
 }
 
 void Entity::tick(const double delta, Level& level) 
@@ -49,7 +93,7 @@ void Entity::tick(const double delta, Level& level)
 void Entity::render(const int cameraY) 
 {
 	int x = static_cast<int>(pos.x), y = static_cast<int>(pos.y - cameraY);
-	texture.render(x, y);
+	texture->render(x, y);
 }
 
 
@@ -88,6 +132,11 @@ void Entity::add_velocity(const double dx, const double dy) {
 	vel.y += dy;
 }
 
+void Entity::set_position(const double x, const double y) {
+	pos.x = x;
+	pos.y = y;
+}
+
 const Vector2D &Entity::get_velocity() const 
 {
 	return vel;
@@ -114,18 +163,13 @@ bool Entity::on_ground(const Level &level) const
 
 Player::~Player() {}
 
-void Player::init(const double x, const double y, const int w, const int h) 
-{
-	pos.x = x;
-	pos.y = y;
+void Player::init(const EntityTemplate& entity_template) {
+	Entity::init(entity_template);
+	const PlayerTemplate& pt = static_cast<const PlayerTemplate&>(entity_template);
 	vel.x = 0;
 	vel.y = 0;
-	width = w;
-	height = h;
 	grapple_max_len = GRAPPLE_LENGTH;
-	load_texture(ASSETS_ROOT + PLAYER_IMG);
-	grapple_hook.load_from_file(ASSETS_ROOT + HOOK_IMG);
-	grapple_hook.set_dimensions(4, 4);
+	grapple_hook = &pt.grappleTexture;
 }
 
 void Player::render(const int cameraY) 
@@ -146,8 +190,7 @@ void Player::render(const int cameraY)
 		prev_pos = *(it->corner);
 	}
 
-	grapple_hook.render(static_cast<int>(hook->x) - 2, static_cast<int>(hook->y - cameraY) - 2);
-
+	grapple_hook->render(static_cast<int>(hook->x) - 2, static_cast<int>(hook->y - cameraY) - 2);
 }
 
 

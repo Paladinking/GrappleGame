@@ -3,12 +3,12 @@
 #include <SDL.h>
 #include <SDL_image.h>
 #include <SDL_ttf.h>
-#include "globals.h"
 #include "util/exceptions.h"
 #include "engine/game.h"
 #include "game/climbGame.h"
 #include "game/levelMaker.h"
 #include "game/menu.h"
+#include "game/config.h"
 
 /**
  * Frees still used global resources and quits SDL and SDL_image.
@@ -76,10 +76,10 @@ int main(int argc, char* args[])
 		}
 	}
 
-	load_globals();
+	config::init();
 
 	try {
-		TextBox::init(ASSETS_ROOT + "font/OpenSans-Bold.ttf");
+		TextBox::init(config::get_asset_path("font/OpenSans-Bold.ttf"));
 	} catch (const base_exception &e) {
 		std::cout << e.msg << std::endl;
 		exit(-3);

@@ -2,6 +2,7 @@
 #define CONFIG_00_H
 #include "file/json.h"
 #include "globals.h"
+#include "engine/texture.h"
 #include <vector>
 #include <array>
 
@@ -63,6 +64,12 @@ namespace config {
 	void write_options();
 	
 	void reset_bindings();
+	
+	void init();
+	
+	const JsonObject& get_template(const std::string& name);
+	
+	std::string get_asset_path(const std::string& path);
 }
 
 

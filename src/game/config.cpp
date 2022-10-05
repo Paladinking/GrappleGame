@@ -2,6 +2,64 @@
 #include "file/fileIO.h"
 #include <iostream>
 
+#ifdef ROOT_BUILD
+const std::string PROJECT_ROOT = "./";
+#else
+const std::string PROJECT_ROOT = "../../";
+#endif
+const std::string CONFIG_FILE = PROJECT_ROOT + "config.json";
+
+bool VERBOSE = false;
+
+std::string ASSETS_ROOT = PROJECT_ROOT + "assets/";
+std::string CONFIG_ROOT = PROJECT_ROOT + "config/";
+std::string LEVELS_ROOT = PROJECT_ROOT + ASSETS_ROOT + "levels/";
+
+std::string LEVELS_FILE = "levels.json";
+std::string OPTION_FILE = "options.json";
+std::string STATIC_TEMPLATES_FILE = "static_templates.json";
+
+void config::init() {
+	JsonObject conf;
+	try {
+		conf = json::read_from_file(CONFIG_FILE);
+	} catch(const base_exception& e) {
+		std::cout << e.msg << std::endl;
+		std::cout << "Using default configs" << std::endl;
+	}
+
+	if (conf.has_key_of_type<bool>("VERBOSE")) {
+		VERBOSE = conf.get<bool>("VERBOSE");
+	}
+
+	if (conf.has_key_of_type<std::string>("ASSETS_ROOT")) {
+		ASSETS_ROOT = PROJECT_ROOT + conf.get<std::string>("ASSETS_ROOT");
+	}
+	if (conf.has_key_of_type<std::string>("CONFIG_ROOT")) {
+		CONFIG_ROOT = PROJECT_ROOT + conf.get<std::string>("CONFIG_ROOT");
+	}
+	if (conf.has_key_of_type<std::string>("LEVELS_ROOT")) {
+		LEVELS_ROOT = PROJECT_ROOT + conf.get<std::string>("LEVELS_ROOT");
+	}
+	if (conf.has_key_of_type<std::string>("LEVELS_FILE")) {
+		LEVELS_FILE = conf.get<std::string>("LEVELS_FILE");
+	}
+	if (conf.has_key_of_type<std::string>("OPTION_FILE")) {
+		OPTION_FILE = conf.get<std::string>("OPTION_FILE");
+	}
+	if (conf.has_key_of_type<std::string>("STATIC_TEMPLATES_FILE")) {
+		STATIC_TEMPLATES_FILE = conf.get<std::string>("STATIC_TEMPLATES_FILE");
+	}
+	
+	if (!VERBOSE) return;
+	std::cout << "ASSETS_ROOT: " << ASSETS_ROOT << std::endl;
+	std::cout << "CONFIG_ROOT: " << CONFIG_ROOT << std::endl;
+	std::cout << "LEVELS_ROOT: " << LEVELS_ROOT << std::endl;
+	std::cout << "LEVELS_FILE: " << LEVELS_FILE << std::endl;
+	std::cout << "OPTION_FILE: " << OPTION_FILE << std::endl;
+	std::cout << "STATIC_TEMPLATES_FILE: " << STATIC_TEMPLATES_FILE << std::endl;
+}
+
 bool options_loaded = false;
 JsonObject options;
 
@@ -90,4 +148,24 @@ std::pair<std::string, std::string> config::get_level(const int index) {
 	}
 	const JsonObject& lvl = levels.get<JsonList>("LEVELS").get<JsonObject>(index);
 	return {LEVELS_ROOT + lvl.get<std::string>("file"), ASSETS_ROOT + lvl.get<std::string>("tiles")};
+}
+
+
+bool static_templates_loaded;
+// Always loaded templates
+JsonObject static_templates;
+const JsonObject& config::get_template(const std::string& name) {
+	if (!static_templates_loaded) {
+		if (VERBOSE) std::cout << "Loading " << CONFIG_ROOT << STATIC_TEMPLATES_FILE << std::endl;
+		static_templates = json::read_from_file(CONFIG_ROOT + STATIC_TEMPLATES_FILE);
+		if(!static_templates.has_key_of_type<JsonObject>("Player")) {
+			throw file_exception("Player template missing");
+		}
+		static_templates_loaded = true;
+	}
+	return static_templates.get<JsonObject>(name);
+}
+
+std::string config::get_asset_path(const std::string& path) {
+	return ASSETS_ROOT + path;
 }

@@ -90,10 +90,15 @@ void ClimbGame::init() {
 	Player* p = new Player();
 	
 	player.reset(p);
-	player->init(PLAYER_START_X, PLAYER_START_Y, PLAYER_FULL_WIDTH, PLAYER_FULL_HEIGHT);
-	
+
+	player_template.reset(EntityTemplate::from_json(config::get_template("Player")));
+	player->init(*player_template);
+
+	player->set_position(PLAYER_START_X, PLAYER_START_Y);
 	entities.push_back(player);
 }
+
+
 
 void ClimbGame::create_inputs() {
 	const JsonObject& controls = config::get_bindings(bindings::CLIMBGAME.key);

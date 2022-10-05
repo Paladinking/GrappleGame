@@ -3,11 +3,31 @@
 #include <string>
 #include <vector>
 #include <memory>
+#include <utility>
 #include <stdio.h>
 #include "util/utilities.h"
 #include "engine/texture.h"
 #include "level.h"
 #include "globals.h"
+#include "file/json.h"
+
+class EntityTemplate {
+	public:
+		EntityTemplate(const int w, const int h, Texture&& t) : w(w), h(h), texture(std::move(t)) {};
+	
+		const int w;
+		const int h;
+		const Texture texture;
+		
+		static EntityTemplate* from_json(const JsonObject& obj);
+};
+
+class PlayerTemplate : public EntityTemplate {
+	public:
+		PlayerTemplate(const int w, const int h, Texture&& t, Texture&& gt) : EntityTemplate(w, h, std::move(t)), grappleTexture(std::move(gt)) {};
+
+		const Texture grappleTexture;
+};
 
 class Entity {
 	public:
@@ -18,11 +38,11 @@ class Entity {
 		 * Destructor for freeing texture.
 		 */
 		virtual ~Entity();
-		
+
 		/**
-		 * Loads the texture of this entity from a file.
+		 * Initializes this entity based on a template.
 		 */
-		void load_texture(std::string texture_path);
+		virtual void init(const EntityTemplate& entity_template);
 		
 		/**
 		 * Tick for the entity called every frame. The default implementation moves the entity by
@@ -45,6 +65,11 @@ class Entity {
 		 * Adds (dx, dy) to the velocity of this entity.
 		 */
 		void add_velocity(const double dx, const double dy);
+		
+		/**
+		 * Sets the position of this entity to (x, y).
+		 */
+		void set_position(const double x, const double y);
 		
 		/**
 		 * Returns true if this entity is standing on ground.
@@ -79,7 +104,8 @@ class Entity {
 		int width, height;
 	
 	private:
-		Texture texture;
+		// Textures are owned by the game, not the entities.
+		const Texture* texture;
 		
 	
 	
@@ -97,7 +123,7 @@ class Player : public Entity {
 		virtual ~Player();
 		Player() {};
 		
-		void init(const double x, const double y, const int w, const int h);
+		virtual void init(const EntityTemplate& entity_template) override;
 		
 		virtual void render(const int cameraY) override;
 		
@@ -133,7 +159,7 @@ class Player : public Entity {
 			UNUSED, TRAVELING, PLACED, PULLING, RETURNING
 		};
 		
-		Texture grapple_hook;
+		const Texture* grapple_hook;
 		
 		GrapplingMode grappling_mode = UNUSED;
 
