@@ -13,8 +13,6 @@ get_target_property(SDL2_INCLUDE_DIRS SDL2::SDL2 INTERFACE_INCLUDE_DIRECTORIES)
 get_target_property(SDL2_image_INCLUDE_DIRS SDL2_image::SDL2_image INTERFACE_INCLUDE_DIRECTORIES)
 get_target_property(SDL2_ttf_INCLUDE_DIRS SDL2_ttf::SDL2_ttf INTERFACE_INCLUDE_DIRECTORIES)
 
-
-
 include_directories(${PROJECT_SOURCE_DIR}/src)
 include_directories(${SDL2_INCLUDE_DIRS})
 include_directories(${SDL2_image_INCLUDE_DIRS})
@@ -55,11 +53,7 @@ add_library(
 	${GAME_DIR}/menu.cpp	
 )
 
-message(STATIC ${SDL2_LIBRARIES})
-
-add_executable(main src/main.cpp src/globals.cpp)
-
-
+add_executable(main src/main.cpp)
 
 target_link_options(main PUBLIC /SUBSYSTEM:CONSOLE)
 target_link_options(main PUBLIC /ENTRY:WinMainCRTStartup)
@@ -73,15 +67,15 @@ target_link_libraries(main ${SDL2_LIBRARIES})
 target_link_libraries(main SDL2_image::SDL2_image)
 target_link_libraries(main SDL2_ttf::SDL2_ttf)
 
-add_custom_command ( TARGET main POST_BUILD
+add_custom_command (TARGET main POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_if_different
     $<TARGET_FILE:SDL2::SDL2> $<TARGET_FILE_DIR:main>
 )
-add_custom_command ( TARGET main POST_BUILD
+add_custom_command (TARGET main POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_if_different
     $<TARGET_FILE:SDL2_image::SDL2_image> $<TARGET_FILE_DIR:main>
 )
-add_custom_command ( TARGET main POST_BUILD
+add_custom_command (TARGET main POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_if_different
     $<TARGET_FILE:SDL2_ttf::SDL2_ttf> $<TARGET_FILE_DIR:main>
 )
