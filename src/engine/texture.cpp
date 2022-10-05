@@ -16,6 +16,7 @@ void Texture::load_from_file(std::string path) {
 }
 
 void Texture::load_from_file(std::string path, const int w, const int h) {
+	free();
 	SDL_Surface* surface = IMG_Load(path.c_str());
 	if (surface == NULL) {
 		throw image_load_exception(std::string(IMG_GetError()));
@@ -50,15 +51,12 @@ void Texture::free() {
 	}
 }
 
-void Texture::render(const int x, const int y) {
+void Texture::render(const int x, const int y) const {
 	SDL_Rect rect = {x, y, width, height};
 	SDL_RenderCopy(gRenderer, texture, NULL, &rect);
-	Uint32 format;
-	int acc, w, h;
-	SDL_QueryTexture(texture, &format, &acc, &w, &h);
 }
 
-void Texture::render(const int dest_x, const int dest_y, const int x, const int y, const int w, const int h) {
+void Texture::render(const int dest_x, const int dest_y, const int x, const int y, const int w, const int h) const {
 	SDL_Rect target = {dest_x, dest_y, width, height};
 	SDL_Rect source = {x, y, w, h};
 	SDL_RenderCopy(gRenderer, texture, &source, &target);

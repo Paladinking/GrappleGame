@@ -42,13 +42,13 @@ class Texture {
 		/**
 		 * Renders this texture at position (x, y) using the global gRenderer.
 		 */
-		void render(const int x, const int y);
+		void render(const int x, const int y) const;
 		
 		/**
 		 * Renders the rectangle (x, y, w, h) of this texture at position (dest_x, dest_y),
 		 * using the global gRenderer.
 		 */
-		void render(const int dest_x, const int dest_y, const int x, const int y, const int w, const int h);
+		void render(const int dest_x, const int dest_y, const int x, const int y, const int w, const int h) const;
 		
 		/**
 		 * Returns the width of this texture.
