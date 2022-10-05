@@ -9,5 +9,5 @@
 	"CONFIG_ROOT" : "config/",
 	"STATIC_TEMPLATES_FILE" : "static_templates.json",
 	"OPTION_FILE" : "options.json",
-	"LEVELS_FILE" : "levels.json" 
+	"LEVELS_FILE" : "levels.json"
 }

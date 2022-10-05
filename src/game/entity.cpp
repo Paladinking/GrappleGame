@@ -413,7 +413,7 @@ void Player::update_grapple(CornerList &allCorners, CornerList &corners, CornerL
 	// Index of moved point, direction to go in vector.
 	int mp_index = 0, dir = 1;
 	if (!first) {
-		mp_index = grapple_points.size() - 1;
+		mp_index = static_cast<int>(grapple_points.size()) - 1;
 		dir = -1;
 	}
 	std::shared_ptr<Corner> cur = grapple_points[mp_index].corner;

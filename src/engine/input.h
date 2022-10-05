@@ -58,7 +58,7 @@ class MouseHoldInput : public HoldInput {
 		MouseHoldInput(const Uint32 mouse_mask) : mouse_mask(mouse_mask) {}
 	
 		virtual bool is_pressed(const Uint8* keys, const Uint32 mouseButton) override {
-			return mouse_mask & mouseButton != 0;
+			return (mouse_mask & mouseButton) != 0;
 		}
 
 	private:

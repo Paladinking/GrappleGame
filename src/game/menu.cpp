@@ -83,7 +83,7 @@ void OptionsMenu::init() {
 		group_start += index;
 	}
 	
-	last_input_button = buttons.size() - 1;
+	last_input_button = static_cast<int>(buttons.size()) - 1;
 	buttons.emplace_back((window_width - 120) / 2, h_offset, 120, 60, "Reset", 25);
 	h_offset += 60 + MARGIN_Y;
 	

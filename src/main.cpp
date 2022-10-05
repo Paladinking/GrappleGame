@@ -68,7 +68,7 @@ int main(int argc, char* args[])
 	bool level_maker = false;
 
 	if (argc > 1) {
-		for (unsigned i = 1; i < argc; ++i) {
+		for (int i = 1; i < argc; ++i) {
 			if (strcmp(args[i], "level_maker") == 0 || strcmp(args[i], "--level_maker") == 0 ) {
 				level_maker = true;
 				break;

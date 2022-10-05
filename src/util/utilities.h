@@ -130,7 +130,7 @@ class TileMap {
 	public:
 		TileMap() {}
 
-		TileMap(const unsigned width, const unsigned height) : width(width), height(height) {} 
+		TileMap(const int width, const int height) : width(width), height(height) {} 
 
 		/**
 		 * Returns true if a tile contained in the pixel rectangle (x, y, w, h) contains a blocked tile.
@@ -228,16 +228,16 @@ class TileMap {
 			 return tile_size;
 		 }
 		 
-		 void set_tilesize(unsigned tilesize) {
+		 void set_tilesize(int tilesize) {
 			 tile_size = tilesize;
 		 }
 		 
 	protected:
 		std::unique_ptr<bool[]> map;
 		
-		unsigned width = 0, height = 0;
+		int width = 0, height = 0;
 		
-		unsigned tile_size = 1;
+		int tile_size = 1;
 		
 };
 

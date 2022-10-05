@@ -34,7 +34,7 @@ class FileReader {
 				throw file_exception("File exception: " + std::string(SDL_GetError()));
 			}
 			index = -1;
-			max = SDL_RWread(in, &buffer, sizeof(char), 256 * sizeof(char));
+			max = static_cast<long>(SDL_RWread(in, &buffer, sizeof(char), 256 * sizeof(char)));
 		}
 		
 		~FileReader() {
@@ -48,7 +48,7 @@ class FileReader {
 			++index;
 			if (index == max) {
 				index = 0;
-				max = SDL_RWread(in, &buffer, sizeof(char), 256 * sizeof(char));
+				max = static_cast<long>(SDL_RWread(in, &buffer, sizeof(char), 256 * sizeof(char)));
 				if (max == 0) return false;
 			} 
 			c = buffer[index];
@@ -85,9 +85,9 @@ class FileReader {
 		template<class T>
 		bool read_many(T* res, int nr) {
 			++index;
-			long pos = SDL_RWtell(in) - max + index;
+			long pos = static_cast<long>(SDL_RWtell(in)) - max + index;
 			SDL_RWseek(in, pos, RW_SEEK_SET);
-			long read = SDL_RWread(in, res, sizeof(T), nr);
+			long read = static_cast<long>(SDL_RWread(in, res, sizeof(T), nr));
 			index = -1;
 			max = 0;
 			return read == nr;
@@ -102,7 +102,7 @@ class FileReader {
 		bool read_string(char* &s) {
 			char c;
 			if (!read_next(c)) return false; // Read string only looks forwards.
-			int buf_len = 0;
+			long buf_len = 0;
 			char* buf = new char[buf_len];
 			char* null_pos;
 			do {
@@ -121,7 +121,7 @@ class FileReader {
 						return false;
 					}
 				} else {
-					int len = 1 + null_pos - (buffer + index);
+					long len = static_cast<long>(1 + null_pos - (buffer + index));
 					char* tmp = new char[buf_len + len];
 					memcpy(tmp, buf, buf_len);
 					memcpy(tmp + buf_len, buffer + index, len);
@@ -169,7 +169,7 @@ class FileReader {
 		 * Stores this position in pos for a future reset.
 		 */
 		void mark(long &pos) {
-			pos = SDL_RWtell(in) - max + index;
+			pos = static_cast<long>(SDL_RWtell(in) - max + index);
 		}
 
 		/**
@@ -186,7 +186,7 @@ class FileReader {
 		void reset(long &pos) {
 			SDL_RWseek(in, pos, RW_SEEK_SET);
 			index = 0;
-			max = SDL_RWread(in, &buffer, sizeof(char), 256 * sizeof(char));
+			max = static_cast<long>(SDL_RWread(in, &buffer, sizeof(char), 256 * sizeof(char)));
 		}
 
 		/**
@@ -199,7 +199,7 @@ class FileReader {
 			char *buf = new char[temp_mark];
 			long read_bytes = 0;
 			while (read_bytes < temp_mark) {
-				long r = SDL_RWread(in, buf + read_bytes, 1, temp_mark - read_bytes);
+				long r = static_cast<long>(SDL_RWread(in, buf + read_bytes, 1, temp_mark - read_bytes));
 				if (r == 0) {
 					throw file_exception("Could not read from file, " + std::string(SDL_GetError()));
 				}
@@ -246,12 +246,12 @@ class FileWriter {
 		}
 		
 		bool write(const std::string &s) {
-			long written = SDL_RWwrite(out, s.c_str(), 1, s.length());
+			size_t written = SDL_RWwrite(out, s.c_str(), 1, s.length());
 			return written == s.length();
 		}
 		
-		bool write(const char *s, long len) {
-			long written = SDL_RWwrite(out, s, 1, len + 1);
+		bool write(const char *s, size_t len) {
+			size_t written = SDL_RWwrite(out, s, 1, len + 1);
 			return written == len + 1;
 		}
 		

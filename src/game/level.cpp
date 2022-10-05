@@ -12,7 +12,6 @@ constexpr int TILE_SIZE = 8;
 
 void LevelData::load_from_file(const std::string& path) {
 	FileReader reader = FileReader(path, true);
-	char* img_path_cstr;
 	if (
 		!reader.read_next(width) ||
 		!reader.read_next(height) ||
@@ -75,7 +74,7 @@ void Level::load_from_file(const std::string& path, const std::string& img_path)
 	}
 	
 	map = std::make_unique<bool[]>(level_data.width * level_data.height);
-	for (int i = 0; i < level_data.width * level_data.height; ++i) {
+	for (int i = 0; static_cast<unsigned>(i) < level_data.width * level_data.height; ++i) {
 		Uint16 tile = level_data.data[i];
 		
 		int tile_index = (tile >> 8);
@@ -87,7 +86,7 @@ void Level::load_from_file(const std::string& path, const std::string& img_path)
 		if (tile_index == 0xFF) {
 			continue;
 		};
-		if (tile_index >= level_data.img_tilecount) {
+		if (tile_index >= static_cast<int>(level_data.img_tilecount)) {
 			throw file_exception("Invalid tile " + std::to_string(tile_index) + " in level file");
 		}
 		
@@ -117,8 +116,8 @@ void Level::load_from_file(const std::string& path, const std::string& img_path)
 
 
 
-	this->width = level_data.width;
-	this->height = level_data.height;
+	this->width = static_cast<int>(level_data.width);
+	this->height = static_cast<int>(level_data.height);
 	create_corners();
 }
 
