@@ -1,0 +1,13 @@
+{
+	"SCREEN_WIDTH" : 640,
+	"SCREEN_HEIGHT" : 640,
+
+	"VERBOSE" : true,
+
+	"ASSETS_ROOT" : "assets/",
+	"LEVELS_ROOT" : "assets/levels/",
+	"CONFIG_ROOT" : "config/",
+	"STATIC_TEMPLATES_FILE" : "static_templates.json",
+	"OPTION_FILE" : "options.json",
+	"LEVELS_FILE" : "levels.json" 
+}

@@ -1,0 +1,18 @@
+{
+	"Player" : {
+		"Type" : "Player",
+		"Texture" : {
+			"Path": "player.png",
+			"Width" : 24,
+			"Height" : 40
+		},
+		"Width" : 24,
+		"Height" : 40,
+		
+		"HookTexture" : {
+			"Path" : "hook.png",
+			"Width" : 4,
+			"Height": 4
+		}
+	}
+}
