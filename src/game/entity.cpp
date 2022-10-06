@@ -237,7 +237,11 @@ void Player::tick(const double delta, Level &level)
 		const double new_len = new_line_vector.length();
 		const double len = grapple_length - prev_len + new_len;
 
-		if (len >= grapple_max_len) {	
+		if (len >= grapple_max_len) {
+			// If after a movement, the length of the grapple exceeds the maximum, the player has to be pulled by the rope.
+			// This is done by projecting the vector onto the ortagonal vector to the line vector
+			// This is not perfect, the regular movement should be made up to the point reaching the max_length
+			// Current solution can lead to stuttering on low framerates
 			double angle = get_angle(line_vector.x, line_vector.y, to_move.x, to_move.y);
 			if (angle > PI_HALF) {
 				const double rotated_x = -line_vector.y, rotated_y = line_vector.x;
