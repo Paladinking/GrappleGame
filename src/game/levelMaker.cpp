@@ -10,8 +10,8 @@ constexpr int TILE_SELECTOR_SIZE = 64;
 constexpr int TILE_SELECTOR_TW = 10;
 constexpr int TILE_SELECTOR_TH = 10;
 
-constexpr int ZOOM_FACTOR = 4;
-constexpr int ZOOM_MAX = 19;
+const int ZOOM_LEVELS[] = {8, 10, 16, 20, 32, 40, 64, 80, 160};
+constexpr int ZOOM_LEVELS_SIZE = 9;
 
 void LevelMaker::init() {
 	State::init();
@@ -76,23 +76,28 @@ void LevelMaker::handle_down(const SDL_Keycode key, const Uint8 mouse) {
 	if (clear_tile_input->is_targeted(key, mouse)) {
 		tile_press(false);
 	}
-	if (zoom_in_input->is_targeted(key, mouse) && zoom_level < ZOOM_MAX) {
+	if (zoom_in_input->is_targeted(key, mouse) && zoom_level < ZOOM_LEVELS_SIZE - 1) {
+		const int prev_ts = ZOOM_LEVELS[zoom_level];
 		zoom_level++;
-		x_start += ZOOM_FACTOR / 2;
-		x_end -= ZOOM_FACTOR / 2;
-		y_start += ZOOM_FACTOR / 2;
-		y_end -= ZOOM_FACTOR / 2;
+		const int ts = ZOOM_LEVELS[zoom_level];
+		const int visible_tiles_delta = editor_width / prev_ts - editor_width / ts;
+		x_start += visible_tiles_delta / 2;
+		x_end -= visible_tiles_delta / 2;
+		y_start += visible_tiles_delta / 2;
+		y_end -= visible_tiles_delta / 2;
 	} else if (zoom_out_input->is_targeted(key, mouse) && zoom_level > 0) {
+		const int prev_ts = ZOOM_LEVELS[zoom_level];
 		zoom_level--;
-		int delta_x_start = std::min(ZOOM_FACTOR / 2, x_start)
-				- std::min(0, static_cast<int>(level_data.width) - x_end - 2);
-		int delta_y_start = std::min(ZOOM_FACTOR / 2, y_start) 
-				- std::min(0, static_cast<int>(level_data.height) - y_end - 2);
-		
+		const int ts = ZOOM_LEVELS[zoom_level];
+		const int visible_tiles_delta = editor_width / ts - editor_width / prev_ts;
+		int delta_x_start = std::min(visible_tiles_delta / 2, x_start)
+				- std::min(0, static_cast<int>(level_data.width) - x_end - visible_tiles_delta / 2);
+		int delta_y_start = std::min(visible_tiles_delta / 2, y_start) 
+				- std::min(0, static_cast<int>(level_data.height) - y_end - visible_tiles_delta / 2);
 		x_start -= delta_x_start;
-		x_end += ZOOM_FACTOR - delta_x_start;
+		x_end += visible_tiles_delta - delta_x_start;
 		y_start -= delta_y_start;
-		y_end += ZOOM_FACTOR - delta_y_start;
+		y_end += visible_tiles_delta - delta_y_start; 
 	} 
 	if (left_input->is_targeted(key, mouse) && x_start > 0) {
 		x_start--;
@@ -121,7 +126,8 @@ void LevelMaker::handle_down(const SDL_Keycode key, const Uint8 mouse) {
 void LevelMaker::render() {
 	SDL_Rect r = {0, 0, static_cast<int>(window_width), static_cast<int>(window_height)};
 	SDL_FillRect(window_surface, &r, SDL_MapRGB(window_surface->format, 255, 255, 255));
-	int ts = static_cast<int>(TILE_SIZE * (static_cast<double>(level_data.width) / static_cast<double>(x_end - x_start)));
+	
+	const int ts = ZOOM_LEVELS[zoom_level];
 	for (int x = x_start; x < x_end; ++x) {
 		for (int y = y_start; y < y_end; ++y) {
 			Uint16 tile_index = level_data.data[x + level_data.width * y] >> 8;
