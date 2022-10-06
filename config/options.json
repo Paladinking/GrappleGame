@@ -17,7 +17,8 @@
 			"navigate_up" : "Up",
 			"navigate_down" : "Down",
 			"navigate_left" : "Left",
-			"navigate_right" : "Right"
+			"navigate_right" : "Right",
+			"save_level" : "S"
 		},
 		"GENERAL" : {
 			"exit_menu" : "Escape"
