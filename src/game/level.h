@@ -33,7 +33,9 @@ class Corner {
 
 class Level : public TileMap {
 	public:
-		Level() {}
+		Level(const int tile_size) {
+			this->tile_size = tile_size;
+		}
 
 		void load_from_file(const std::string& path, const std::string& img_path);
 

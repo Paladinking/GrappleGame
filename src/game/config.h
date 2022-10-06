@@ -38,7 +38,8 @@ namespace bindings {
 			{"navigate_up", "Up"},
 			{"navigate_down", "Down"},
 			{"navigate_left", "Left"},
-			{"navigate_right", "Right"}
+			{"navigate_right", "Right"},
+			{"save_level", "S"}
 		}
 	};
 	
@@ -53,6 +54,7 @@ namespace bindings {
 }
 
 namespace config {
+	
 	JsonObject& get_options();
 	
 	JsonObject& get_bindings();
@@ -70,6 +72,8 @@ namespace config {
 	const JsonObject& get_template(const std::string& name);
 	
 	std::string get_asset_path(const std::string& path);
+	
+	std::string get_default_tileset();
 }
 
 

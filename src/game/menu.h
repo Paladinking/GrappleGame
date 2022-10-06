@@ -4,6 +4,7 @@
 #include "globals.h"
 #include "engine/ui.h"
 #include "file/json.h"
+#include "level.h"
 
 class MainMenu : public Menu {
 	public:
@@ -81,8 +82,21 @@ class LevelMakerStartup : public Menu {
 	protected:
 
 		virtual void button_press(const int btn) override;
+		
+	private:
+		enum ButtonId {
+			START_LEVEL_MAKER, NEW_LEVEL, LOAD_FILE, ADD_HEIGHT, SUB_HEIGHT
+		};
 
-	
+		void create_default_level();
+		
+		void sync_text();
+		
+		bool loaded;
+
+		std::string tileset_path;
+
+		LevelData data;
 };
 
 #endif

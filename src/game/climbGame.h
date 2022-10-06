@@ -13,7 +13,7 @@
 
 class ClimbGame : public State {
 	public:
-		ClimbGame() : State(SCREEN_WIDTH, SCREEN_HEIGHT, "Climbgame") {}
+		ClimbGame() : State(SCREEN_WIDTH, SCREEN_HEIGHT, "Climbgame"), level(TILE_SIZE) {}
 
 		virtual void tick(const Uint64 delta, StateStatus& res) override;
 

@@ -4,6 +4,7 @@
 #include "levelMaker.h"
 #include "config.h"
 #include <iostream>
+#include <nfdcpp.h>
 
 const std::string MainMenu::BUTTON_NAMES[] = {"Start Game", "Level Maker", "Options"};
 
@@ -27,8 +28,8 @@ void MainMenu::button_press(const int btn) {
 		case START_GAME:
 			next_state = new ClimbGame();
 			break;
-		case LEVEL_MAKER:
-			next_state = new LevelMaker();
+		case LEVEL_MAKER: 
+			next_state = new LevelMakerStartup();
 			break;
 		case OPTIONS:
 			next_state = new OptionsMenu();
@@ -196,4 +197,79 @@ void OptionsMenu::render() {
 		input_promt.render(0, 0);
 	}
 	SDL_RenderPresent(gRenderer);
+}
+
+void LevelMakerStartup::init() {
+	Menu::init();
+
+	create_default_level();
+
+	buttons.emplace_back(3 * window_width / 4 - 100, 3 * window_height / 4 - 40, 200, 80, "Start", 30);
+	buttons.emplace_back(window_width / 3 - 110, 8 * window_height / 12 - 20, 100, 40, "New Level", 15);
+	buttons.emplace_back(window_width / 3 - 110, 9 * window_height / 12 - 20, 100, 40, "Load Level", 15);
+	buttons.emplace_back(window_width / 3 - 50, 21 * window_height / 48 - 20, 20, 20, "+", 15);
+	buttons.emplace_back(window_width / 3 - 80, 21 * window_height / 48 - 20, 20, 20, "-", 15);
+
+	text.emplace_back(window_width / 4 - 100, 4 * window_height / 8 - 40, 200, 80, "Tileset: " + tileset_path, 15);
+	text.emplace_back(window_width / 4 - 100, 6 * window_height / 16 - 40, 200, 80, "Height: " + std::to_string(data.height), 15);
+	text.emplace_back(window_width / 4 - 100, 5 * window_height / 16 - 40, 200, 80, "Data: clear", 15);
+}
+
+void LevelMakerStartup::create_default_level() {
+	loaded = false;
+	tileset_path = config::get_default_tileset();
+	data.height = TILE_HEIGHT * 2;
+	data.width = TILE_WIDTH;
+	data.img_tilesize = 32;
+	data.img_tilewidth = 10;
+	data.img_tilecount = 96;
+}
+
+void LevelMakerStartup::button_press(const int btn) {
+	switch (btn) {
+		case START_LEVEL_MAKER:
+			if (!loaded) {
+				data.data = std::make_unique<Uint16[]>(data.width * data.height);
+				for (size_t i = 0; i < data.width * data.height; ++i) {
+					data.data[i] = (0xFF << 8);
+				}
+			}
+			next_state = new LevelMaker(std::move(data), config::get_asset_path(tileset_path));
+			break;
+		case NEW_LEVEL: 
+			create_default_level();
+			text[1].set_text("Height: " + std::to_string(data.height));
+			text[2].set_text("Data: clear");
+			break;
+		case LOAD_FILE: {
+			std::string file_path;
+			if (nfd::OpenDialog(file_path) == NFD_OKAY) {
+				try {
+					LevelData temp;
+					temp.load_from_file(file_path);
+					data = std::move(temp);
+					loaded = true;
+				} catch (const base_exception& e) {
+					std::cout << e.msg << std::endl;
+				}
+				text[1].set_text("Height: " + std::to_string(data.height));
+				text[2].set_text("Data: " + loaded ? "Loaded" : "clear");
+			}
+			break;
+		}
+		case ADD_HEIGHT:
+			if (!loaded) {
+				data.height += TILE_HEIGHT;
+				data.data = std::make_unique<Uint16[]>(data.width * data.height);
+				text[1].set_text("Height: " + std::to_string(data.height));
+			}
+			break;
+		case SUB_HEIGHT:
+			if (!loaded && data.height > TILE_HEIGHT) {
+				data.height -= TILE_HEIGHT;
+				data.data = std::make_unique<Uint16[]>(data.width * data.height);
+				text[1].set_text("Height: " + std::to_string(data.height));
+			}
+			break;
+	}
 }

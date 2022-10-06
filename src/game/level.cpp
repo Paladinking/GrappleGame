@@ -8,8 +8,6 @@
 #include "util/exceptions.h"
 #include "globals.h"
 
-constexpr int TILE_SIZE = 8;
-
 void LevelData::load_from_file(const std::string& path) {
 	FileReader reader = FileReader(path, true);
 	if (
@@ -19,12 +17,20 @@ void LevelData::load_from_file(const std::string& path) {
 		!reader.read_next(img_tilewidth) ||
 		!reader.read_next(img_tilecount)
 	) {
-		throw file_exception("Could not read level file");
+		throw file_exception("Invalid level file");
 	}
 	data = std::make_unique<Uint16[]>(width * height);
 	if (!reader.read_many(data.get(), width * height)) {
-		throw file_exception("Could not read level file");
+		throw file_exception("Invalid level file");
 	}
+	if (width != TILE_WIDTH || (height % TILE_HEIGHT) != 0) {
+		throw file_exception("Bad dimensions in level file");
+	}
+	for (size_t i = 0; i < width * height; ++i) {
+		Uint16 tile = data[i] >> 8;
+		if (tile != 0xFF && tile >= img_tilecount) throw file_exception("Invalid tile in level file");
+	}
+	
 }
 
 void LevelData::write_to_file(const std::string& path) {
@@ -50,19 +56,13 @@ void Level::load_from_file(const std::string& path, const std::string& img_path)
 	LevelData level_data;
 	level_data.load_from_file(path);
 
-	const int tile_size = TILE_SIZE;
-	this->tile_size = TILE_SIZE;
-	if (level_data.width != window_width / tile_size || level_data.height % (window_width / tile_size) != 0) {
-		throw file_exception("Invalid level file");
-	}
-	
 	std::unique_ptr<SDL_Surface, SurfaceDeleter> tiles(IMG_Load(img_path.c_str()));
 	
 	if (tiles == nullptr) {
 		throw image_load_exception(std::string(IMG_GetError()));
 	}
 
-	int visible_screens = level_data.height / (window_height / tile_size);
+	int visible_screens = level_data.height / TILE_HEIGHT;
 	
 	std::unique_ptr<std::unique_ptr<SDL_Surface, SurfaceDeleter>[]> surfaces = 
 		std::make_unique<std::unique_ptr<SDL_Surface, SurfaceDeleter>[]>(visible_screens);
@@ -76,27 +76,24 @@ void Level::load_from_file(const std::string& path, const std::string& img_path)
 	map = std::make_unique<bool[]>(level_data.width * level_data.height);
 	for (int i = 0; static_cast<unsigned>(i) < level_data.width * level_data.height; ++i) {
 		Uint16 tile = level_data.data[i];
-		
+
 		int tile_index = (tile >> 8);
 		bool filled = (tile & 0xFF) != 0;
-		
+
 		map[i] = filled;
-		
+
 
 		if (tile_index == 0xFF) {
 			continue;
 		};
-		if (tile_index >= static_cast<int>(level_data.img_tilecount)) {
-			throw file_exception("Invalid tile " + std::to_string(tile_index) + " in level file");
-		}
-		
+
 		SDL_Rect source = {
 			(tile_index % static_cast<int>(level_data.img_tilewidth)) * static_cast<int>(level_data.img_tilesize), 
 			(tile_index / static_cast<int>(level_data.img_tilewidth)) * static_cast<int>(level_data.img_tilesize),
 			static_cast<int>(level_data.img_tilesize), 
 			static_cast<int>(level_data.img_tilesize)
 		};
-		
+
 		SDL_Rect dest = {
 			(i % static_cast<int>(level_data.width)) * tile_size,
 			((i / static_cast<int>(level_data.width)) * tile_size) % window_height,

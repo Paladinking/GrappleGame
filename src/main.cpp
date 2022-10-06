@@ -87,7 +87,8 @@ int main(int argc, char* args[])
 	int exit_status = 0;
 	State* state;
 	if (level_maker) {
-		state = new LevelMaker();
+		return -4;
+		//state = new LevelMaker();
 	} else {
 		state = new MainMenu();
 	}

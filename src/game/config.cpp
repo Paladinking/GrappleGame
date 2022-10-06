@@ -169,3 +169,7 @@ const JsonObject& config::get_template(const std::string& name) {
 std::string config::get_asset_path(const std::string& path) {
 	return ASSETS_ROOT + path;
 }
+
+std::string config::get_default_tileset() {
+	return "tiles/tiles.png";
+}
