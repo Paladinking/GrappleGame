@@ -18,7 +18,10 @@
 			"navigate_down" : "Down",
 			"navigate_left" : "Left",
 			"navigate_right" : "Right",
-			"save_level" : "S"
+			"save_level" : "S",
+			"tiles_mode" : "1",
+			"collision_mode" : "2",
+			"tile_collisions" : "B"
 		},
 		"GENERAL" : {
 			"exit_menu" : "Escape"

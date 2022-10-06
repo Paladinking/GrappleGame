@@ -162,8 +162,8 @@ std::vector<std::shared_ptr<Corner>>& Level::get_corners() {
 
 void Level::render(int cameraY) {
 	int first = cameraY / window_height;
-	int last = (cameraY + window_height) / window_height;
-	for (int i = 0; i < 2; ++i) {
+	int last = (cameraY + 2 * window_height - 1) / window_height;
+	for (int i = first; i < last; ++i) {
 		level_textures[i].render(0, i * window_height - cameraY);
 	}
 }
