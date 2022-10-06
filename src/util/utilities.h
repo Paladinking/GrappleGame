@@ -130,7 +130,7 @@ class TileMap {
 	public:
 		TileMap() {}
 
-		TileMap(const int width, const int height) : width(width), height(height) {} 
+		TileMap(const int tile_size, const int width, const int height) : tile_size(tile_size), width(width), height(height) {}
 
 		/**
 		 * Returns true if a tile contained in the pixel rectangle (x, y, w, h) contains a blocked tile.
