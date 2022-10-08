@@ -253,7 +253,7 @@ void LevelMakerStartup::button_press(const int btn) {
 					std::cout << e.msg << std::endl;
 				}
 				text[1].set_text("Height: " + std::to_string(data.height));
-				text[2].set_text("Data: " + loaded ? "Loaded" : "clear");
+				text[2].set_text(loaded ? "Data: loaded" : "Data: clear");
 			}
 			break;
 		}
