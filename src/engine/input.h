@@ -1,26 +1,40 @@
 #ifndef INPUT_00_H
 #define INPUT_00_H
-#include "file/json.h"
 #include "util/exceptions.h"
 #include <memory>
 #include <string>
 #include <SDL.h>
 
+/**
+ * Exception type for bad binding names.
+ */
 class binding_exception : public base_exception {
 	public:
 		binding_exception(std::string msg) : base_exception(msg) {};
 	
 };
 
+/**
+ * Class for press inputs, used in event handling methods.
+ */
 class PressInput {
 	public:
+		/**
+		 * Returns true if this input was the target of a key or mouse event.
+		 */
 		virtual bool is_targeted(const SDL_Keycode key, const Uint32 mouseButton) = 0;
 };
 
+/**
+ * Class for a press input targeted by mouse.
+ */
 class MousePressInput : public PressInput {
 	public:
 		MousePressInput(const Uint32 mouse_button) : mouse_button(mouse_button) {}
 		
+		/**
+		 * Returns true if the mouse targets equals the one for this input.
+		 */
 		virtual bool is_targeted(const SDL_Keycode key, const Uint32 mouse) override {
 			return mouse == mouse_button;
 		}
@@ -29,17 +43,29 @@ class MousePressInput : public PressInput {
 		const Uint32 mouse_button;
 };
 
+/**
+ * Class for a press input that can never be triggered.
+ */
 class EmptyPressInput : public PressInput {
 	public:
+		/**
+		 * Always returns false.
+		 */
 		virtual bool is_targeted(const SDL_Keycode key, const Uint32 mouse) override {
 			return false;
 		}
 };
 
+/**
+ * Class for a press input triggered by keyboard.
+ */
 class KeyPressInput : public PressInput {
 	public:
 		KeyPressInput(const SDL_Keycode key_code) : key_code(key_code) {}
 		
+		/**
+		 * Returns true if the key target equals the one for this input.
+		 */
 		virtual bool is_targeted(const SDL_Keycode key, const Uint32 mouseButton) override {
 			return key_code == key;
 		}
@@ -48,15 +74,27 @@ class KeyPressInput : public PressInput {
 		const SDL_Keycode key_code;
 };
 
+/**
+ * Class for hold inputs, used when polling an input every frame.
+ */
 class HoldInput {
 	public:
+		/**
+		 * Returns true if this input is currently pressed.
+		 */
 		virtual bool is_pressed(const Uint8* keys, const Uint32  mouseButton) = 0;
 };
 
+/**
+ * Class for hold inputs based on the mouse.
+ */
 class MouseHoldInput : public HoldInput {
 	public:
 		MouseHoldInput(const Uint32 mouse_mask) : mouse_mask(mouse_mask) {}
-	
+
+		/**
+		 * Returns true if the mouseButton of this input is pressed.
+		 */
 		virtual bool is_pressed(const Uint8* keys, const Uint32 mouseButton) override {
 			return (mouse_mask & mouseButton) != 0;
 		}
@@ -65,17 +103,30 @@ class MouseHoldInput : public HoldInput {
 		const Uint32 mouse_mask;
 };
 
+/**
+ * Class for hold inputs that can never be pressed.
+ */
 class EmptyHoldInput : public HoldInput {
 	public:
+
+		/**
+		 * Always returns false.
+		 */ 
 		virtual bool is_pressed(const Uint8* keys, const Uint32 mouseButton) override {
 			return false;
 		}
 };
 
+/**
+ * Class for a hold input targeted by keyboard.
+ */
 class KeyHoldInput : public HoldInput {
 	public:
 		KeyHoldInput(const SDL_Scancode key) : key(key) {}
-	
+
+		/**
+		 * Returns true if the key matching this input is pressed.
+		 */
 		virtual bool is_pressed(const Uint8* keys, const Uint32 mouseButton) override {
 			return keys[key];
 		}
@@ -84,20 +135,38 @@ class KeyHoldInput : public HoldInput {
 		const SDL_Scancode key;
 };
 
+/**
+ * Returns the name of an input based on a down-event.
+ * If mouse contains an SDL_BUTTON_*something* value, the key is ignored.
+ * If no name matches, "None" is returned. Passing "None" to get_*hold/press*_input 
+ * will return an Empy*Hold/Press/Imput ptr.
+ */
 std::string get_input_name(const SDL_Keycode key, const Uint32 mouse);
 
+/**
+ * Returns a pointer to a PressInput with the name name.
+ * If no input matches, a binding_exception is thrown.
+ */
 std::unique_ptr<PressInput> get_press_input(const std::string& name);
 
+/**
+ * Returns a pointer to a HoldInput with the name name.
+ * If no input matches, a binding_exception is thrown.
+ */
 std::unique_ptr<HoldInput> get_hold_input(const std::string& name);
 
+/**
+ * Returns a pointer to a PressInput with the name name.
+ * If no input matches, default_name is tried instead.
+ * If default_name also has no match, a binding_exception is thrown.
+ */
 std::unique_ptr<PressInput> get_press_input(const std::string& name, const std::string& default_name);
 
+/**
+ * Returns a pointer to a HoldInput with the name name.
+ * If no input matches, default_name is tried instead.
+ * If default_name also has no match, a binding_exception is thrown.
+ */
 std::unique_ptr<HoldInput> get_hold_input(const std::string& name, const std::string& default_name);
-
-std::unique_ptr<PressInput> get_press_input(const std::string& key_name, const std::string& default_name, const JsonObject& obj);
-
-std::unique_ptr<HoldInput> get_hold_input(const std::string& key_name, const std::string& default_name, const JsonObject& obj);
-
-
 
 #endif

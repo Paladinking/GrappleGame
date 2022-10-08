@@ -13,12 +13,15 @@ class Texture {
 		Texture() {};
 		
 		Texture(SDL_Texture* const t, const int w, const int h) : texture(t), width(w), height(h) {};
-		
+
+		/**
+		 * Copying a texture is not supported, since it would be very rarely desired.
+		 * If so, copy the underlying SDL_Texture and create a new Texture instead.
+		 */
 		Texture(const Texture& o) = delete;
-		
-		Texture(Texture&& o);
-		
 		Texture& operator=(const Texture&) = delete;
+
+		Texture(Texture&& o);
 		
 		Texture& operator=(Texture&&);
 		

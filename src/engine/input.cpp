@@ -18,14 +18,6 @@ std::string get_input_name(const SDL_Keycode key, const Uint32 mouse) {
 	return "None";
 }
 
-std::unique_ptr<PressInput> get_press_input(const std::string& key_name, const std::string& default_name, const JsonObject& obj) {
-	return get_press_input(obj.get_default<std::string>(key_name, default_name), default_name);
-}
-
-std::unique_ptr<HoldInput> get_hold_input(const std::string& key_name, const std::string& default_name, const JsonObject& obj) {
-	return get_hold_input(obj.get_default<std::string>(key_name, default_name), default_name);
-}
-
 std::unique_ptr<PressInput> get_press_input(const std::string& name, const std::string& default_name) {
 	try {
 		return get_press_input(name);

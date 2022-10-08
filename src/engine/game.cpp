@@ -7,7 +7,6 @@ SDL_Window* gWindow;
  * Base Game class
  *
  */
- 
 Game::Game(const int window_width, const int window_height, const std::string& title) 
 	: initial_width(window_width), initial_height(window_height), initial_title(title) {
 	if (initial_width <= 0 || initial_height <= 0) throw game_exception("Invalid window dimensions");
@@ -34,18 +33,18 @@ void Game::create() {
     {
 		throw SDL_exception("Window could not be created, " + std::string(SDL_GetError()));
     }
-	
+
 	gRenderer = SDL_CreateRenderer(gWindow, -1, SDL_RENDERER_ACCELERATED);
 	if (gRenderer == NULL) 
 	{
 		SDL_DestroyWindow(gWindow);
 		throw SDL_exception("Renderer could not be created, " + std::string(SDL_GetError()));
 	}
-	
+
 	SDL_RenderSetVSync(gRenderer, 1);
 	SDL_SetRenderDrawBlendMode(gRenderer, SDL_BLENDMODE_BLEND);
 	SDL_SetRenderDrawColor(gRenderer, 0xFF, 0xFF, 0xFF, 0xFF);
-	
+
 	destroyed = false;
 	init();
 }

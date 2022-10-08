@@ -96,7 +96,7 @@ class FileReader {
 		
 		/**
 		 * Reads a null-terminated string from the file, allocates memory for it and pointing s to it.
-		 * Returns false if no null-ptr could be read. Will consume bytes even when 
+		 * Returns false if no such string could be read. Will consume bytes even when 
 		 * returning false, but all memory will be freed and s will remain unchanged.
 		 */
 		bool read_string(char* &s) {
