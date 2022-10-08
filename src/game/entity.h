@@ -122,19 +122,21 @@ class Player : public Entity {
 	public:
 		virtual ~Player();
 		Player() {};
-		
+
 		virtual void init(const EntityTemplate& entity_template) override;
-		
+
 		virtual void render(const int cameraY) override;
-		
+
 		virtual void tick(const double delta, Level &level) override;
-		
+
 		void fire_grapple(const int target_x, const int target_y);
-		
+
 		void return_grapple();
-		
+
+		void jump();
+
 		void set_pull(bool pull);
-		
+
 		void set_release(bool release);
 
 	private:
@@ -166,7 +168,7 @@ class Player : public Entity {
 		double grapple_length;
 		double grapple_max_len;
 		
-		bool pull, release;
+		bool pull, release, is_on_ground;
 
 		Vector2D grapple_vel;
 		

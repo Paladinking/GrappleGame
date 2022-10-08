@@ -6,7 +6,6 @@
 
 constexpr double MAX_MOVEMENT_VEL = 350.0;
 constexpr double MOVEMENT_ACCELERATION = 2200.0;
-constexpr double JUMP_VEL = 800.0;
 
 constexpr int PLAYER_FULL_WIDTH = 24;
 constexpr int PLAYER_FULL_HEIGHT = 40;
@@ -123,12 +122,7 @@ void ClimbGame::handle_down(const SDL_Keycode key, const Uint8 mouse) {
 		player->set_release(true);
 	}
 	if (jump_input->is_targeted(key, mouse)) {
-		if (player->on_ground(level)) 
-		{
-			const Vector2D &vel = player->get_velocity();
-			player->add_velocity(0, -vel.y -JUMP_VEL);
-			//vel.y = -JUMP_VEL;
-		}
+		player->jump();
 	}
 	if (return_input->is_targeted(key, mouse)) {
 		player->return_grapple();

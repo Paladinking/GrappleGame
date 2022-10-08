@@ -12,6 +12,7 @@ constexpr int GRAPPLE_LENGTH = 600;
 constexpr double GRAPPLE_SPEED = 1300.0;
 constexpr double GRAPPLE_PULL = 5000.0;
 constexpr double GRAPPLE_RELEASE = 200.0;
+constexpr double JUMP_VEL = 800.0;
 
 void texture_form_template(Texture& t, const JsonObject& text) {
 	if (
@@ -198,7 +199,6 @@ void Player::render(const int cameraY)
 void Player::tick(const double delta, Level &level)
 {
 	Vector2D old_pos = {pos.x + width / 2, pos.y + height / 2};
-	bool is_on_ground = on_ground(level);
 	if (is_on_ground) {
 		double factor = delta * FRICTION_FACTOR;
 		if (vel.x > 0) {
@@ -275,6 +275,7 @@ void Player::tick(const double delta, Level &level)
 		}
 		try_move(to_move.x, to_move.y, tilesize, level);
 	}
+	is_on_ground = on_ground(level);
 
 	if (grappling_mode == TRAVELING || (grappling_mode == PLACED && (len > 0))) 
 	{
@@ -365,6 +366,16 @@ void Player::return_grapple() {
 	if (grappling_mode == TRAVELING ||  grappling_mode == PLACED) {
 		grapple_points.clear();
 		grappling_mode = UNUSED;
+	}
+}
+
+void Player::jump() {
+	if (is_on_ground) {
+		vel.y = -JUMP_VEL;
+	} else if (grappling_mode == PLACED && grapple_points[grapple_points.size() - 2].corner->y < center_point->y) {
+		grapple_points.clear();
+		grappling_mode = UNUSED;
+		vel.y = -JUMP_VEL;
 	}
 }
 
