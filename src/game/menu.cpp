@@ -3,8 +3,8 @@
 #include "climbGame.h"
 #include "levelMaker.h"
 #include "config.h"
+#include "nativefiledialog/nfdcpp.h"
 #include <iostream>
-#include <nfdcpp.h>
 
 const std::string MainMenu::BUTTON_NAMES[] = {"Start Game", "Level Maker", "Options"};
 

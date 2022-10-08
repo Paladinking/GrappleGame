@@ -3,7 +3,7 @@
 #include "util/exceptions.h"
 #include "config.h"
 #include "globals.h"
-#include <nfdcpp.h>
+#include "nativefiledialog/nfdcpp.h"
 #include <algorithm>
 
 constexpr int TILE_SELECTOR_SIZE = 64;
