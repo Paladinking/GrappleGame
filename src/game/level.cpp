@@ -19,7 +19,7 @@ void LevelData::load_from_file(const std::string& path) {
 	) {
 		throw file_exception("Invalid level file");
 	}
-	data = std::make_unique<Uint16[]>(width * height);
+	data = std::make_unique<Uint32[]>(width * height);
 	if (!reader.read_many(data.get(), width * height)) {
 		throw file_exception("Invalid level file");
 	}
@@ -27,8 +27,10 @@ void LevelData::load_from_file(const std::string& path) {
 		throw file_exception("Bad dimensions in level file");
 	}
 	for (size_t i = 0; i < width * height; ++i) {
-		Uint16 tile = data[i] >> 8;
-		if (tile != 0xFF && tile >= img_tilecount) throw file_exception("Invalid tile in level file");
+		Uint32 tile = (data[i] >> 8) & 0xFF;
+		Uint32 scale = (data[i] >> 16) & 0xFF;
+		if (tile != 0xFF && (tile >= img_tilecount || scale > 8))
+			throw file_exception("Invalid tile in level file");
 	}
 	
 }
@@ -75,9 +77,10 @@ void Level::load_from_file(const std::string& path, const std::string& img_path)
 	
 	map = std::make_unique<bool[]>(level_data.width * level_data.height);
 	for (int i = 0; static_cast<unsigned>(i) < level_data.width * level_data.height; ++i) {
-		Uint16 tile = level_data.data[i];
+		Uint32 tile = level_data.data[i]; //FIX
 
-		int tile_index = (tile >> 8);
+		int tile_index = (tile >> 8) & 0xFF;
+		int tile_scale = (tile >> 16) & 0xFF;
 		bool filled = (tile & 0xFF) != 0;
 
 		map[i] = filled;
@@ -97,7 +100,7 @@ void Level::load_from_file(const std::string& path, const std::string& img_path)
 		SDL_Rect dest = {
 			(i % static_cast<int>(level_data.width)) * tile_size,
 			((i / static_cast<int>(level_data.width)) * tile_size) % window_height,
-			tile_size, tile_size
+			tile_size * tile_scale, tile_size * tile_scale
 		};
 
 		const int surface_index = ((i / level_data.width)) / (window_height / tile_size);
@@ -139,7 +142,7 @@ void Level::create_corners() {
 				botton_left = false;
 				bottom_right = false;
 			}
-			double x_pos = (double) x, y_pos = (double) y;
+			double x_pos = static_cast<double>(x), y_pos = static_cast<double>(y);
 			if (top_left) {
 				corners.push_back(std::shared_ptr<Corner>(new Corner(x_pos * tile_size, y_pos * tile_size)));
 			}
