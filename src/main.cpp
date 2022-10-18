@@ -79,7 +79,8 @@ int main(int argc, char* args[])
 	config::init();
 
 	try {
-		TextBox::init(config::get_asset_path("font/OpenSans-Bold.ttf"));
+		//TextBox::init(config::get_asset_path("font/OpenSans-Bold.ttf"));
+		engine::init();
 	} catch (const base_exception &e) {
 		std::cout << e.msg << std::endl;
 		exit(-3);

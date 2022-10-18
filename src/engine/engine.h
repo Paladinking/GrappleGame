@@ -13,4 +13,8 @@ struct SurfaceDeleter {
 	void operator()(SDL_Surface* s) {SDL_FreeSurface(s);}
 };
 
+namespace engine {
+	void init();
+};
+
 #endif

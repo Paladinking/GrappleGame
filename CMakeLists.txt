@@ -44,6 +44,7 @@ add_library(
 add_library(
 	Engine OBJECT 
 	${ENGINE_DIR}/game.cpp
+	${ENGINE_DIR}/engine.cpp
 	${ENGINE_DIR}/input.cpp
 	${ENGINE_DIR}/texture.cpp
 	${ENGINE_DIR}/ui.cpp

@@ -2,9 +2,9 @@
 
 TTF_Font* TextBox::font;
 
-void TextBox::init(const std::string& font_path) {
-	Button::font = TTF_OpenFont(font_path.c_str(), 20); //TODO make path dynamic
-	if (Button::font == NULL) {
+void TextBox::init(SDL_RWops* font_data) {
+	TextBox::font = TTF_OpenFontRW(font_data, 1, 20);
+	if (TextBox::font == NULL) {
 		throw game_exception(std::string(TTF_GetError()));
 	}
 }
