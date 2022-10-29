@@ -9,7 +9,7 @@
 #include "globals.h"
 
 void LevelData::load_from_file(const std::string& path) {
-	FileReader reader = FileReader(path, true);
+	FileReader reader = FileReader(path, true, true);
 	if (
 		!reader.read_next(width) ||
 		!reader.read_next(height) ||
@@ -34,7 +34,7 @@ void LevelData::load_from_file(const std::string& path) {
 }
 
 void LevelData::write_to_file(const std::string& path) {
-	FileWriter writer = FileWriter(path, true);
+	FileWriter writer = FileWriter(path, true, true);
 	if (
 		!writer.write(width) ||
 		!writer.write(height) ||

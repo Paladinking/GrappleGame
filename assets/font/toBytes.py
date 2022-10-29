@@ -9,7 +9,7 @@ def toHex(b):
 def main(args):
     if len(args) < 2:
         return
-    outName = args[1].split('.')[0  ] + ".txt" if len(args) == 2 else args[2]
+    outName = args[1].split('.')[0] + ".txt" if len(args) == 2 else args[2]
     with open(args[1], 'rb') as file:
         data = file.read() 
     with open(outName, "wb") as file:

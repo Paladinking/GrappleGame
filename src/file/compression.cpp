@@ -106,7 +106,7 @@ size_t compressWrite(SDL_RWops* ptr, const void* data, size_t size, size_t num) 
 	while (true) {
 		strm->next_out = comp_data->buffer;
 		strm->avail_out = BUFFER_SIZE;
-		int ret = comp_data->data_filter(strm, Z_FINISH);
+		int ret = comp_data->data_filter(strm, Z_NO_FLUSH);
 		if (ret != Z_OK && ret != Z_STREAM_END && ret != Z_BUF_ERROR) {
 			break;
 		}
@@ -131,6 +131,28 @@ int compressClose(SDL_RWops* ptr) {
 	SDL_RWops* source = static_cast<SDL_RWops*>(ptr->hidden.unknown.data1);
 	CompressData* comp_data = static_cast<CompressData*>(ptr->hidden.unknown.data2);
 	z_stream* strm = &comp_data->stream;
+	
+	if (strm->next_in == nullptr && strm->next_out != nullptr) {
+		while (true) {
+			strm->avail_in = 0;
+			strm->avail_out = BUFFER_SIZE;
+			strm->next_out = comp_data->buffer;
+			int ret = comp_data->data_filter(strm, Z_FINISH);
+			if (ret != Z_OK && ret != Z_BUF_ERROR && ret != Z_STREAM_END) {
+				break;
+			}
+			const unsigned have = BUFFER_SIZE - strm->avail_out;
+			const unsigned out = static_cast<unsigned>(SDL_RWwrite(source, comp_data->buffer, 1, have));
+			if (out < have) {
+				break;
+			}
+			if (ret == Z_STREAM_END || (ret == Z_BUF_ERROR && strm->avail_out == BUFFER_SIZE)) {
+				break;
+			}
+		}
+		
+	}
+	
 	comp_data->end_filter(strm);
 
 	int ret = source->close(source);
