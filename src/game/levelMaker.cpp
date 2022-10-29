@@ -6,12 +6,20 @@
 #include "nativefiledialog/nfdcpp.h"
 #include <algorithm>
 
+// Tile apperance (0xUUSSIITT)
+// UU = unused
+// SS = tilescale
+// II = image id
+// TT = tile type (empty 0 or solid 1)
+// eg empty tile apperance (0x0000FF00)
+
 constexpr int TILE_SELECTOR_SIZE = 64;
 constexpr int TILE_SELECTOR_TW = 10;
 constexpr int TILE_SELECTOR_TH = 10;
 
 const int ZOOM_LEVELS[] = {8, 10, 16, 20, 32, 40, 64, 80, 160};
 constexpr int ZOOM_LEVELS_SIZE = 9;
+constexpr int MAX_TILE_SCALE = 8;
 
 void LevelMaker::init() {
 	State::init();
@@ -31,6 +39,8 @@ void LevelMaker::init() {
 	tiles_input = get_press_input(controls.get<std::string>("tiles_mode"), "None");
 	colisions_input = get_press_input(controls.get<std::string>("collision_mode"), "None");
 	tile_colisions_input = get_press_input(controls.get<std::string>("tile_collisions"), "None");
+	tile_scale_up_input = get_press_input(controls.get<std::string>("tile_scale_up"), "None");
+	tile_scale_down_input = get_press_input(controls.get<std::string>("tile_scale_down"), "None");
 	editor_width = window_width / 2;
 
 	SDL_Surface* t = IMG_Load(tiles_path.c_str());
@@ -64,18 +74,26 @@ void LevelMaker::tile_press(const bool put) {
 			selected = static_cast<Uint16>(index);
 		}
 	} else {
-		int zoom_tile_size = editor_width / (x_end - x_start);
-		int x_tile = x_start + (mouseX / zoom_tile_size);
-		int y_tile = y_start + (mouseY / zoom_tile_size);
-		int index = x_tile + y_tile * level_data.width;
+		const int zoom_tile_size = editor_width / (x_end - x_start);
+		const int x_tile = x_start + (mouseX / zoom_tile_size);
+		const int y_tile = y_start + (mouseY / zoom_tile_size);
+		const int index = x_tile + y_tile * level_data.width;
+
 		if (editor_mode == PLACE_TILES) {
-			if (tile_colisions) {
-				level_data.data[index] = put ? (selected << 8) | 1 : (0xFF << 8);
-			} else {
-				level_data.data[index] = (level_data.data[index] & 0xFF) | (put ? (selected << 8) : (0xFF << 8));
+			Uint32 new_tile = put ? (tile_scale << 16) | (selected << 8) | 1 : (0xFF << 8);
+			if (!tile_colisions) {
+				new_tile = (new_tile & 0xFFFFFF00) | level_data.data[index] & 0xFF;
 			}
+			const Uint32 val = put ? (0xFF << 8) | 1 : (0xFF << 8);
+			for (int y  = y_tile; y < std::min(y_tile + static_cast<int>(tile_scale), static_cast<int>(level_data.height)); ++y) {
+				for (int x = x_tile; x < std::min(x_tile + static_cast<int>(tile_scale), static_cast<int>(level_data.width)); ++x) {
+					int i = x + level_data.width * y;
+					level_data.data[i] = tile_colisions ? val : (val & 0xFFFFFF00) | level_data.data[i] & 0xFF;
+				}
+			}
+			level_data.data[index] = new_tile;
 		} else {
-			level_data.data[index] = (level_data.data[index] & 0xFF00) | (put ? 1 : 0);
+			level_data.data[index] = (level_data.data[index] & 0xFFFFFF00) | (put ? 1 : 0);
 		}
 	}
 }
@@ -138,6 +156,12 @@ void LevelMaker::handle_down(const SDL_Keycode key, const Uint8 mouse) {
 	if (tile_colisions_input->is_targeted(key, mouse)) {
 		tile_colisions = !tile_colisions;
 	}
+	if (tile_scale_up_input->is_targeted(key, mouse) && tile_scale < MAX_TILE_SCALE) {
+		tile_scale++;
+		
+	} else if (tile_scale_down_input->is_targeted(key, mouse) && tile_scale > 1) {
+		tile_scale--;
+	}
 }
 
 void LevelMaker::render() {
@@ -147,14 +171,17 @@ void LevelMaker::render() {
 	const int ts = ZOOM_LEVELS[zoom_level];
 	for (int x = x_start; x < x_end; ++x) {
 		for (int y = y_start; y < y_end; ++y) {
-			SDL_Rect dest = {(x - x_start) * ts, (y - y_start) * ts, ts, ts};
+			
 			if (editor_mode == PLACE_TILES) {
-				Uint16 tile_index = level_data.data[x + level_data.width * y] >> 8;
+				Uint16 tile_index = (level_data.data[x + level_data.width * y] >> 8) & 0xFF;
+				Uint16 scale = (level_data.data[x + level_data.width * y] >> 16) & 0xFF;
 				if (tile_index != 0xFF) {
 					SDL_Rect source = get_tile_rect(tile_index, level_data);
+					SDL_Rect dest = {(x - x_start) * ts, (y - y_start) * ts, ts * scale, ts * scale};
 					SDL_BlitScaled(tiles.get(), &source, window_surface, &dest);
 				}
 			} else {
+				SDL_Rect dest = {(x - x_start) * ts, (y - y_start) * ts, ts, ts};
 				if ((level_data.data[x + level_data.width * y] & 0xFF) != 0) {
 					SDL_FillRect(window_surface, &dest, SDL_MapRGB(window_surface->format, 0xFF, 0, 0));
 				}

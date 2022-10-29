@@ -36,7 +36,8 @@ class LevelMaker : public State {
 			zoom_in_input, zoom_out_input, 
 			put_tile_input, clear_tile_input,
 			left_input, right_input, up_input, down_input,
-			save_input, tiles_input, colisions_input, tile_colisions_input;
+			save_input, tiles_input, colisions_input, tile_colisions_input,
+			tile_scale_up_input, tile_scale_down_input;
 
 		Uint16 selected = 0;
 		
@@ -50,6 +51,9 @@ class LevelMaker : public State {
 		int x_start = 0, x_end = 80;
 		int y_start = 0, y_end = 80;
 		int zoom_level = 0;
+
+		// Number of tiles of one side of the texture (1-8). Uint32 so that tile_scale << 16 fits.
+		Uint32 tile_scale = 1; 
 
 		int editor_width = 640;
 };

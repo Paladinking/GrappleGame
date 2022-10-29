@@ -42,7 +42,9 @@ namespace bindings {
 			{"save_level", "S"},
 			{"tiles_mode", "1"},
 			{"collision_mode", "2"},
-			{"tile_collisions", "B"}
+			{"tile_collisions", "B"},
+			{"tile_scale_up", "Q"},
+			{"tile_scale_down", "E"}
 		}
 	};
 	

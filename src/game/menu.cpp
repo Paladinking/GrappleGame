@@ -229,7 +229,7 @@ void LevelMakerStartup::button_press(const int btn) {
 	switch (btn) {
 		case START_LEVEL_MAKER:
 			if (!loaded) {
-				data.data = std::make_unique<Uint16[]>(data.width * data.height);
+				data.data = std::make_unique<Uint32[]>(data.width * data.height);
 				for (size_t i = 0; i < data.width * data.height; ++i) {
 					data.data[i] = (0xFF << 8);
 				}
@@ -260,14 +260,12 @@ void LevelMakerStartup::button_press(const int btn) {
 		case ADD_HEIGHT:
 			if (!loaded) {
 				data.height += TILE_HEIGHT;
-				data.data = std::make_unique<Uint16[]>(data.width * data.height);
 				text[1].set_text("Height: " + std::to_string(data.height));
 			}
 			break;
 		case SUB_HEIGHT:
 			if (!loaded && data.height > TILE_HEIGHT) {
 				data.height -= TILE_HEIGHT;
-				data.data = std::make_unique<Uint16[]>(data.width * data.height);
 				text[1].set_text("Height: " + std::to_string(data.height));
 			}
 			break;
