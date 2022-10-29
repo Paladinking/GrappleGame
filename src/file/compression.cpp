@@ -29,8 +29,6 @@ size_t compressRead(SDL_RWops* ptr, void* dest, size_t size, size_t num) {
 	
 	const unsigned target = static_cast<unsigned>(size * num > UINT_MAX ?  (UINT_MAX / size) * size : size * num);
 
-	std::cout << target << std::endl;
-
 	unsigned read_bytes = 0;
 	SDL_RWops* source = static_cast<SDL_RWops*>(ptr->hidden.unknown.data1);
 	CompressData* comp_data = static_cast<CompressData*>(ptr->hidden.unknown.data2);

@@ -41,6 +41,7 @@ target_link_libraries(nfd User32.lib)
 add_library(
 	FileIO OBJECT
 	${FileIO_DIR}/json.cpp
+	${FileIO_DIR}/compression.cpp
 )
 
 add_library(

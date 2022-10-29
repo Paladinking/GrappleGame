@@ -4,6 +4,7 @@
 #include <string>
 #include <cstring>
 #include "util/exceptions.h"
+#include "compression.h"
 
 /**
  * file_exception, for when opening a file fails.
@@ -28,15 +29,23 @@ T swap_byteorder(T &t) {
 
 class FileReader {
 	public:
-		FileReader(std::string file_name, bool binary) {
+		FileReader(std::string file_name, bool binary, bool compression) {
 			in = SDL_RWFromFile(file_name.c_str(), binary ? "rb" : "r");
 			if (in == NULL) {
 				throw file_exception("File exception: " + std::string(SDL_GetError()));
 			}
+			if (compression) {
+				in = SDL_RWinflate(in);
+				if (in == NULL) {
+					throw file_exception("File exception: could not initialize inflation");
+				}
+			}
 			index = -1;
-			max = static_cast<long>(SDL_RWread(in, &buffer, sizeof(char), 256 * sizeof(char)));
+			max = static_cast<long>(SDL_RWread(in, &buffer, sizeof(char), BUFFER_SIZE * sizeof(char)));
 		}
 		
+		FileReader(std::string file_name, bool binary) : FileReader(file_name, binary, false) {}
+
 		~FileReader() {
 			SDL_RWclose(in);
 		}
@@ -47,9 +56,10 @@ class FileReader {
 		bool read_next(char &c) {
 			++index;
 			if (index == max) {
-				index = 0;
-				max = static_cast<long>(SDL_RWread(in, &buffer, sizeof(char), 256 * sizeof(char)));
+				index = -1;
+				max = static_cast<long>(SDL_RWread(in, &buffer, sizeof(char), BUFFER_SIZE * sizeof(char)));
 				if (max == 0) return false;
+				index = 0;
 			} 
 			c = buffer[index];
 			return true;
@@ -70,27 +80,31 @@ class FileReader {
 		 */
 		template<class T>
 		bool read_next(T &res) {
-			char* res_data = reinterpret_cast<char*>(&res);
-			for (int j = 0; j < sizeof(T); ++j) {
-				if (!read_next(res_data[j])) return false;
-			}
-			return true;
+			return read_many(&res, 1);
 		}
 		
 		/**
 		 * Reads nr objects of Type T into res. Returns false if not all objects could be read.
-		 * This will not use the buffer at all, it will be cleared. If reading an amount of data 
-		 * smaller than 256 bytes (the buffer size) it could be better to iterate over read_next<T>().
 		 */ 
 		template<class T>
 		bool read_many(T* res, int nr) {
-			++index;
-			long pos = static_cast<long>(SDL_RWtell(in)) - max + index;
-			SDL_RWseek(in, pos, RW_SEEK_SET);
-			long read = static_cast<long>(SDL_RWread(in, res, sizeof(T), nr));
-			index = -1;
-			max = 0;
-			return read == nr;
+			char* res_data = reinterpret_cast<char*>(res);
+			long remaining = sizeof(T) * nr;
+			do {
+				++index;
+				if (remaining <= max - index) {
+					memcpy(res_data + sizeof(T) * nr - remaining, buffer + index, remaining);
+					index += remaining - 1;
+					remaining = 0;
+				} else {
+					memcpy(res_data + sizeof(T) * nr - remaining, buffer + index, max - index);
+					remaining -= max - index;
+					index = -1;
+					max = static_cast<long>(SDL_RWread(in, &buffer, sizeof(char), BUFFER_SIZE * sizeof(char)));
+					if (max == 0) return false;
+				}
+			} while (remaining > 0);
+			return true;
 		}
 		
 		
@@ -186,7 +200,8 @@ class FileReader {
 		void reset(long &pos) {
 			SDL_RWseek(in, pos, RW_SEEK_SET);
 			index = 0;
-			max = static_cast<long>(SDL_RWread(in, &buffer, sizeof(char), 256 * sizeof(char)));
+			max = static_cast<long>(SDL_RWread(in, &buffer, sizeof(char), BUFFER_SIZE * sizeof(char)));
+			if (max == 0) index = -1;
 		}
 
 		/**
@@ -223,23 +238,34 @@ class FileReader {
 		
 	
 	private:
-		char buffer[256];
+	
+		static const long BUFFER_SIZE = 1024;
+
+		char buffer[BUFFER_SIZE];
 		SDL_RWops *in;
 		
 		long mark_index = 0;
 		
 		long index = 0;
-		long max = 0;
+		long max = 0;		
 };
 
 class FileWriter {
 	public:
-		FileWriter(std::string file_name, bool binary) {
+		FileWriter(std::string file_name, bool binary, bool compression) {
 			out = SDL_RWFromFile(file_name.c_str(), binary ? "wb" : "w");
 			if (out == NULL) {
 				throw file_exception("Could not open file, " + std::string(SDL_GetError()));
 			}
+			if (compression) {
+				out = SDL_RWdeflate(out);
+				if (out == NULL) {
+					throw file_exception("Could not initialize deflation.");
+				}
+			}
 		}
+		
+		FileWriter(std::string file_name, bool binary) : FileWriter(file_name, binary, false) {}
 		
 		~FileWriter() {
 			SDL_RWclose(out);
@@ -252,7 +278,7 @@ class FileWriter {
 		
 		bool write(const char *s, size_t len) {
 			size_t written = SDL_RWwrite(out, s, 1, len + 1);
-			return written == len + 1;
+			return written == len + 1;	
 		}
 		
 		bool write(const char c) {
