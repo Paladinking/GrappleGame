@@ -50,11 +50,10 @@ void run_game(Game &game, int& exit_status) {
 	game.destroy_game();
 }
 
-int main(int argc, char* args[])
-{
-	atexit(cleanup);
-	at_quick_exit(cleanup);
-
+/**
+ * Initialize SDL, engine and config.
+ */
+void init() {
 	if (SDL_Init(SDL_INIT_VIDEO) < 0) {
 		std::cout << "Could not initialize SDL, "  << SDL_GetError() << std::endl;
 		exit(-1);
@@ -64,6 +63,20 @@ int main(int argc, char* args[])
 		std::cout << "Could not initialize SDL_tff, " << TTF_GetError() << std::endl;
 		exit(-2);
 	}
+	
+	try {
+		engine::init();
+		config::init();
+	} catch (const base_exception &e) {
+		std::cout << e.msg << std::endl;
+		exit(-3);
+	}
+}
+
+int main(int argc, char* args[])
+{
+	atexit(cleanup);
+	at_quick_exit(cleanup);
 
 	bool level_maker = false;
 
@@ -75,25 +88,15 @@ int main(int argc, char* args[])
 			} 
 		}
 	}
-
 	
-	try {
-		engine::init();
-		config::init();
-	} catch (const base_exception &e) {
-		std::cout << e.msg << std::endl;
-		exit(-3);
-	}
+	init();
+
 	int exit_status = 0;
-	State* state;
 	if (level_maker) {
 		return -4;
-	} else {
-		state = new MainMenu();
 	}
 
-	StateGame game(state, "Grapple Game");
-	std::cout << '2' << std::endl;
+	StateGame game(new MainMenu(), "Grapple Game");
 	run_game(game, exit_status);
 
 	return exit_status;
