@@ -9,7 +9,7 @@
 // Tile apperance (0xUUSSIITT)
 // UU = unused
 // SS = tilescale
-// II = image id
+// II = image id (0xFF means no image)
 // TT = tile type (empty 0 or solid 1)
 // eg empty tile apperance (0x0000FF00)
 
