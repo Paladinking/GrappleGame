@@ -411,7 +411,6 @@ void json::write_to_file(std::string path, const JsonObject &obj, bool pretty) {
 	}
 	std::string str = s.str();
 	writer.write(str);
-	
 }
 
 void to_pretty_stream(std::ostream& os, const json::Type& val, int indentations) {

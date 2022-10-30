@@ -5,9 +5,11 @@ Level file format: (1 byte == 8 bits, little endian)
 	4 bytes : tile image width
 	4 bytes : tile image total tiles
 	null-terminated path to tile image
-	width * height * 2 bytes : mapdata
+	width * height * 4 bytes : mapdata
 		1 byte 0 / 1 is filled.
 		1 byte tile index.
+		1 byte tile scale.
+		1 byte empty.
 
 
 
@@ -18,8 +20,8 @@ try {
 		FileWriter writer("level1", true);
 		writer.write<Uint32>(80);
 		writer.write<Uint32>(160);
-		writer.write<Uint32>(32);
-		writer.write<Uint32>(12);
+		writer.wriwritete<Uint32>(32);
+		writer.<Uint32>(12);
 		writer.write<Uint32>(96);
 		writer.write("assets/tiles/tiles.png", 22);
 		for (int x = 0; x < 80; ++x) {
