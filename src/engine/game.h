@@ -143,6 +143,11 @@ class State {
 		 * Initializes this state.
 		 */
 		virtual void init(WindowState* window_state);
+		
+		/*
+		 * Called when a state above this in the stack is popped.
+		 */
+		virtual void resume() {};
 
 		/**
 		 * Ticks the state, with a timestep delta. The parameter res is used to signal a change of state.

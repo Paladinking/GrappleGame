@@ -50,7 +50,8 @@ void ClimbGame::handle_input(double delta, StateStatus& res) {
 
 	if (do_grapple) { //Grapple is a push input, but mouse_pos is updated after. (Change?)
 		do_grapple = false;
-		int world_mouseX = window_state->mouseX, world_mouseY = window_state->mouseY + static_cast<int>(camera_y);
+		const int world_mouseX = window_state->mouseX - game_viewport.x;
+		const int world_mouseY = window_state->mouseY + static_cast<int>(camera_y) - game_viewport.y;
 		player->fire_grapple(world_mouseX, world_mouseY);
 	}
 	
@@ -60,8 +61,12 @@ void ClimbGame::handle_input(double delta, StateStatus& res) {
 }
 
 void ClimbGame::render() {
-	SDL_SetRenderDrawColor(gRenderer, 0xFF, 0xFF, 0xFF, 0xFF);
+	SDL_RenderSetViewport(gRenderer, &game_viewport);
+	SDL_SetRenderDrawColor(gRenderer, 0xAA, 0xAA, 0xAA, 0xFF);
 	SDL_RenderClear(gRenderer);
+	SDL_SetRenderDrawColor(gRenderer, 0xFF, 0xFF, 0xFF, 0xFF);
+	SDL_RenderFillRect(gRenderer, NULL);
+	
 	int camera_y_tile = (static_cast<int>(camera_y)) / level.get_tilesize();
 	level.render(static_cast<int>(camera_y));
 	player->render(static_cast<int>(camera_y));
@@ -75,6 +80,13 @@ void ClimbGame::init(WindowState* ws) {
 	std::pair<std::string, std::string> lvl1 = config::get_level(0);
 	level.set_screen_size(SCREEN_WIDTH, SCREEN_HEIGHT);
 	level.load_from_file(lvl1.first, lvl1.second);
+	
+	game_viewport = {
+		window_state->screen_width / 2 - SCREEN_WIDTH / 2, 
+		window_state->screen_height / 2 - SCREEN_HEIGHT / 2,
+		SCREEN_WIDTH,
+		SCREEN_HEIGHT
+	};
 	
 	const int tile_size = level.get_tilesize();
 
@@ -95,6 +107,9 @@ void ClimbGame::init(WindowState* ws) {
 
 	player->set_position(PLAYER_START_X, PLAYER_START_Y);
 	entities.push_back(player);
+	
+	SDL_SetRenderDrawColor(gRenderer, 0xFF, 0xAA, 0xFF, 0xFF);
+	SDL_RenderClear(gRenderer);
 }
 
 

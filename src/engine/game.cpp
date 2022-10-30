@@ -173,6 +173,7 @@ void StateGame::tick(Uint64 delta) {
 				exit_game();
 			} else {
 				update_window(states.top().get());
+				states.top()->resume();
 			}
 			break;
 		case StateStatus::EXIT:

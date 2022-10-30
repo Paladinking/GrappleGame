@@ -14,7 +14,7 @@ void MainMenu::init(WindowState* window_state) {
 	SDL_ShowWindow(gWindow);
 	State::init(window_state);
 	SDL_GetRendererOutputSize(gRenderer, &window_state->screen_width, &window_state->screen_height);
-	SDL_WindowSize(gWindow, &window_state->window_width, &window_state->window_height);
+	SDL_GetWindowSize(gWindow, &window_state->window_width, &window_state->window_height);
 
 	buttons.reserve(ButtonId::TOTAL);
 	for (int i = 0; i < ButtonId::TOTAL; ++i) {
@@ -27,6 +27,10 @@ void MainMenu::init(WindowState* window_state) {
 		);
 	}
 	exit = false;
+}
+
+void MainMenu::resume() {
+	SDL_RenderSetViewport(gRenderer, NULL);
 }
 
 void MainMenu::button_press(const int btn) {

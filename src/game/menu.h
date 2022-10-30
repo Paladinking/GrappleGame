@@ -18,6 +18,11 @@ class MainMenu : public Menu {
 		 */
 		virtual void init(WindowState* window_state) override;
 
+		/**
+		 * Fixes the viewport.
+		 */
+		virtual void resume() override;
+
 	protected:
 
 		virtual void button_press(const int btn) override;
