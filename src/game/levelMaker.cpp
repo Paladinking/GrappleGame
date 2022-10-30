@@ -42,7 +42,7 @@ void LevelMaker::init(WindowState* ws) {
 	tile_colisions_input = get_press_input(controls.get<std::string>("tile_collisions"), "None");
 	tile_scale_up_input = get_press_input(controls.get<std::string>("tile_scale_up"), "None");
 	tile_scale_down_input = get_press_input(controls.get<std::string>("tile_scale_down"), "None");
-	editor_width = SCREEN_WIDTH * 2;
+	editor_width = SCREEN_WIDTH;
 
 	SDL_Surface* t = IMG_Load(tiles_path.c_str());
 	if (t == NULL) {
