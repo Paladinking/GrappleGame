@@ -17,10 +17,6 @@ class MainMenu : public Menu {
 		 * Initializes the MainMenu, creating all buttons.
 		 */
 		virtual void init(WindowState* window_state) override;
-		
-		virtual int get_prefered_width() const override;
-		
-		virtual int get_prefered_height() const override;
 
 	protected:
 
@@ -48,15 +44,15 @@ class OptionsMenu : public Menu {
 		static const int BUTTON_WIDTH = 100, BUTTON_HEIGHT = 50;
 
 		virtual void handle_down(const SDL_Keycode key, const Uint8 mouse) override;
-		
+
 		virtual void handle_up(const SDL_Keycode key,const Uint8 mouse) override;
 
 		virtual void button_press(const int btn) override;
-		
+
 		virtual void render() override;
-		
+
 		virtual void handle_wheel(const SDL_MouseWheelEvent &e) override;
-		
+
 		virtual void menu_exit() override;
 
 	private:
@@ -70,9 +66,9 @@ class OptionsMenu : public Menu {
 		int last_input_button;
 
 		int btn;
-		
+
 		int full_height, camera_y;
-		
+
 		void color_matching(const int index, const std::string& cur, const std::string& old);
 
 };
@@ -86,16 +82,16 @@ class LevelMakerStartup : public Menu {
 	protected:
 
 		virtual void button_press(const int btn) override;
-		
+
 	private:
 		enum ButtonId {
 			START_LEVEL_MAKER, NEW_LEVEL, LOAD_FILE, ADD_HEIGHT, SUB_HEIGHT
 		};
 
 		void create_default_level();
-		
+
 		void sync_text();
-		
+
 		bool loaded;
 
 		std::string tileset_path;

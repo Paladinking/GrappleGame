@@ -24,10 +24,6 @@ class ClimbGame : public State {
 		virtual void handle_up(const SDL_Keycode key, const Uint8 mouse) override;
 
 		virtual void handle_down(const SDL_Keycode key, const Uint8 mouse) override;
-		
-		virtual int get_prefered_width() const override;
-
-		virtual int get_prefered_height() const override;
 
 	private:
 	

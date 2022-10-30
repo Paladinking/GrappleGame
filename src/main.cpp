@@ -96,7 +96,7 @@ int main(int argc, char* args[])
 		return -4;
 	}
 
-	StateGame game(new MainMenu(), "Grapple Game");
+	StateGame game(new MainMenu(), 100, 100, "Grapple Game");
 	run_game(game, exit_status);
 
 	return exit_status;

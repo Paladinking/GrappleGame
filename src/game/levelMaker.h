@@ -19,11 +19,6 @@ class LevelMaker : public State {
 		virtual void init(WindowState* window_state) override;
 
 		virtual void render() override;
-		
-		virtual int get_prefered_width() const override;
-
-		virtual int get_prefered_height() const override;
-
 	private:
 
 		void tile_press(bool put);

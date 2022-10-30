@@ -190,7 +190,7 @@ class State {
  */
 class StateGame : public Game {
 	public:
-		StateGame(State* state, const std::string& title);
+		StateGame(State* state, const int w, const int h, const std::string& title);
 
 	protected:
 

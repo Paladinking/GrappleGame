@@ -13,11 +13,9 @@ void MainMenu::init(WindowState* window_state) {
 	SDL_SetWindowTitle(gWindow, "ClimbGame");
 	SDL_ShowWindow(gWindow);
 	State::init(window_state);
-	//int x, y;
-	//SDL_GetRendererOutputSize(gRenderer, &x, &y);
-	//SDL_Rect viewport = {x / 2 - SCREEN_WIDTH / 2, y / 2 - SCREEN_HEIGHT / 2, SCREEN_WIDTH, SCREEN_HEIGHT};
-	//SDL_RenderSetViewport(gRenderer, &viewport);
-	
+	SDL_GetRendererOutputSize(gRenderer, &window_state->screen_width, &window_state->screen_height);
+	SDL_WindowSize(gWindow, &window_state->window_width, &window_state->window_height);
+
 	buttons.reserve(ButtonId::TOTAL);
 	for (int i = 0; i < ButtonId::TOTAL; ++i) {
 		buttons.emplace_back(
@@ -29,15 +27,6 @@ void MainMenu::init(WindowState* window_state) {
 		);
 	}
 	exit = false;
-}
-
-int MainMenu::get_prefered_width() const {
-	return SCREEN_WIDTH;
-}
-
-		
-int MainMenu::get_prefered_height() const {
-	return SCREEN_WIDTH;
 }
 
 void MainMenu::button_press(const int btn) {

@@ -30,8 +30,8 @@ void ClimbGame::tick(const Uint64 delta, StateStatus& res) {
 		camera_y -= std::min(CAMERA_SPEED * dDelta, CAMERA_PAN_REGION - camera_y_delta);
 		if (camera_y < camera_y_min) camera_y = camera_y_min;
 	}
-	else if (camera_y_delta > window_state->screen_height - CAMERA_PAN_REGION) {
-		camera_y += std::min(CAMERA_SPEED * dDelta, camera_y_delta - window_state->screen_height + CAMERA_PAN_REGION);
+	else if (camera_y_delta > SCREEN_HEIGHT - CAMERA_PAN_REGION) {
+		camera_y += std::min(CAMERA_SPEED * dDelta, camera_y_delta - SCREEN_HEIGHT + CAMERA_PAN_REGION);
 		if (camera_y > camera_y_max) camera_y = camera_y_max;
 	}
 }
@@ -71,16 +71,15 @@ void ClimbGame::render() {
 
 void ClimbGame::init(WindowState* ws) {
 	State::init(ws);
-
 	create_inputs();
 	std::pair<std::string, std::string> lvl1 = config::get_level(0);
-	level.set_screen_size(window_state->screen_width, window_state->screen_height);
+	level.set_screen_size(SCREEN_WIDTH, SCREEN_HEIGHT);
 	level.load_from_file(lvl1.first, lvl1.second);
 	
 	const int tile_size = level.get_tilesize();
 
-	visible_tiles_x = window_state->screen_width / tile_size;
-	visible_tiles_y = window_state->screen_height / tile_size;
+	visible_tiles_x = SCREEN_WIDTH / tile_size;
+	visible_tiles_y = SCREEN_HEIGHT / tile_size;
 	camera_y = PLAYER_START_Y;
 	camera_y_max = tile_size * (level.get_height() - visible_tiles_y);
 	camera_y_min = 0;
@@ -137,12 +136,4 @@ void ClimbGame::handle_up(const SDL_Keycode key, const Uint8 mouse) {
 	if (release_input->is_targeted(key, mouse)) {
 		player->set_release(false);
 	}
-}
-
-int ClimbGame::get_prefered_width() const {
-	return SCREEN_WIDTH;
-}
-
-int ClimbGame::get_prefered_height() const {
-	return SCREEN_HEIGHT;
 }

@@ -49,7 +49,7 @@ void Game::create() {
 	SDL_GetWindowSize(gWindow, &window_state.window_width, &window_state.window_height);
 	SDL_GetRendererOutputSize(gRenderer, &window_state.screen_width, &window_state.screen_height);
 	destroyed = false;
-	
+
 	init();
 }
 
@@ -138,12 +138,13 @@ int State::get_prefered_height() const {
  *
  */
  
-StateGame::StateGame(State* initial_state, const std::string& title) : 
-	Game(initial_state->get_prefered_width(), initial_state->get_prefered_height(), title) {
+StateGame::StateGame(State* initial_state, const int w, const int h, const std::string& title) : 
+	Game(w, h, title) {
 	states.emplace(initial_state);
 }
 
 void StateGame::init() {
+	update_window(states.top().get());
 	states.top()->init(&window_state);
 }
 
