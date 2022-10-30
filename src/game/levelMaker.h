@@ -17,9 +17,13 @@ class LevelMaker : public State {
 		virtual void handle_down(const SDL_Keycode key, const Uint8 mouse) override;
 
 		virtual void init(WindowState* window_state) override;
+	
+		virtual void handle_wheel(const SDL_MouseWheelEvent &e) override;
 
 		virtual void render() override;
 	private:
+	
+		void zoom(const bool in);
 
 		void tile_press(bool put);
 		
@@ -46,15 +50,15 @@ class LevelMaker : public State {
 
 		LevelData level_data;
 		bool tile_colisions = true;
+		bool updated = true;
 
-		int x_start = 0, x_end = 80;
-		int y_start = 0, y_end = 80;
-		int zoom_level = 0;
+		int scale_factor = 1;
+		double camera_x = 0.0, camera_y = 0.0;
+		
+		SDL_Rect editor_viewport, tiles_viewport;
 
 		// Number of tiles of one side of the texture (1-8). Uint32 so that tile_scale << 16 fits.
 		Uint32 tile_scale = 1; 
-
-		int editor_width = 640;
 };
 
 #endif
