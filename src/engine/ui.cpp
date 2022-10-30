@@ -144,15 +144,11 @@ void Menu::render() {
 }
 
 void Menu::tick(const Uint64 delta, StateStatus& res) {
-	if (exit) {
-		res.action = StateStatus::POP;
-	} else if (next_state != nullptr) {
-		res.new_state = next_state;
-		res.action = StateStatus::PUSH;
-		next_state = nullptr;
-	}
+	res = next_res;
+	next_res.action = StateStatus::NONE;
+	next_res.new_state = nullptr;
 }
 
 void Menu::menu_exit() {
-	exit = true;
+	next_res.action = StateStatus::POP;
 }

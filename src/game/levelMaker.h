@@ -21,6 +21,8 @@ class LevelMaker : public State {
 		virtual void handle_wheel(const SDL_MouseWheelEvent &e) override;
 
 		virtual void render() override;
+		
+		virtual void tick(const Uint64 delta, StateStatus& res) override;
 	private:
 	
 		void zoom(const bool in);
@@ -41,6 +43,7 @@ class LevelMaker : public State {
 			left_input, right_input, up_input, down_input,
 			save_input, tiles_input, colisions_input, tile_colisions_input,
 			tile_scale_up_input, tile_scale_down_input;
+		std::unique_ptr<HoldInput> camera_pan_input, exit_input;
 
 		Uint16 selected = 0;
 		

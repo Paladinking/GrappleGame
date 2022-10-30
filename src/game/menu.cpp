@@ -26,7 +26,6 @@ void MainMenu::init(WindowState* window_state) {
 			BUTTON_NAMES[i]
 		);
 	}
-	exit = false;
 }
 
 void MainMenu::resume() {
@@ -36,13 +35,13 @@ void MainMenu::resume() {
 void MainMenu::button_press(const int btn) {
 	switch (btn) {
 		case START_GAME:
-			next_state = new ClimbGame();
+			next_res = {StateStatus::PUSH, new ClimbGame()};
 			break;
 		case LEVEL_MAKER: 
-			next_state = new LevelMakerStartup();
+			next_res = {StateStatus::PUSH, new LevelMakerStartup()};
 			break;
 		case OPTIONS:
-			next_state = new OptionsMenu();
+			next_res = {StateStatus::PUSH, new OptionsMenu()};
 			break;
 	}
 }
@@ -256,7 +255,7 @@ void LevelMakerStartup::button_press(const int btn) {
 					data.data[i] = (0xFF << 8);
 				}
 			}
-			next_state = new LevelMaker(std::move(data), config::get_asset_path(tileset_path));
+			next_res = {StateStatus::SWAP, new LevelMaker(std::move(data), config::get_asset_path(tileset_path))};
 			break;
 		case NEW_LEVEL: 
 			create_default_level();

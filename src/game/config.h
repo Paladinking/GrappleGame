@@ -44,7 +44,8 @@ namespace bindings {
 			{"collision_mode", "2"},
 			{"tile_collisions", "B"},
 			{"tile_scale_up", "Q"},
-			{"tile_scale_down", "E"}
+			{"tile_scale_down", "E"},
+			{"camera_pan", "Mouse Middle"}
 		}
 	};
 	

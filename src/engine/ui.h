@@ -123,6 +123,7 @@ class Menu : public State {
 		Menu();
 		
 		Menu(const std::string& exit_input);
+
 		/**
 		 * Handles a down-event of keyboard or mouse.
 		 */
@@ -146,12 +147,10 @@ class Menu : public State {
 	protected:
 		std::vector<Button> buttons;
 		std::vector<TextBox> text;
-		
 
 
 		// Set by subclasses to swap state
-		State* next_state = nullptr;	
-		bool exit = false;
+		StateStatus next_res;
 
 		/**
 		 * Called when a button is pressed.

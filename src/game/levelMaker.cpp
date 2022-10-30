@@ -46,6 +46,8 @@ void LevelMaker::init(WindowState* ws) {
 	tile_colisions_input = get_press_input(controls.get<std::string>("tile_collisions"), "None");
 	tile_scale_up_input = get_press_input(controls.get<std::string>("tile_scale_up"), "None");
 	tile_scale_down_input = get_press_input(controls.get<std::string>("tile_scale_down"), "None");
+	camera_pan_input = get_hold_input(controls.get<std::string>("camera_pan"), "None");
+	exit_input = get_hold_input(config::get_bindings(bindings::GENERAL.key).get<std::string>("exit_menu"), "None");
 
 	tiles_viewport = {
 		window_state->screen_width - TILE_SELECTOR_SIZE * TILE_SELECTOR_TW,
@@ -164,13 +166,17 @@ void LevelMaker::handle_down(const SDL_Keycode key, const Uint8 mouse) {
 	} 
 	if (left_input->is_targeted(key, mouse)) {
 		camera_x -= DEFAULT_TS * SCALE_FACTORS[scale_factor] / 3.0;
+		updated = true;
 	} else if (right_input->is_targeted(key, mouse)) {
 		camera_x += DEFAULT_TS * SCALE_FACTORS[scale_factor] / 3.0;
+		updated = true;
 	}
 	if (up_input->is_targeted(key, mouse)) {
 		camera_y -= DEFAULT_TS * SCALE_FACTORS[scale_factor] / 3.0;
+		updated = true;
 	} else if (down_input->is_targeted(key, mouse)) {
 		camera_y += DEFAULT_TS * SCALE_FACTORS[scale_factor] / 3.0;
+		updated = true;
 	}
 	if (save_input->is_targeted(key, mouse)) {
 		std::string path;
@@ -194,25 +200,26 @@ void LevelMaker::handle_down(const SDL_Keycode key, const Uint8 mouse) {
 	} else if (tile_scale_down_input->is_targeted(key, mouse) && tile_scale > 1) {
 		tile_scale--;
 	}
-	if (zoom_in_input->is_targeted(key, mouse) && scale_factor < SCALE_FACTORS_LEN - 1) {
-		scale_factor++;
-		updated = true;
-	} else if (zoom_out_input->is_targeted(key, mouse) && scale_factor > 0) {
-		scale_factor--;
-		updated = true;
-	} 
 }
 
-void LevelMaker::render() {
-	int mouse_dx = 0, mouse_dy = 0;
-	Uint32 state = SDL_GetRelativeMouseState(&mouse_dx, &mouse_dy);
-	const double ts = DEFAULT_TS * SCALE_FACTORS[scale_factor];
-	if ((state & SDL_BUTTON_MMASK) != 0) {
+void LevelMaker::tick(const Uint64 delta, StateStatus& res) {
+	if (exit_input->is_pressed(window_state->keyboard_state, window_state->mouse_mask)) {
+		res.action = StateStatus::POP;
+	} else if (camera_pan_input->is_pressed(window_state->keyboard_state, window_state->mouse_mask)) {
+		int mouse_dx = 0, mouse_dy = 0;
+		SDL_GetRelativeMouseState(&mouse_dx, &mouse_dy);
 		camera_x -= mouse_dx;
 		camera_y -= mouse_dy;
 		updated = true;
+	} else {
+		SDL_GetRelativeMouseState(NULL, NULL);
 	}
-	
+}
+
+void LevelMaker::render() {
+	if (!updated) return;
+
+	const double ts = DEFAULT_TS * SCALE_FACTORS[scale_factor];
 	
 	if (camera_x < 0) 
 		camera_x = 0;
@@ -228,8 +235,7 @@ void LevelMaker::render() {
 	SDL_Rect r = {0, 0, window_state->screen_width, window_state->screen_height};
 	SDL_FillRect(window_surface, &r, SDL_MapRGB(window_surface->format, 235, 235, 235));
 	SDL_FillRect(window_surface, &editor_viewport, SDL_MapRGB(window_surface->format, 255, 255, 255));
-	
-	if (!updated) return;
+
 	const int first_tile_x = static_cast<int>(camera_x / ts);
 	const int last_tile_x = std::min(
 		static_cast<int>((camera_x + editor_viewport.w) / ts + 1), static_cast<int>(level_data.width));

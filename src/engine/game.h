@@ -30,7 +30,8 @@ struct WindowState {
 
 	int mouseX;
 	int mouseY;
-	Uint8 mouseButton;
+	Uint32 mouse_mask;
+	const Uint8* keyboard_state;
 };
 
 
@@ -125,7 +126,7 @@ class State;
  */
 struct StateStatus {
 	enum {NONE, SWAP, PUSH, POP, EXIT} action = NONE;
-	// Not smart pointer, will be put in unique_ptr on the State stack later
+	// state to be put on the State stack after a SWAP / PUSH
 	State* new_state = nullptr;
 };
 

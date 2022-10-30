@@ -37,12 +37,11 @@ void ClimbGame::tick(const Uint64 delta, StateStatus& res) {
 }
 
 void ClimbGame::handle_input(double delta, StateStatus& res) {
-	const Uint8* currentKeyStates = SDL_GetKeyboardState(NULL);
 	const Vector2D &vel = player->get_velocity(); 
-	if (left_input->is_pressed(currentKeyStates, window_state->mouseButton) && vel.x > -MAX_MOVEMENT_VEL) {
+	if (left_input->is_pressed(window_state->keyboard_state, window_state->mouse_mask) && vel.x > -MAX_MOVEMENT_VEL) {
 		player->add_acceleration(-MOVEMENT_ACCELERATION, 0);
 	}
-	if (right_input->is_pressed(currentKeyStates, window_state->mouseButton) && vel.x < MAX_MOVEMENT_VEL) 
+	if (right_input->is_pressed(window_state->keyboard_state, window_state->mouse_mask) && vel.x < MAX_MOVEMENT_VEL) 
 	{
 		player->add_acceleration(MOVEMENT_ACCELERATION, 0);
 	}
@@ -55,7 +54,7 @@ void ClimbGame::handle_input(double delta, StateStatus& res) {
 		player->fire_grapple(world_mouseX, world_mouseY);
 	}
 	
-	if (currentKeyStates[SDL_SCANCODE_ESCAPE]) {
+	if (window_state->keyboard_state[SDL_SCANCODE_ESCAPE]) {
 		res.action = StateStatus::POP;
 	}
 }

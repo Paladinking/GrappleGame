@@ -50,6 +50,7 @@ void Game::create() {
 	SDL_GetRendererOutputSize(gRenderer, &window_state.screen_width, &window_state.screen_height);
 	destroyed = false;
 
+	window_state.keyboard_state = SDL_GetKeyboardState(NULL);
 	init();
 }
 
@@ -86,7 +87,7 @@ void Game::run() {
 					break;
 			}
 		}
-		window_state.mouseButton = SDL_GetMouseState(&window_state.mouseX, &window_state.mouseY);
+		window_state.mouse_mask = SDL_GetMouseState(&window_state.mouseX, &window_state.mouseY);
 		Uint64 cur_time = SDL_GetTicks64();
 		this->tick(cur_time - last_time);
 		if (!running) break;
