@@ -13,17 +13,21 @@
 
 class ClimbGame : public State {
 	public:
-		ClimbGame() : State(SCREEN_WIDTH, SCREEN_HEIGHT, "Climbgame"), level(TILE_SIZE) {}
+		ClimbGame() : State(), level(TILE_SIZE) {}
 
 		virtual void tick(const Uint64 delta, StateStatus& res) override;
 
-		virtual void init() override;
+		virtual void init(WindowState* window_state) override;
 
 		virtual void render() override;
 
 		virtual void handle_up(const SDL_Keycode key, const Uint8 mouse) override;
 
 		virtual void handle_down(const SDL_Keycode key, const Uint8 mouse) override;
+		
+		virtual int get_prefered_width() const override;
+
+		virtual int get_prefered_height() const override;
 
 	private:
 	

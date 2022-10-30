@@ -49,9 +49,9 @@ void LevelData::write_to_file(const std::string& path) {
 	}
 }
 
-void Level::set_window_size(const int win_width, const int win_height) {
-	window_width = win_width;
-	window_height = win_height;
+void Level::set_screen_size(const int sw, const int sh) {
+	screen_width = sw;
+	screen_height = sh;
 }
 
 void Level::load_from_file(const std::string& path, const std::string& img_path) {
@@ -71,7 +71,7 @@ void Level::load_from_file(const std::string& path, const std::string& img_path)
 
 	for (int i = 0; i < visible_screens; ++i) {
 		surfaces[i].reset(SDL_CreateRGBSurfaceWithFormat(
-			0, window_width, window_height, tiles->format->BitsPerPixel, tiles->format->format
+			0, screen_width, screen_height, tiles->format->BitsPerPixel, tiles->format->format
 		));
 	}
 	
@@ -99,11 +99,11 @@ void Level::load_from_file(const std::string& path, const std::string& img_path)
 
 		SDL_Rect dest = {
 			(i % static_cast<int>(level_data.width)) * tile_size,
-			((i / static_cast<int>(level_data.width)) * tile_size) % window_height,
+			((i / static_cast<int>(level_data.width)) * tile_size) % screen_height,
 			tile_size * tile_scale, tile_size * tile_scale
 		};
 
-		const int surface_index = ((i / level_data.width)) / (window_height / tile_size);
+		const int surface_index = ((i / level_data.width)) / (screen_height / tile_size);
 
 		SDL_BlitScaled(tiles.get(), &source, surfaces[surface_index].get(), &dest);
 	}
@@ -111,7 +111,7 @@ void Level::load_from_file(const std::string& path, const std::string& img_path)
 	level_textures.clear();
 	for (int i = 0; i < visible_screens; ++i) {
 		SDL_Texture* texture = SDL_CreateTextureFromSurface(gRenderer, surfaces[i].get());
-		level_textures.emplace_back(texture, window_width, window_height);
+		level_textures.emplace_back(texture, screen_width, screen_height);
 	}
 
 
@@ -164,9 +164,9 @@ std::vector<std::shared_ptr<Corner>>& Level::get_corners() {
 }
 
 void Level::render(int cameraY) {
-	int first = cameraY / window_height;
-	int last = (cameraY + 2 * window_height - 1) / window_height;
+	int first = cameraY / screen_height;
+	int last = (cameraY + 2 * screen_height - 1) / screen_height;
 	for (int i = first; i < last; ++i) {
-		level_textures[i].render(0, i * window_height - cameraY);
+		level_textures[i].render(0, i * screen_height - cameraY);
 	}
 }

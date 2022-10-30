@@ -30,8 +30,8 @@ void ClimbGame::tick(const Uint64 delta, StateStatus& res) {
 		camera_y -= std::min(CAMERA_SPEED * dDelta, CAMERA_PAN_REGION - camera_y_delta);
 		if (camera_y < camera_y_min) camera_y = camera_y_min;
 	}
-	else if (camera_y_delta > window_height - CAMERA_PAN_REGION) {
-		camera_y += std::min(CAMERA_SPEED * dDelta, camera_y_delta - window_height + CAMERA_PAN_REGION);
+	else if (camera_y_delta > window_state->screen_height - CAMERA_PAN_REGION) {
+		camera_y += std::min(CAMERA_SPEED * dDelta, camera_y_delta - window_state->screen_height + CAMERA_PAN_REGION);
 		if (camera_y > camera_y_max) camera_y = camera_y_max;
 	}
 }
@@ -39,10 +39,10 @@ void ClimbGame::tick(const Uint64 delta, StateStatus& res) {
 void ClimbGame::handle_input(double delta, StateStatus& res) {
 	const Uint8* currentKeyStates = SDL_GetKeyboardState(NULL);
 	const Vector2D &vel = player->get_velocity(); 
-	if (left_input->is_pressed(currentKeyStates, mouseButton) && vel.x > -MAX_MOVEMENT_VEL) {
+	if (left_input->is_pressed(currentKeyStates, window_state->mouseButton) && vel.x > -MAX_MOVEMENT_VEL) {
 		player->add_acceleration(-MOVEMENT_ACCELERATION, 0);
 	}
-	if (right_input->is_pressed(currentKeyStates, mouseButton) && vel.x < MAX_MOVEMENT_VEL) 
+	if (right_input->is_pressed(currentKeyStates, window_state->mouseButton) && vel.x < MAX_MOVEMENT_VEL) 
 	{
 		player->add_acceleration(MOVEMENT_ACCELERATION, 0);
 	}
@@ -50,7 +50,7 @@ void ClimbGame::handle_input(double delta, StateStatus& res) {
 
 	if (do_grapple) { //Grapple is a push input, but mouse_pos is updated after. (Change?)
 		do_grapple = false;
-		int world_mouseX = mouseX, world_mouseY = mouseY + static_cast<int>(camera_y);
+		int world_mouseX = window_state->mouseX, world_mouseY = window_state->mouseY + static_cast<int>(camera_y);
 		player->fire_grapple(world_mouseX, world_mouseY);
 	}
 	
@@ -69,17 +69,18 @@ void ClimbGame::render() {
 	SDL_RenderPresent(gRenderer);
 }
 
-void ClimbGame::init() {
-	State::init();
+void ClimbGame::init(WindowState* ws) {
+	State::init(ws);
+
 	create_inputs();
 	std::pair<std::string, std::string> lvl1 = config::get_level(0);
-	level.set_window_size(window_width, window_height);
+	level.set_screen_size(window_state->screen_width, window_state->screen_height);
 	level.load_from_file(lvl1.first, lvl1.second);
 	
 	const int tile_size = level.get_tilesize();
 
-	visible_tiles_x = window_width / tile_size;
-	visible_tiles_y = window_height / tile_size;
+	visible_tiles_x = window_state->screen_width / tile_size;
+	visible_tiles_y = window_state->screen_height / tile_size;
 	camera_y = PLAYER_START_Y;
 	camera_y_max = tile_size * (level.get_height() - visible_tiles_y);
 	camera_y_min = 0;
@@ -136,4 +137,12 @@ void ClimbGame::handle_up(const SDL_Keycode key, const Uint8 mouse) {
 	if (release_input->is_targeted(key, mouse)) {
 		player->set_release(false);
 	}
+}
+
+int ClimbGame::get_prefered_width() const {
+	return SCREEN_WIDTH;
+}
+
+int ClimbGame::get_prefered_height() const {
+	return SCREEN_HEIGHT;
 }

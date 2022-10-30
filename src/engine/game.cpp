@@ -1,4 +1,5 @@
 #include "game.h"
+#include <iostream>
 
 SDL_Renderer* gRenderer;
 SDL_Window* gWindow;
@@ -26,7 +27,7 @@ void Game::create() {
 		initial_title.c_str(), 
 		SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 
 		initial_width, initial_height, 
-		SDL_WINDOW_SHOWN
+		SDL_WINDOW_HIDDEN
 	);
 
     if (gWindow == NULL )
@@ -40,12 +41,15 @@ void Game::create() {
 		SDL_DestroyWindow(gWindow);
 		throw SDL_exception("Renderer could not be created, " + std::string(SDL_GetError()));
 	}
-
+	
 	SDL_RenderSetVSync(gRenderer, 1);
 	SDL_SetRenderDrawBlendMode(gRenderer, SDL_BLENDMODE_BLEND);
 	SDL_SetRenderDrawColor(gRenderer, 0xFF, 0xFF, 0xFF, 0xFF);
 
+	SDL_GetWindowSize(gWindow, &window_state.window_width, &window_state.window_height);
+	SDL_GetRendererOutputSize(gRenderer, &window_state.screen_width, &window_state.screen_height);
 	destroyed = false;
+	
 	init();
 }
 
@@ -82,7 +86,7 @@ void Game::run() {
 					break;
 			}
 		}
-		mouseButton = SDL_GetMouseState(&mouseX, &mouseY);
+		window_state.mouseButton = SDL_GetMouseState(&window_state.mouseX, &window_state.mouseY);
 		Uint64 cur_time = SDL_GetTicks64();
 		this->tick(cur_time - last_time);
 		if (!running) break;
@@ -115,39 +119,17 @@ Game::~Game() {
  * State class
  *
  */ 
-void State::init() {
-	if (title == "") {
-		title = std::string(SDL_GetWindowTitle(gWindow));
-	} else {
-		SDL_SetWindowTitle(gWindow, title.c_str());
-	}
-
-	if (window_width <= 0 || window_height <= 0) {
-		SDL_GetWindowSize(gWindow, &window_width, &window_height);
-	} else {
-		SDL_SetWindowSize(gWindow, window_width, window_height);
-		SDL_SetWindowPosition(gWindow, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
-	}
+void State::init(WindowState* window_state) {
+	this->window_state = window_state;
 }
 
-void State::set_mouse_state(const int mouseX, const int mouseY, const Uint8 mouseButton) {
-	this->mouseX = mouseX;
-	this->mouseY = mouseY;
-	this->mouseButton = mouseButton;
+int State::get_prefered_width() const {
+	return -1;
 }
 
-const std::string& State::get_title() const {
-	return title;
+int State::get_prefered_height() const {
+	return -1;
 }
-
-int State::get_width() const {
-	return window_width;
-}
-
-int State::get_height() const {
-	return window_height;
-}
-
 
 
 
@@ -156,13 +138,13 @@ int State::get_height() const {
  *
  */
  
-StateGame::StateGame(State* initial_state) : 
-	Game(initial_state->get_width(), initial_state->get_height(), initial_state->get_title()) {
+StateGame::StateGame(State* initial_state, const std::string& title) : 
+	Game(initial_state->get_prefered_width(), initial_state->get_prefered_height(), title) {
 	states.emplace(initial_state);
 }
 
 void StateGame::init() {
-	states.top()->init();
+	states.top()->init(&window_state);
 }
 
 void StateGame::render() {
@@ -171,28 +153,42 @@ void StateGame::render() {
 
 void StateGame::tick(Uint64 delta) {
 	StateStatus status = {StateStatus::NONE, nullptr};
-	states.top()->set_mouse_state(mouseX, mouseY, mouseButton);
 	states.top()->tick(delta, status);
 
 	switch (status.action) {
 		case StateStatus::PUSH:
 			states.emplace(status.new_state);
-			states.top()->init();
+			update_window(status.new_state);
+			states.top()->init(&window_state);
 			break;
 		case StateStatus::SWAP:
 			states.top().reset(status.new_state);
-			states.top()->init();
+			update_window(status.new_state);
+			states.top()->init(&window_state);
 			break;
 		case StateStatus::POP:
 			states.pop();
 			if (states.size() == 0) {
 				exit_game();
+			} else {
+				update_window(states.top().get());
 			}
 			break;
 		case StateStatus::EXIT:
 			exit_game();
 			break;
 	}			
+}
+
+void StateGame::update_window(const State* const state) {
+	int w = state->get_prefered_width(), h = state->get_prefered_height();
+	if (w == -1) w = window_state.screen_width;
+	if (h == -1) h = window_state.screen_height;
+	if (w != window_state.screen_width || h != window_state.screen_height) {
+		SDL_SetWindowSize(gWindow, w, h);
+		window_state.screen_width = w;
+		window_state.screen_height = h;
+	}
 }
 
 void StateGame::handle_keydown(SDL_KeyboardEvent &e) {

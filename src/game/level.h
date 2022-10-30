@@ -43,10 +43,10 @@ class Level : public TileMap {
 
 		std::vector<std::shared_ptr<Corner>>& get_corners();
 
-		void set_window_size(const int win_width, const int win_height);
+		void set_screen_size(const int screen_width, const int screen_height);
 
 	private:
-		int window_width, window_height;
+		int screen_width, screen_height;
 
 		std::vector<Texture> level_textures;
 

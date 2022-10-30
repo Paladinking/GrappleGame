@@ -11,12 +11,16 @@ class MainMenu : public Menu {
 		/**
 		 * Constructs a MainMenu object.
 		 */
-		MainMenu() : Menu(SCREEN_WIDTH, SCREEN_HEIGHT, "Climbgame") {};
+		MainMenu() : Menu() {};
 
 		/**
 		 * Initializes the MainMenu, creating all buttons.
 		 */
-		virtual void init() override;
+		virtual void init(WindowState* window_state) override;
+		
+		virtual int get_prefered_width() const override;
+		
+		virtual int get_prefered_height() const override;
 
 	protected:
 
@@ -34,9 +38,9 @@ class MainMenu : public Menu {
 
 class OptionsMenu : public Menu {
 	public:
-		OptionsMenu() : Menu(-1, -1, "") {};
+		OptionsMenu() : Menu() {};
 
-		virtual void init() override;
+		virtual void init(WindowState* window_state) override;
 
 	protected:
 
@@ -75,9 +79,9 @@ class OptionsMenu : public Menu {
 
 class LevelMakerStartup : public Menu {
 	public:
-		LevelMakerStartup() : Menu(-1, -1, "") {};
+		LevelMakerStartup() : Menu() {};
 
-		virtual void init() override;
+		virtual void init(WindowState* window_state) override;
 
 	protected:
 

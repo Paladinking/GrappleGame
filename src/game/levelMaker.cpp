@@ -21,8 +21,9 @@ const int ZOOM_LEVELS[] = {8, 10, 16, 20, 32, 40, 64, 80, 160};
 constexpr int ZOOM_LEVELS_SIZE = 9;
 constexpr int MAX_TILE_SCALE = 8;
 
-void LevelMaker::init() {
-	State::init();
+void LevelMaker::init(WindowState* ws) {
+	State::init(ws);
+	SDL_SetWindowTitle(gWindow, "LevelMaker");
 
 	const JsonObject& controls = config::get_bindings(bindings::LEVELMAKER.key);
 	zoom_in_input = get_press_input(controls.get<std::string>("zoom_in"), "None");
@@ -41,7 +42,7 @@ void LevelMaker::init() {
 	tile_colisions_input = get_press_input(controls.get<std::string>("tile_collisions"), "None");
 	tile_scale_up_input = get_press_input(controls.get<std::string>("tile_scale_up"), "None");
 	tile_scale_down_input = get_press_input(controls.get<std::string>("tile_scale_down"), "None");
-	editor_width = window_width / 2;
+	editor_width = window_state->screen_width / 2;
 
 	SDL_Surface* t = IMG_Load(tiles_path.c_str());
 	if (t == NULL) {
@@ -58,6 +59,14 @@ void LevelMaker::init() {
 	window_surface = SDL_GetWindowSurface(gWindow);
 }
 
+int LevelMaker::get_prefered_width() const {
+	return SCREEN_WIDTH * 2;
+}
+
+int LevelMaker::get_prefered_height() const {
+	return SCREEN_HEIGHT;
+}
+
 SDL_Rect get_tile_rect(Uint16 index, const LevelData& level_data) {
 	return {
 		static_cast<int>((index % level_data.img_tilewidth) * level_data.img_tilesize),
@@ -68,6 +77,8 @@ SDL_Rect get_tile_rect(Uint16 index, const LevelData& level_data) {
 }
 
 void LevelMaker::tile_press(const bool put) {
+	const int mouseX = window_state->mouseX;
+	const int mouseY = window_state->mouseY;
 	if (mouseX >= editor_width) {
 		int index = (mouseX - editor_width) / TILE_SELECTOR_SIZE + (mouseY / TILE_SELECTOR_SIZE) * TILE_SELECTOR_TW;
 		if (index >= 0 && index < static_cast<int>(level_data.img_tilecount)) {
@@ -165,7 +176,7 @@ void LevelMaker::handle_down(const SDL_Keycode key, const Uint8 mouse) {
 }
 
 void LevelMaker::render() {
-	SDL_Rect r = {0, 0, static_cast<int>(window_width), static_cast<int>(window_height)};
+	SDL_Rect r = {0, 0, static_cast<int>(window_state->screen_width), static_cast<int>(window_state->screen_height)};
 	SDL_FillRect(window_surface, &r, SDL_MapRGB(window_surface->format, 255, 255, 255));
 	
 	const int ts = ZOOM_LEVELS[zoom_level];

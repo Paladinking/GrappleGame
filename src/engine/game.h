@@ -16,6 +16,23 @@ class game_exception : public base_exception {
 	
 };
 
+/**
+ * WindowState struct for storing state about the window.
+ */
+struct WindowState {
+	// Actual dimensions of the window
+	int window_width;
+	int window_height;
+
+	// Size of the rendering context
+	int screen_width;
+	int screen_height;
+
+	int mouseX;
+	int mouseY;
+	Uint8 mouseButton;
+};
+
 
 /**
  * Bases Game class, to be extended by a more specific game. On it's own is only a white window with a title that can be closed.
@@ -50,13 +67,7 @@ class Game {
 		virtual void destroy_game();
 		
 	protected:
-		// Window dimensions
-		const int initial_width = 100, initial_height = 100;
-		
-		// Mouse position, updated every frame.
-		int mouseX, mouseY;
-		// Pressd mouseButton, updates every frame
-		Uint8 mouseButton;
+		WindowState window_state;
 
 		/**
 		 * Called once per frame, after tick has been called. 
@@ -103,6 +114,7 @@ class Game {
 		bool running = false;
 		bool destroyed = true;
 
+		const int initial_width = 100, initial_height = 100;
 		const std::string initial_title = "Title";
 };
 
@@ -123,20 +135,14 @@ struct StateStatus {
  */
 class State {
 	public:
-		State(const int window_width, const int window_height, const std::string& title) :
-			window_width(window_width), window_height(window_height), title(title) {};
+		State(WindowState* window_state) : window_state(window_state) {};
 
-		State() : title(""), window_width(-1), window_height(-1) {};
-
-		/** 
-		 * Sets the mouse state, used for the state to check position and hold input.
-		 */
-		void set_mouse_state(const int mouseX, const int mouseY, const Uint8 mouseButton);
+		State() : window_state(nullptr) {};
 
 		/**
 		 * Initializes this state.
 		 */
-		virtual void init();
+		virtual void init(WindowState* window_state);
 
 		/**
 		 * Ticks the state, with a timestep delta. The parameter res is used to signal a change of state.
@@ -164,31 +170,17 @@ class State {
 		virtual void handle_wheel(const SDL_MouseWheelEvent &e) {};
 
 		/**
-		 * Get the desired window title of this state.
-		 * (Will match actual if State::init was called)
-		 */
-		const std::string& get_title() const;
-
-		/**
 		 * Get the desired window width of this state.
-		 * (Will match actual if State::init was called)
 		 */
-		int get_width() const;
+		virtual int get_prefered_width() const;
 
 		/**
 		 * Get the desired window height of this state.
-		 * (Will match actual if State::init was called)
 		 */	
-		int get_height() const;
+		virtual int get_prefered_height() const;
 
 	protected:
-		std::string title;
-
-		int window_width, window_height;
-
-		int mouseX, mouseY;
-
-		Uint8 mouseButton;
+		WindowState* window_state; 
 };
 
 
@@ -198,7 +190,7 @@ class State {
  */
 class StateGame : public Game {
 	public:
-		StateGame(State* state);
+		StateGame(State* state, const std::string& title);
 
 	protected:
 
@@ -244,6 +236,11 @@ class StateGame : public Game {
 		virtual void handle_mousewheel(SDL_MouseWheelEvent &e) override;
 
 	private:
+	
+		/**
+		 * Syncs the screen size with the preferred sizes of state.
+		 */
+		void update_window(const State* const state);
 		// State stack
 		std::stack<std::unique_ptr<State>> states;
 	

@@ -8,19 +8,36 @@
 
 const std::string MainMenu::BUTTON_NAMES[] = {"Start Game", "Level Maker", "Options"};
 
-void MainMenu::init() {
-	State::init();
+void MainMenu::init(WindowState* window_state) {
+	SDL_SetWindowFullscreen(gWindow, SDL_WINDOW_FULLSCREEN_DESKTOP);
+	SDL_SetWindowTitle(gWindow, "ClimbGame");
+	SDL_ShowWindow(gWindow);
+	State::init(window_state);
+	//int x, y;
+	//SDL_GetRendererOutputSize(gRenderer, &x, &y);
+	//SDL_Rect viewport = {x / 2 - SCREEN_WIDTH / 2, y / 2 - SCREEN_HEIGHT / 2, SCREEN_WIDTH, SCREEN_HEIGHT};
+	//SDL_RenderSetViewport(gRenderer, &viewport);
+	
 	buttons.reserve(ButtonId::TOTAL);
 	for (int i = 0; i < ButtonId::TOTAL; ++i) {
 		buttons.emplace_back(
-			(window_width - BUTTON_WIDTH) / 2,
-			(i + 1) * window_height / 4,
+			(window_state->screen_width - BUTTON_WIDTH) / 2,
+			(i + 1) * window_state->screen_height / 4,
 			BUTTON_WIDTH,
 			BUTTON_HEIGHT,
 			BUTTON_NAMES[i]
 		);
 	}
 	exit = false;
+}
+
+int MainMenu::get_prefered_width() const {
+	return SCREEN_WIDTH;
+}
+
+		
+int MainMenu::get_prefered_height() const {
+	return SCREEN_WIDTH;
 }
 
 void MainMenu::button_press(const int btn) {
@@ -37,8 +54,8 @@ void MainMenu::button_press(const int btn) {
 	}
 }
 
-void OptionsMenu::init() {
-	Menu::init();
+void OptionsMenu::init(WindowState* ws) {
+	Menu::init(ws);
 
 	const JsonObject& bindings = config::get_bindings();
 
@@ -46,7 +63,7 @@ void OptionsMenu::init() {
 	int h_offset = MARGIN_Y;
 	int group_start = 0;
 	for (auto& it = bindings.keys_begin(); it != bindings.keys_end(); ++it) {
-		text.emplace_back((window_width - 120) / 2, h_offset, 120, 60, *it, 25);
+		text.emplace_back((window_state->screen_width - 120) / 2, h_offset, 120, 60, *it, 25);
 		const JsonObject& group = bindings.get<JsonObject>(*it);
 		h_offset += 60 + MARGIN_Y;
 		int index = 0;
@@ -55,9 +72,9 @@ void OptionsMenu::init() {
 			const std::string& val = group.get<std::string>(key);
 			int x = 0;
 			if (index % 2 == 0) {
-				x = window_width / 2 - BUTTON_WIDTH - MARGIN_X;
+				x = window_state->screen_width / 2 - BUTTON_WIDTH - MARGIN_X;
 			} else {
-				x = window_width / 2 + MARGIN_X + MARGIN_X / 2 + BUTTON_WIDTH;
+				x = window_state->screen_width / 2 + MARGIN_X + MARGIN_X / 2 + BUTTON_WIDTH;
 			}
 			buttons.emplace_back(x, h_offset, BUTTON_WIDTH, BUTTON_HEIGHT, val, 15);
 			button_data.emplace_back(*it, key);
@@ -85,19 +102,19 @@ void OptionsMenu::init() {
 	}
 	
 	last_input_button = static_cast<int>(buttons.size()) - 1;
-	buttons.emplace_back((window_width - 120) / 2, h_offset, 120, 60, "Reset", 25);
+	buttons.emplace_back((window_state->screen_width - 120) / 2, h_offset, 120, 60, "Reset", 25);
 	h_offset += 60 + MARGIN_Y;
 	
 	full_height = h_offset;
-	input_promt = TextBox(0, 0, window_width, window_height, "Press any button: ", 50);
+	input_promt = TextBox(0, 0, window_state->screen_width, window_state->screen_height, "Press any button: ", 50);
 	waiting_for_input = false;
 }
 
 void OptionsMenu::handle_wheel(const SDL_MouseWheelEvent &e) {
 	camera_y -= 25 * e.y;
 	if (camera_y < 0 ) camera_y = 0;
-	if (camera_y > full_height - window_height) {
-		camera_y = full_height - window_height;
+	if (camera_y > full_height - window_state->screen_height) {
+		camera_y = full_height - window_state->screen_height;
 	}
 }
 
@@ -180,12 +197,12 @@ void OptionsMenu::menu_exit() {
 void OptionsMenu::render() {
 	// A bit hacky... the game updates the mouse position after handling events, 
 	// 	so mouseY will still be offset when potential clicks get handled.
-	mouseY += camera_y; 
+	window_state->mouseY += camera_y; 
 	SDL_SetRenderDrawColor(gRenderer, 0xFF, 0xFF, 0xFF, 0xFF);
 	SDL_RenderClear(gRenderer);
 
 	for (auto& b : buttons) {
-		b.set_hover(!waiting_for_input && b.is_pressed(mouseX, mouseY));
+		b.set_hover(!waiting_for_input && b.is_pressed(window_state->mouseX, window_state->mouseY));
 		b.render(0, -camera_y);
 	}
 	for (auto& t : text) {
@@ -199,20 +216,32 @@ void OptionsMenu::render() {
 	SDL_RenderPresent(gRenderer);
 }
 
-void LevelMakerStartup::init() {
-	Menu::init();
+void LevelMakerStartup::init(WindowState* ws) {
+	Menu::init(ws);
 
 	create_default_level();
 
-	buttons.emplace_back(3 * window_width / 4 - 100, 3 * window_height / 4 - 40, 200, 80, "Start", 30);
-	buttons.emplace_back(window_width / 3 - 110, 8 * window_height / 12 - 20, 100, 40, "New Level", 15);
-	buttons.emplace_back(window_width / 3 - 110, 9 * window_height / 12 - 20, 100, 40, "Load Level", 15);
-	buttons.emplace_back(window_width / 3 - 50, 21 * window_height / 48 - 20, 20, 20, "+", 15);
-	buttons.emplace_back(window_width / 3 - 80, 21 * window_height / 48 - 20, 20, 20, "-", 15);
+	buttons.emplace_back(3 * window_state->screen_width / 4 - 100, 3 * window_state->screen_height / 4 - 40, 200, 80, "Start", 30);
+	buttons.emplace_back(window_state->screen_width / 3 - 110, 8 * window_state->screen_height / 12 - 20, 100, 40, "New Level", 15);
+	buttons.emplace_back(window_state->screen_width / 3 - 110, 9 * window_state->screen_height / 12 - 20, 100, 40, "Load Level", 15);
+	buttons.emplace_back(window_state->screen_width / 3 - 50, 21 * window_state->screen_height / 48 - 20, 20, 20, "+", 15);
+	buttons.emplace_back(window_state->screen_width / 3 - 80, 21 * window_state->screen_height / 48 - 20, 20, 20, "-", 15);
 
-	text.emplace_back(window_width / 4 - 100, 4 * window_height / 8 - 40, 200, 80, "Tileset: " + tileset_path, 15);
-	text.emplace_back(window_width / 4 - 100, 6 * window_height / 16 - 40, 200, 80, "Height: " + std::to_string(data.height), 15);
-	text.emplace_back(window_width / 4 - 100, 5 * window_height / 16 - 40, 200, 80, "Data: clear", 15);
+	text.emplace_back(
+		window_state->screen_width / 4 - 100, 
+		4 * window_state->screen_height / 8 - 40, 200, 80,
+		"Tileset: " + tileset_path, 15
+	);
+	text.emplace_back(
+		window_state->screen_width / 4 - 100,
+		6 * window_state->screen_height / 16 - 40, 200, 80, 
+		"Height: " + std::to_string(data.height), 15
+	);
+	text.emplace_back(
+		window_state->screen_width / 4 - 100,
+		5 * window_state->screen_height / 16 - 40,
+		200, 80, "Data: clear", 15
+	);
 }
 
 void LevelMakerStartup::create_default_level() {

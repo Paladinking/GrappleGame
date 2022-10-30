@@ -120,9 +120,9 @@ class Button : public TextBox {
 
 class Menu : public State {
 	public:	
-		Menu(const int w, const int h, const std::string& title);
+		Menu();
 		
-		Menu(const int w, const int h, const std::string& title, const std::string& exit_input);
+		Menu(const std::string& exit_input);
 		/**
 		 * Handles a down-event of keyboard or mouse.
 		 */

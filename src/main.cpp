@@ -76,11 +76,10 @@ int main(int argc, char* args[])
 		}
 	}
 
-	config::init();
-
+	
 	try {
-		//TextBox::init(config::get_asset_path("font/OpenSans-Bold.ttf"));
 		engine::init();
+		config::init();
 	} catch (const base_exception &e) {
 		std::cout << e.msg << std::endl;
 		exit(-3);
@@ -89,11 +88,12 @@ int main(int argc, char* args[])
 	State* state;
 	if (level_maker) {
 		return -4;
-		//state = new LevelMaker();
 	} else {
 		state = new MainMenu();
 	}
-	StateGame game(state);
+
+	StateGame game(state, "Grapple Game");
+	std::cout << '2' << std::endl;
 	run_game(game, exit_status);
 
 	return exit_status;

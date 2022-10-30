@@ -12,13 +12,17 @@
 
 class LevelMaker : public State {
 	public:
-		LevelMaker(LevelData&& data, const std::string& tiles_path) : State(SCREEN_WIDTH * 2, SCREEN_HEIGHT, "Level maker"), level_data(std::move(data)), tiles_path(tiles_path) {}
+		LevelMaker(LevelData&& data, const std::string& tiles_path) : State(), level_data(std::move(data)), tiles_path(tiles_path) {}
 
 		virtual void handle_down(const SDL_Keycode key, const Uint8 mouse) override;
 
-		virtual void init() override;
+		virtual void init(WindowState* window_state) override;
 
 		virtual void render() override;
+		
+		virtual int get_prefered_width() const override;
+
+		virtual int get_prefered_height() const override;
 
 	private:
 
