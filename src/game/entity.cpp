@@ -104,7 +104,7 @@ void Entity::try_move(const double dx, const double dy, int tilesize, const Leve
 {
 	double new_x = pos.x, new_y = pos.y;
 	new_x += dx;
-	int x_tile = static_cast<int>((dx > 0 ? (new_x + width - 1) : new_x) / tilesize);
+	int x_tile = static_cast<int>(std::floor((dx > 0 ? (new_x + width - 1) : new_x) / tilesize));
 	if (level.is_blocked_line_v(x_tile, new_y, height)) 
 	{
 		vel.x = 0;
@@ -112,7 +112,7 @@ void Entity::try_move(const double dx, const double dy, int tilesize, const Leve
 	}
 
 	new_y += dy;
-	int y_tile = static_cast<int>((dy > 0 ? (new_y + height - 1) : new_y) / tilesize);
+	int y_tile = static_cast<int>(std::floor((dy > 0 ? (new_y + height - 1) : new_y) / tilesize));
 	if (level.is_blocked_line_h(y_tile, new_x, width))
 	{
 		vel.y = 0;
