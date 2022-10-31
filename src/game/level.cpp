@@ -103,9 +103,17 @@ void Level::load_from_file(const std::string& path, const std::string& img_path)
 			tile_size * tile_scale, tile_size * tile_scale
 		};
 
-		const int surface_index = ((i / level_data.width)) / (screen_height / tile_size);
+		const int surface_index = (i / level_data.width) / (screen_height / tile_size);
 
 		SDL_BlitScaled(tiles.get(), &source, surfaces[surface_index].get(), &dest);
+
+		// A scaled tile might be part of two screens
+		const int next_surface_index = (i / level_data.width + tile_scale - 1) / (screen_height / tile_size);
+		if (next_surface_index <= visible_screens - 1 && surface_index != next_surface_index) {
+			dest.y -= static_cast<int>(level_data.width) * tile_size;
+			dest.h = tile_size * tile_scale; //SDL_BlitScaled modifies dest, so h needs to be changed back.
+			int res = SDL_BlitScaled(tiles.get(), &source, surfaces[next_surface_index].get(), &dest);
+		}
 	}
 
 	level_textures.clear();
