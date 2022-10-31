@@ -236,11 +236,11 @@ void LevelMaker::render() {
 	SDL_FillRect(window_surface, &r, SDL_MapRGB(window_surface->format, 235, 235, 235));
 	SDL_FillRect(window_surface, &editor_viewport, SDL_MapRGB(window_surface->format, 255, 255, 255));
 
-	const int first_tile_x = static_cast<int>(camera_x / ts);
+	const int first_tile_x = std::max(static_cast<int>(camera_x / ts) - MAX_TILE_SCALE, 0);
 	const int last_tile_x = std::min(
 		static_cast<int>((camera_x + editor_viewport.w) / ts + 1), static_cast<int>(level_data.width));
 
-	const int first_tile_y = static_cast<int>(camera_y / ts);
+	const int first_tile_y = std::max(static_cast<int>(camera_y / ts) - MAX_TILE_SCALE, 0);
 	const int last_tile_y = std::min(
 		static_cast<int>((camera_y + editor_viewport.h) / ts + 1), static_cast<int>(level_data.height));
 
