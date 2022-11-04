@@ -5,6 +5,7 @@
 #include "engine/texture.h"
 #include <vector>
 #include <array>
+#include <tuple>
 
 namespace bindings {
 	
@@ -67,7 +68,7 @@ namespace config {
 	
 	JsonObject& get_bindings(const std::string& key);
 	
-	std::pair<std::string, std::string> get_level(const int index);
+	std::tuple<std::string, std::string, std::string> get_level(const int index);
 
 	void write_options();
 	

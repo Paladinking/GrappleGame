@@ -54,7 +54,7 @@ void Level::set_screen_size(const int sw, const int sh) {
 	screen_height = sh;
 }
 
-void Level::load_from_file(const std::string& path, const std::string& img_path) {
+void Level::load_from_file(const std::string& path, const std::string& img_path, const std::string& obj_path) {
 	LevelData level_data;
 	level_data.load_from_file(path);
 

@@ -126,12 +126,12 @@ constexpr int TOTAL_LEVELS = 1;
 bool levels_loaded = false;
 JsonObject levels;
 
-std::pair<std::string, std::string> config::get_level(const int index) {
+std::tuple<std::string, std::string, std::string> config::get_level(const int index) {
 	if (!levels_loaded) {
 		if (VERBOSE) std::cout << "Loading " << CONFIG_ROOT << LEVELS_FILE << std::endl;
 		//No try ... catch since failing to load levels cannot be handled.
 		levels = json::read_from_file(CONFIG_ROOT + LEVELS_FILE);
-		if (!levels.has_key_of_type<JsonList>("LEVELS")) {
+		if (!levels.has_key_of_type<JsonList>("LEVELS") || !levels.has_key_of_type<JsonObject>("LEVEL_CONFIGURATIONS")) {
 			throw file_exception("Invalid levels file");
 		}
 		JsonList& lvls = levels.get<JsonList>("LEVELS");
@@ -141,13 +141,26 @@ std::pair<std::string, std::string> config::get_level(const int index) {
 		for (int i = 0; i < lvls.size(); ++i) {
 			if(!lvls.has_index_of_type<JsonObject>(i)) throw file_exception("Invalid levels file");
 			JsonObject& obj = lvls.get<JsonObject>(i);
-			if (!obj.has_key_of_type<std::string>("file") || !obj.has_key_of_type<std::string>("tiles")) {
+			if (!obj.has_key_of_type<std::string>("file") || !obj.has_key_of_type<std::string>("config")) {
 				throw file_exception("Level" + std::to_string(i) + " is invalid");
 			}
 		}
 	}
 	const JsonObject& lvl = levels.get<JsonList>("LEVELS").get<JsonObject>(index);
-	return {LEVELS_ROOT + lvl.get<std::string>("file"), ASSETS_ROOT + lvl.get<std::string>("tiles")};
+	const JsonObject& cnf = levels.get<JsonObject>("LEVEL_CONFIGURATIONS");
+	const std::string& cnf_key = lvl.get<std::string>("config");
+	if (!cnf.has_key_of_type<JsonObject>(cnf_key)) {
+		throw file_exception("Level " + std::to_string(index) + " has invalid config");
+	}
+	const JsonObject& lvl_config = cnf.get<JsonObject>(cnf_key);
+	if (!lvl_config.has_key_of_type<std::string>("tiles") || !lvl_config.has_key_of_type<std::string>("objects")) {
+		throw file_exception("Level " + std::to_string(index) + " has invalid config");
+	}
+	return {
+		LEVELS_ROOT + lvl.get<std::string>("file"),
+		ASSETS_ROOT + lvl_config.get<std::string>("tiles"),
+		ASSETS_ROOT + lvl_config.get<std::string>("objects")
+	};
 }
 
 

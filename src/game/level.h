@@ -41,7 +41,7 @@ class Level : public TileMap<Tile> {
 			this->tile_size = tile_size;
 		}
 
-		void load_from_file(const std::string& path, const std::string& img_path);
+		void load_from_file(const std::string& path, const std::string& img_path, const std::string& obj_path);
 
 		void render(int cameraY);
 

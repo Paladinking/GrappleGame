@@ -1,24 +1,30 @@
 {
+	"LEVEL_CONFIGURATIONS" : {
+		"default" : {
+			"tiles" : "tiles/tiles.png",
+			"objects" : "objects.png"
+		}
+	},
 	"LEVELS" : [
 		{
 			"file" : "level2",
-			"tiles" : "tiles/tiles.png"
+			"config" : "default"
 		},
 		{
 			"file" : "levelt",
-			"tiles" : "tiles/tiles.png"
+			"config" : "default"
 		},
 		{
 			"file" : "level1",
-			"tiles" : "tiles/tiles.png"
+			"config" : "default"
 		},
 		{
 			"file" : "level3",
-			"tiles" : "tiles/tiles.png"
+			"config" : "default"
 		},
 		{
 			"file" : "levels1",
-			"tiles" : "tiles/tiles.png"
+			"config" : "default"
 		}
 	
 	]

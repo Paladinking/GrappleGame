@@ -10,7 +10,7 @@ constexpr double MOVEMENT_ACCELERATION = 2200.0;
 constexpr int PLAYER_FULL_WIDTH = 24;
 constexpr int PLAYER_FULL_HEIGHT = 40;
 constexpr int PLAYER_START_X = 320;
-constexpr int PLAYER_START_Y = 960;
+constexpr int PLAYER_START_Y = 320;
 
 constexpr int CAMERA_PAN_REGION = 200;
 constexpr double CAMERA_SPEED = 1000.0;
@@ -76,9 +76,9 @@ void ClimbGame::render() {
 void ClimbGame::init(WindowState* ws) {
 	State::init(ws);
 	create_inputs();
-	std::pair<std::string, std::string> lvl1 = config::get_level(0);
+	std::tuple<std::string, std::string, std::string> lvl1 = config::get_level(0);
 	level.set_screen_size(SCREEN_WIDTH, SCREEN_HEIGHT);
-	level.load_from_file(lvl1.first, lvl1.second);
+	level.load_from_file(std::get<0>(lvl1), std::get<1>(lvl1), std::get<2>(lvl1));
 	
 	game_viewport = {
 		window_state->screen_width / 2 - SCREEN_WIDTH / 2, 
