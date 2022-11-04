@@ -31,9 +31,13 @@ class Corner {
 
 };
 
-class Level : public TileMap {
+enum class Tile : Uint16 {
+	EMPTY, BLOCKED, SPIKES
+};
+
+class Level : public TileMap<Tile> {
 	public:
-		Level(const int tile_size) {
+		Level(const int tile_size) : TileMap(Tile::BLOCKED) {
 			this->tile_size = tile_size;
 		}
 

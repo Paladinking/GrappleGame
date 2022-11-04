@@ -75,15 +75,15 @@ void Level::load_from_file(const std::string& path, const std::string& img_path)
 		));
 	}
 	
-	map = std::make_unique<bool[]>(level_data.width * level_data.height);
+	map = std::make_unique<Tile[]>(level_data.width * level_data.height);
 	for (int i = 0; static_cast<unsigned>(i) < level_data.width * level_data.height; ++i) {
-		Uint32 tile = level_data.data[i]; //FIX
+		Uint32 t = level_data.data[i]; //FIX??
 
-		int tile_index = (tile >> 8) & 0xFF;
-		int tile_scale = (tile >> 16) & 0xFF;
-		bool filled = (tile & 0xFF) != 0;
+		int tile_index = (t >> 8) & 0xFF;
+		int tile_scale = (t >> 16) & 0xFF;
+		Tile tile = (t & 0xFF) == 0 ? Tile::EMPTY : Tile::BLOCKED;
 
-		map[i] = filled;
+		map[i] = tile;
 
 
 		if (tile_index == 0xFF) {
@@ -132,21 +132,21 @@ void Level::load_from_file(const std::string& path, const std::string& img_path)
 void Level::create_corners() {
 	for (int x = 0; x < width; ++x) {
 		for (int y = 0; y < height; ++y) {
-			if (!is_blocked(x, y)) continue;
+			if (get_tile(x, y) != Tile::BLOCKED) continue;
 			bool top_left = true, top_right = true, botton_left = true, bottom_right = true;
-			if (is_blocked(x - 1, y)) {
+			if (get_tile(x - 1, y) == Tile::BLOCKED) {
 				top_left = false;
 				botton_left = false;
 			}
-			if (is_blocked(x + 1, y)) {
+			if (get_tile(x + 1, y) == Tile::BLOCKED) {
 				top_right = false;
 				bottom_right = false;
 			}
-			if (is_blocked(x, y - 1)) {
+			if (get_tile(x, y - 1) == Tile::BLOCKED) {
 				top_left = false;
 				top_right = false;
 			}
-			if (is_blocked(x, y + 1)) {
+			if (get_tile(x, y + 1) == Tile::BLOCKED) {
 				botton_left = false;
 				bottom_right = false;
 			}

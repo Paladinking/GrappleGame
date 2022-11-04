@@ -105,7 +105,7 @@ void Entity::try_move(const double dx, const double dy, int tilesize, const Leve
 	double new_x = pos.x, new_y = pos.y;
 	new_x += dx;
 	int x_tile = static_cast<int>(std::floor((dx > 0 ? (new_x + width - 1) : new_x) / tilesize));
-	if (level.is_blocked_line_v(x_tile, new_y, height)) 
+	if (level.has_tile_line_v(x_tile, new_y, height, Tile::BLOCKED)) 
 	{
 		vel.x = 0;
 		new_x = dx > 0 ? (x_tile * tilesize - width) : (x_tile + 1) * tilesize;
@@ -113,7 +113,7 @@ void Entity::try_move(const double dx, const double dy, int tilesize, const Leve
 
 	new_y += dy;
 	int y_tile = static_cast<int>(std::floor((dy > 0 ? (new_y + height - 1) : new_y) / tilesize));
-	if (level.is_blocked_line_h(y_tile, new_x, width))
+	if (level.has_tile_line_h(y_tile, new_x, width, Tile::BLOCKED))
 	{
 		vel.y = 0;
 		new_y = dy > 0 ? y_tile * tilesize - height : (y_tile + 1) * tilesize;
@@ -152,9 +152,9 @@ bool Entity::on_ground(const Level &level) const
 {
 	int tilesize = level.get_tilesize();
 	int y_tile =  static_cast<int>((pos.y + height) / tilesize);
-	for (int i = static_cast<int>(pos.x / tilesize); i <= (pos.x + width - 1) / tilesize; ++i)
+	for (int i = static_cast<int>(pos.x / tilesize); i <= (pos.x + width - 1) / tilesize; ++i) //level.line...?
 	{
-		if (level.is_blocked(i, y_tile))
+		if (level.get_tile(i, y_tile) == Tile::BLOCKED)
 		{
 			return true;
 		}
@@ -330,7 +330,7 @@ void Player::tick(const double delta, Level &level)
 		{
 			new_x += move_step.x;
 			new_y += move_step.y;
-			if (level.is_blocked_pixel(new_x, new_y))
+			if (level.get_tile_pixel(new_x, new_y) == Tile::BLOCKED)
 			{
 				place_grapple(new_x, new_y, move_step.x, move_step.y, tilesize, level.get_corners());
 				return;
@@ -338,7 +338,7 @@ void Player::tick(const double delta, Level &level)
 		}
 		new_x += to_move.x;
 		new_y += to_move.y;
-		if (level.is_blocked_pixel(new_x, new_y)) {
+		if (level.get_tile_pixel(new_x, new_y) == Tile::BLOCKED) {
 			place_grapple(new_x, new_y, to_move.x, to_move.y, tilesize, level.get_corners());
 			return;
 		}

@@ -126,22 +126,23 @@ class Vector2D {
 /**
  * A tilemap for collisions.
  */
+template<class T>
 class TileMap {
 	public:
-		TileMap() {}
+		TileMap(const T out_of_bounds) : out_of_bounds(out_of_bounds) {}
 
-		TileMap(const int tile_size, const int width, const int height) : tile_size(tile_size), width(width), height(height) {}
+		TileMap(const int tile_size, const int width, const int height, const T out_of_bounds) : tile_size(tile_size), width(width), height(height), out_of_bounds(out_of_bounds) {}
 
 		/**
-		 * Returns true if a tile contained in the pixel rectangle (x, y, w, h) contains a blocked tile.
+		 * Returns true if a tile contained in the pixel rectangle (x, y, w, h) contains tile.
 		 */
-		bool is_blocked_rect(int x, int y, int w, int h) const
+		bool has_tile_rect(const int x, const int y, const int w, const int h, const T tile) const
 		{
 			for (int i = x / tile_size; i <= (x + w - 1) / tile_size; i++) 
 			{
 				for (int j = y / tile_size; j <= (y + h - 1) / tile_size; j++)
 				{
-					if (is_blocked(i, j))
+					if (get_tile(i, j) == tile)
 					{
 						return true;
 					}
@@ -151,13 +152,13 @@ class TileMap {
 		}
 
 		/**
-		 * Returns true if some point at a vertical line is blocked.
+		 * Returns true if some point at a vertical line has the tile tile.
 		 */
-		bool is_blocked_line_v(int x_tile, double y_start, double length) const
+		bool has_tile_line_v(const int x_tile, const double y_start, const double length, const T tile) const
 		{
 			for (int i = static_cast<int>(std::floor(y_start / tile_size)); i <= (y_start + length - 1) / tile_size; ++i)
 			{
-				if (is_blocked(x_tile, i)) 
+				if (get_tile(x_tile, i) == tile) 
 				{
 					return true;
 				}
@@ -166,13 +167,13 @@ class TileMap {
 		}
 
 		/**
-		 * Returns true if some point at a horizontal line is blocked.
+		 * Returns true if some point at a horizontal line has the tile tile.
 		 */
-		bool is_blocked_line_h(int y_tile, double x_start, double length) const
+		bool has_tile_line_h(const int y_tile, const double x_start, const double length, const T tile) const
 		{
 			for (int i = static_cast<int>(std::floor(x_start / tile_size)); i <= (x_start + length - 1) / tile_size; ++i)
 			{
-				if (is_blocked(i, y_tile))
+				if (get_tile(i, y_tile) == tile)
 				{
 					return true;
 				}
@@ -181,29 +182,30 @@ class TileMap {
 		}
 
 		/**
-		 * Returns true if the pixel (x, y) is blocked or not, returning true if the pixel is out of bounds.
+		 * Returns the tile at pixel (x, y), returning out_of_bounds if the pixel is out of bounds.
 		 */
-		bool is_blocked_pixel(const int x, const int y) const {
-			return is_blocked(x / tile_size, y / tile_size);
+		T get_tile_pixel(const int x, const int y) const {
+			return get_tile(x / tile_size, y / tile_size);
 		}
-		bool is_blocked_pixel(const double x, const double y) const {
-			return is_blocked(static_cast<int>(std::floor(x / tile_size)), static_cast<int>(std::floor(y / tile_size)));
+		T get_tile_pixel(const double x, const double y) const {
+			return get_tile(static_cast<int>(std::floor(x / tile_size)), static_cast<int>(std::floor(y / tile_size)));
 		}
+
 		/**
-		 * Returns true if the tile (x, y) is blocked or not, returning true if tile is out of bounds.
+		 * Returns the tile (x, y), returning out_of_bounds if tile is out of bounds.
 		 */
-		bool is_blocked(const int x, const int y) const {
+		T get_tile(const int x, const int y) const {
 			if (x < 0 || x >= width || y < 0 || y >= height)
 			{
-				return true;
+				return out_of_bounds;
 			}
 			return map[x + width * y];
 		}
 		
 		/**
-		 * Returns the value of the tile at (x, y) same as is_blocked without bounds check.
+		 * Returns the value of the tile at (x, y) same as get_tile without bounds check.
 		 */
-		bool get_tile(const int x, const int y) const {
+		T at(const int x, const int y) const {
 			return map[x + width * y];
 		}
 		
@@ -228,16 +230,19 @@ class TileMap {
 			 return tile_size;
 		 }
 		 
-		 void set_tilesize(int tilesize) {
+		 void set_tilesize(const int tilesize) {
 			 tile_size = tilesize;
 		 }
 		 
 	protected:
-		std::unique_ptr<bool[]> map;
+		std::unique_ptr<T[]> map;
 		
 		int width = 0, height = 0;
 		
 		int tile_size = 1;
+		
+	private:
+		const T out_of_bounds;
 		
 };
 
