@@ -203,7 +203,7 @@ class TileMap {
 		}
 		
 		/**
-		 * Returns the value of the tile at (x, y) same as get_tile without bounds check.
+		 * Returns the value of the tile at (x, y), same as get_tile without bounds check.
 		 */
 		T at(const int x, const int y) const {
 			return map[x + width * y];

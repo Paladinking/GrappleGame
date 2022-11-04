@@ -1,7 +1,23 @@
 {
 	"LEVELS" : [
 		{
+			"file" : "level2",
+			"tiles" : "tiles/tiles.png"
+		},
+		{
+			"file" : "levelt",
+			"tiles" : "tiles/tiles.png"
+		},
+		{
 			"file" : "level1",
+			"tiles" : "tiles/tiles.png"
+		},
+		{
+			"file" : "level3",
+			"tiles" : "tiles/tiles.png"
+		},
+		{
+			"file" : "levels1",
 			"tiles" : "tiles/tiles.png"
 		}
 	
