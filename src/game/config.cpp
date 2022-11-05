@@ -170,14 +170,11 @@ const JsonObject& config::get_level_config(const std::string& key) {
 	return lvl_config;
 }
 
-std::tuple<std::string, std::string, std::string> config::get_level_and_config(const int index) {
+std::pair<std::string, const JsonObject&> config::get_level_and_config(const int index) {
 	const JsonObject& lvl = config::get_level(index);
 	const JsonObject& lvl_config = config::get_level_config(lvl.get<std::string>("config"));
-	return {
-		LEVELS_ROOT + lvl.get<std::string>("file"),
-		ASSETS_ROOT + lvl_config.get<std::string>("tiles"),
-		ASSETS_ROOT + lvl_config.get<std::string>("objects")
-	};
+	std::pair<std::string, const JsonObject&>  p(LEVELS_ROOT + lvl.get<std::string>("file"), lvl_config);
+	return p;
 }
 
 

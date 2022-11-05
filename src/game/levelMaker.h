@@ -12,7 +12,7 @@
 
 class LevelMaker : public State {
 	public:
-		LevelMaker(LevelData&& data, const std::string& tiles_path, const std::string& objects_path) : State(), level_data(std::move(data)), tiles_path(tiles_path), objects_path(objects_path) {}
+		LevelMaker(LevelData&& data, const LevelConfig& level_config) : State(), level_data(std::move(data)), level_config(level_config) {}
 
 		virtual void handle_down(const SDL_Keycode key, const Uint8 mouse) override;
 
@@ -28,8 +28,6 @@ class LevelMaker : public State {
 		void zoom(const bool in);
 
 		void tile_press(bool put);
-		
-		std::string tiles_path, objects_path;
 		
 		std::unique_ptr<SDL_Surface, SurfaceDeleter> tiles;
 		std::unique_ptr<SDL_Surface, SurfaceDeleter> objects;
@@ -47,18 +45,19 @@ class LevelMaker : public State {
 		std::unique_ptr<HoldInput> camera_pan_input, exit_input;
 
 		Uint16 selected = 0;
-		
+
 		enum {
 			PLACE_TILES, PLACE_COLLISIONS
 		} editor_mode = PLACE_TILES;
 
 		LevelData level_data;
+		LevelConfig level_config;
 		bool tile_colisions = true;
 		bool updated = true;
 
 		int scale_factor = 0;
 		double camera_x = 0.0, camera_y = 0.0;
-		
+
 		SDL_Rect editor_viewport, tiles_viewport, objects_viewport;
 
 		// Number of tiles of one side of the texture (1-8). Uint32 so that tile_scale << 16 fits.

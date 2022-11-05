@@ -76,10 +76,12 @@ void ClimbGame::render() {
 void ClimbGame::init(WindowState* ws) {
 	State::init(ws);
 	create_inputs();
-	std::tuple<std::string, std::string, std::string> lvl1 = config::get_level_and_config(0);
+
+	std::pair<std::string, const JsonObject&> lvl1 = config::get_level_and_config(0);
+	//std::tuple<std::string, std::string, std::string> lvl1 = config::get_level_and_config(0);
 	level.set_screen_size(SCREEN_WIDTH, SCREEN_HEIGHT);
 
-	level.load_from_file(std::get<0>(lvl1), std::get<1>(lvl1), std::get<2>(lvl1));
+	level.load_from_file(lvl1.first, lvl1.second);
 	
 	game_viewport = {
 		window_state->screen_width / 2 - SCREEN_WIDTH / 2, 

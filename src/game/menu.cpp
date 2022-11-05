@@ -271,7 +271,7 @@ void LevelMakerStartup::create_default_level() {
 	data.width = TILE_WIDTH;
 	data.img_tilesize = 32;
 	data.img_tilewidth = 10;
-	data.img_tilecount = 96;
+	data.img_tilecount = 80;
 }
 
 void LevelMakerStartup::button_press(const int btn) {
@@ -289,8 +289,7 @@ void LevelMakerStartup::button_press(const int btn) {
 				StateStatus::SWAP, 
 				new LevelMaker(
 					std::move(data), 
-					config::get_asset_path(lvl_config.get<std::string>("tiles")),
-					config::get_asset_path(lvl_config.get<std::string>("objects"))
+					LevelConfig::load_from_json(lvl_config)
 				)
 			};
 			break;

@@ -74,7 +74,7 @@ namespace config {
 
 	const JsonObject& get_level_config(const std::string& key);
 	
-	std::tuple<std::string, std::string, std::string> get_level_and_config(const int index);
+	std::pair<std::string, const JsonObject&> get_level_and_config(const int index);
 
 	void write_options();
 	

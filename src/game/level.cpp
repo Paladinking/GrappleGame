@@ -4,9 +4,9 @@
 #include "level.h"
 #include "engine/engine.h"
 #include "file/fileIO.h"
-#include "file/json.h"
 #include "util/exceptions.h"
 #include "globals.h"
+#include "config.h"
 
 void LevelData::load_from_file(const std::string& path) {
 	FileReader reader = FileReader(path, true, true);
@@ -49,16 +49,28 @@ void LevelData::write_to_file(const std::string& path) {
 	}
 }
 
+LevelConfig LevelConfig::load_from_json(const JsonObject& obj) {
+	return {
+		obj.get<int>("tile_size"),
+		obj.get<int>("tile_width"),
+		obj.get<int>("tile_count"),
+		config::get_asset_path(obj.get<std::string>("tiles")),
+		config::get_asset_path(obj.get<std::string>("objects"))
+	};
+}
+
 void Level::set_screen_size(const int sw, const int sh) {
 	screen_width = sw;
 	screen_height = sh;
 }
 
-void Level::load_from_file(const std::string& path, const std::string& img_path, const std::string& obj_path) {
+void Level::load_from_file(const std::string& path, const JsonObject& obj) {
 	LevelData level_data;
 	level_data.load_from_file(path);
+	
+	LevelConfig conf = LevelConfig::load_from_json(obj);
 
-	std::unique_ptr<SDL_Surface, SurfaceDeleter> tiles(IMG_Load(img_path.c_str()));
+	std::unique_ptr<SDL_Surface, SurfaceDeleter> tiles(IMG_Load(conf.tiles_path.c_str()));
 	
 	if (tiles == nullptr) {
 		throw image_load_exception(std::string(IMG_GetError()));
@@ -91,10 +103,10 @@ void Level::load_from_file(const std::string& path, const std::string& img_path,
 		};
 
 		SDL_Rect source = {
-			(tile_index % static_cast<int>(level_data.img_tilewidth)) * static_cast<int>(level_data.img_tilesize), 
-			(tile_index / static_cast<int>(level_data.img_tilewidth)) * static_cast<int>(level_data.img_tilesize),
-			static_cast<int>(level_data.img_tilesize), 
-			static_cast<int>(level_data.img_tilesize)
+			(tile_index % static_cast<int>(conf.img_tilewidth)) * static_cast<int>(conf.img_tilesize), 
+			(tile_index / static_cast<int>(conf.img_tilewidth)) * static_cast<int>(conf.img_tilesize),
+			static_cast<int>(conf.img_tilesize), 
+			static_cast<int>(conf.img_tilesize)
 		};
 
 		SDL_Rect dest = {

@@ -16,7 +16,6 @@
 
 constexpr int TILE_SELECTOR_SIZE = 64;
 constexpr int TILE_SELECTOR_TW = 10;
-constexpr int TILE_SELECTOR_TH = 10;
 
 // How big a tile is at scale_factor 1.0
 constexpr double DEFAULT_TS = 16.0;
@@ -53,7 +52,7 @@ void LevelMaker::init(WindowState* ws) {
 		window_state->screen_width - TILE_SELECTOR_SIZE * TILE_SELECTOR_TW,
 		0,
 		TILE_SELECTOR_SIZE * TILE_SELECTOR_TW,
-		TILE_SELECTOR_SIZE * TILE_SELECTOR_TH
+		TILE_SELECTOR_SIZE * (static_cast<int>(level_config.img_tilecount) / TILE_SELECTOR_TW)
 	};
 
 	const int editor_w = window_state->screen_width - tiles_viewport.w;
@@ -74,11 +73,15 @@ void LevelMaker::init(WindowState* ws) {
 	};
 	
 	{
-//		SDL_Surface* t = IMG_Load();
+		SDL_Surface* t = IMG_Load(level_config.objects_path.c_str());
+		if (t == NULL) {
+			throw image_load_exception(std::string(IMG_GetError()));
+		}
+		objects.reset(t);
 	}
 
 
-	SDL_Surface* t = IMG_Load(tiles_path.c_str());
+	SDL_Surface* t = IMG_Load(level_config.tiles_path.c_str());
 	if (t == NULL) {
 		throw image_load_exception(std::string(IMG_GetError()));
 	}
@@ -93,12 +96,12 @@ void LevelMaker::init(WindowState* ws) {
 	window_surface = SDL_GetWindowSurface(gWindow);
 }
 
-SDL_Rect get_tile_rect(Uint16 index, const LevelData& level_data) {
+SDL_Rect get_tile_rect(Uint16 index, const LevelConfig& level_config) {
 	return {
-		static_cast<int>((index % level_data.img_tilewidth) * level_data.img_tilesize),
-		static_cast<int>((index / level_data.img_tilewidth) * level_data.img_tilesize),
-		static_cast<int>(level_data.img_tilesize),
-		static_cast<int>(level_data.img_tilesize)
+		static_cast<int>((index % level_config.img_tilewidth) * level_config.img_tilesize),
+		static_cast<int>((index / level_config.img_tilewidth) * level_config.img_tilesize),
+		static_cast<int>(level_config.img_tilesize),
+		static_cast<int>(level_config.img_tilesize)
 	};
 }
 
@@ -113,7 +116,7 @@ void LevelMaker::tile_press(const bool put) {
 	) {
 		int index = (mouseX - tiles_viewport.x) / TILE_SELECTOR_SIZE 
 			+ ((mouseY - tiles_viewport.y) / TILE_SELECTOR_SIZE) * TILE_SELECTOR_TW;
-		if (index >= 0 && index < static_cast<int>(level_data.img_tilecount)) {
+		if (index >= 0 && index < static_cast<int>(level_config.img_tilecount)) {
 			selected = static_cast<Uint16>(index);
 		}
 	} else if (
@@ -262,7 +265,7 @@ void LevelMaker::render() {
 				Uint16 tile_index = (level_data.data[x + level_data.width * y] >> 8) & 0xFF;
 				Uint16 scale = (level_data.data[x + level_data.width * y] >> 16) & 0xFF;
 				if (tile_index != 0xFF) {
-					SDL_Rect source = get_tile_rect(tile_index, level_data);
+					SDL_Rect source = get_tile_rect(tile_index, level_config);
 					SDL_Rect dest = {
 						static_cast<int>(editor_viewport.x + x * ts - camera_x),
 						static_cast<int>(editor_viewport.y + y * ts - camera_y), 
@@ -284,8 +287,9 @@ void LevelMaker::render() {
 	}
 
 	SDL_SetClipRect(window_surface, NULL);
-	for (Uint16 i = 0; i < level_data.img_tilecount; ++i) {
-		SDL_Rect tile_rect = get_tile_rect(i, level_data);
+	SDL_FillRect(window_surface, &tiles_viewport, SDL_MapRGB(window_surface->format, 0xFF, 0xAA, 0));
+	for (Uint16 i = 0; i < level_config.img_tilecount; ++i) {
+		SDL_Rect tile_rect = get_tile_rect(i, level_config);
 		SDL_Rect dest = {
 			tiles_viewport.x + (i % TILE_SELECTOR_TW) * TILE_SELECTOR_SIZE,
 			(i / TILE_SELECTOR_TW) * TILE_SELECTOR_SIZE, 
@@ -296,6 +300,11 @@ void LevelMaker::render() {
 			SDL_BlitScaled(marker.get(), NULL, window_surface, &dest);
 		}
 	}
+	
+	SDL_Rect dest = {
+		objects_viewport.x, objects_viewport.y, TILE_SELECTOR_SIZE, TILE_SELECTOR_SIZE
+	};
+	SDL_BlitScaled(objects.get(), NULL, window_surface, &dest);
 	updated = false;
 	
 	SDL_UpdateWindowSurface(gWindow);

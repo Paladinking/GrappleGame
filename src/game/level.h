@@ -2,6 +2,7 @@
 #define LEVEL_00_H
 #include "util/utilities.h"
 #include "engine/texture.h"
+#include "file/json.h"
 
 
 /**
@@ -18,6 +19,19 @@ struct LevelData {
 	void load_from_file(const std::string& path);
 	
 	void write_to_file(const std::string& path);
+};
+
+/**
+ * LevelConfig is a struct representing asset configuration for a level.
+ */
+struct LevelConfig {
+	int img_tilesize;
+	int img_tilewidth;
+	int img_tilecount;
+	std::string tiles_path;
+	std::string objects_path;
+	
+	static LevelConfig load_from_json(const JsonObject& obj);
 };
 
 class Corner {
@@ -41,7 +55,7 @@ class Level : public TileMap<Tile> {
 			this->tile_size = tile_size;
 		}
 
-		void load_from_file(const std::string& path, const std::string& img_path, const std::string& obj_path);
+		void load_from_file(const std::string& path, const JsonObject& config);
 
 		void render(int cameraY);
 
