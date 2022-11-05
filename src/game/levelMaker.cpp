@@ -11,7 +11,7 @@
 // UU = unused
 // SS = tilescale
 // II = image id (0xFF means no image)
-// TT = tile type (empty 0 or solid 1)
+// TT = tile type (empty 0, blocked 1, spike 2)
 // eg empty tile apperance (0x0000FF00)
 
 constexpr int TILE_SELECTOR_SIZE = 64;
@@ -21,8 +21,8 @@ constexpr int TILE_SELECTOR_TH = 10;
 // How big a tile is at scale_factor 1.0
 constexpr double DEFAULT_TS = 16.0;
 // To avoid lines appearing in the tiles, some zoom levels that works at ca 1.25 multiples apart from each other.
-const double SCALE_FACTORS[] = {1.0, 1.25, 1.5, 2.0, 3.0, 3.75, 4.75, 6.0, 7.5, 9.5, 12.0, 15.0, 18.75, 23.5, 30.0};
-constexpr int SCALE_FACTORS_LEN = 15;
+const double SCALE_FACTORS[] = {0.625, 1.0, 1.25, 1.5, 2.0, 3.0, 3.75, 4.75, 6.0, 7.5, 9.5, 12.0, 15.0, 18.75, 23.5, 30.0};
+constexpr int SCALE_FACTORS_LEN = 16;
 constexpr int MAX_TILE_SCALE = 8;
 
 void LevelMaker::init(WindowState* ws) {
@@ -66,6 +66,16 @@ void LevelMaker::init(WindowState* ws) {
 		editor_h
 	};
 	
+	objects_viewport = {
+		tiles_viewport.x,
+		tiles_viewport.h,
+		tiles_viewport.w,
+		window_state->screen_height - tiles_viewport.h
+	};
+	
+	{
+//		SDL_Surface* t = IMG_Load();
+	}
 
 
 	SDL_Surface* t = IMG_Load(tiles_path.c_str());

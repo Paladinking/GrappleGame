@@ -68,7 +68,13 @@ namespace config {
 	
 	JsonObject& get_bindings(const std::string& key);
 	
-	std::tuple<std::string, std::string, std::string> get_level(const int index);
+	const JsonList& get_levels();
+
+	const JsonObject& get_level(const int index);
+
+	const JsonObject& get_level_config(const std::string& key);
+	
+	std::tuple<std::string, std::string, std::string> get_level_and_config(const int index);
 
 	void write_options();
 	
@@ -80,7 +86,7 @@ namespace config {
 	
 	std::string get_asset_path(const std::string& path);
 	
-	std::string get_default_tileset();
+	std::string get_level_path(const std::string& path);
 }
 
 

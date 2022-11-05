@@ -87,13 +87,25 @@ void Button::set_hover(const bool hover) {
 }
 
 void Button::render(const int x_offset, const int y_offset) {
-	if (hover) {
-		SDL_SetRenderDrawColor(gRenderer, 200, 200, 240, 0xFF);
-	} else {
-		SDL_SetRenderDrawColor(gRenderer, 100, 100, 220, 0xFF);
-	}
 	SDL_Rect r = {x + x_offset, y + y_offset, w, h};
-	SDL_RenderFillRect(gRenderer, &r);
+	if (background != nullptr) {
+		if (hover) {
+			background->set_color_mod(200, 200, 200);
+		} else {
+			background->set_color_mod(255, 255, 255);
+		}
+		background->set_dimensions(r.w, r.h);
+		background->render(r.x, r.y);
+	} else {
+		if (hover) {
+			SDL_SetRenderDrawColor(gRenderer, 200, 200, 240, 0xFF);
+		} else {
+			SDL_SetRenderDrawColor(gRenderer, 100, 100, 220, 0xFF);
+		}
+		SDL_RenderFillRect(gRenderer, &r);
+	}
+	
+	
 	TextBox::render(x_offset, y_offset);
 }
 

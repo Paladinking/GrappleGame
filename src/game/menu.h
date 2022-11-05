@@ -90,16 +90,24 @@ class LevelMakerStartup : public Menu {
 
 	private:
 		enum ButtonId {
-			START_LEVEL_MAKER, NEW_LEVEL, LOAD_FILE, ADD_HEIGHT, SUB_HEIGHT
+			START_LEVEL_MAKER, NEW_LEVEL, ADD_HEIGHT, SUB_HEIGHT, LEVELS_PREV, LEVELS_NEXT
 		};
 
 		void create_default_level();
+		
+		void create_levels_buttons(const JsonList& levels);
 
 		void sync_text();
 
-		bool loaded;
+		int loaded = -1;
+		
+		int levels_button_start;
+		int levels_button_fits;
+		int levels_button_page;
 
 		std::string tileset_path;
+		
+		std::shared_ptr<Texture> btn_texture;
 
 		LevelData data;
 };

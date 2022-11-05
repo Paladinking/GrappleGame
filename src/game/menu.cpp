@@ -215,7 +215,6 @@ void LevelMakerStartup::init(WindowState* ws) {
 
 	buttons.emplace_back(3 * window_state->screen_width / 4 - 100, 3 * window_state->screen_height / 4 - 40, 200, 80, "Start", 30);
 	buttons.emplace_back(window_state->screen_width / 3 - 110, 8 * window_state->screen_height / 12 - 20, 100, 40, "New Level", 15);
-	buttons.emplace_back(window_state->screen_width / 3 - 110, 9 * window_state->screen_height / 12 - 20, 100, 40, "Load Level", 15);
 	buttons.emplace_back(window_state->screen_width / 3 - 50, 21 * window_state->screen_height / 48 - 20, 20, 20, "+", 15);
 	buttons.emplace_back(window_state->screen_width / 3 - 80, 21 * window_state->screen_height / 48 - 20, 20, 20, "-", 15);
 
@@ -234,11 +233,40 @@ void LevelMakerStartup::init(WindowState* ws) {
 		5 * window_state->screen_height / 16 - 40,
 		200, 80, "Data: clear", 15
 	);
+	
+	btn_texture.reset(new Texture());
+	btn_texture->load_from_file(config::get_asset_path("button.png"));
+	const JsonList& levels = config::get_levels();
+	levels_button_fits = (window_state->screen_width - 100) / 300;
+	if (levels_button_fits < levels.size()) {
+		buttons.emplace_back(50, 100, 25, 25, "<");
+		buttons.emplace_back(window_state->screen_width - 75, 100, 25, 25, ">");
+		levels_button_start = LEVELS_NEXT + 1;
+	} else {
+		levels_button_start = LEVELS_PREV;
+	}
+	levels_button_page = 0;
+	create_levels_buttons(levels);
+}
+
+void LevelMakerStartup::create_levels_buttons(const JsonList& levels) {
+	const int start_x = window_state->screen_width / 2 - (300 * levels_button_fits) / 2 + 25;
+	for (int i = 0; i < levels_button_fits; ++i) {
+		if (i + levels_button_fits * levels_button_page >= levels.size()) break;
+		const std::string& text = levels.get<JsonObject>(i + levels_button_fits * levels_button_page).get<std::string>("name");
+		if (buttons.size() > i + levels_button_start) {
+			buttons[i + levels_button_start].set_text(text);
+		} else {
+			buttons.emplace_back(start_x + i * 300, 50, 250, 100, text, btn_texture);
+		}
+	}
+	while (buttons.size() - levels_button_start > levels.size() - levels_button_page * levels_button_fits) {
+		buttons.pop_back();
+	}
 }
 
 void LevelMakerStartup::create_default_level() {
-	loaded = false;
-	tileset_path = config::get_default_tileset();
+	loaded = -1;
 	data.height = TILE_HEIGHT * 2;
 	data.width = TILE_WIDTH;
 	data.img_tilesize = 32;
@@ -248,47 +276,68 @@ void LevelMakerStartup::create_default_level() {
 
 void LevelMakerStartup::button_press(const int btn) {
 	switch (btn) {
-		case START_LEVEL_MAKER:
-			if (!loaded) {
+		case START_LEVEL_MAKER: {
+			if (loaded == -1) {
 				data.data = std::make_unique<Uint32[]>(data.width * data.height);
 				for (size_t i = 0; i < data.width * data.height; ++i) {
 					data.data[i] = (0xFF << 8);
 				}
 			}
-			next_res = {StateStatus::SWAP, new LevelMaker(std::move(data), config::get_asset_path(tileset_path))};
+			const JsonObject& lvl_config = loaded == -1 ? config::get_level_config("default") : 
+				config::get_level_config(config::get_level(loaded).get<std::string>("config"));
+			next_res = {
+				StateStatus::SWAP, 
+				new LevelMaker(
+					std::move(data), 
+					config::get_asset_path(lvl_config.get<std::string>("tiles")),
+					config::get_asset_path(lvl_config.get<std::string>("objects"))
+				)
+			};
 			break;
+		}
 		case NEW_LEVEL: 
 			create_default_level();
 			text[1].set_text("Height: " + std::to_string(data.height));
 			text[2].set_text("Data: clear");
-			break;
-		case LOAD_FILE: {
-			std::string file_path;
-			if (nfd::OpenDialog(file_path) == NFD_OKAY) {
-				try {
-					LevelData temp;
-					temp.load_from_file(file_path);
-					data = std::move(temp);
-					loaded = true;
-				} catch (const base_exception& e) {
-					std::cout << e.msg << std::endl;
-				}
-				text[1].set_text("Height: " + std::to_string(data.height));
-				text[2].set_text(loaded ? "Data: loaded" : "Data: clear");
-			}
-			break;
-		}
+			break; 
 		case ADD_HEIGHT:
-			if (!loaded) {
+			if (loaded == -1) {
 				data.height += TILE_HEIGHT;
 				text[1].set_text("Height: " + std::to_string(data.height));
 			}
 			break;
 		case SUB_HEIGHT:
-			if (!loaded && data.height > TILE_HEIGHT) {
+			if (loaded == -1 && data.height > TILE_HEIGHT) {
 				data.height -= TILE_HEIGHT;
 				text[1].set_text("Height: " + std::to_string(data.height));
 			}
 			break;
+		default:
+			if (btn >= levels_button_start) {
+				loaded = btn + levels_button_page * levels_button_fits - levels_button_start;
+				const JsonObject& lvl = config::get_level(loaded);
+				try {
+					LevelData temp;
+					temp.load_from_file(config::get_level_path(lvl.get<std::string>("file")));
+					data = std::move(temp);
+				} catch (const base_exception& e) {
+					std::cout << e.msg << std::endl;
+					loaded = -1;
+				}
+				text[1].set_text("Height: " + std::to_string(data.height));
+				text[2].set_text(loaded == -1 ? "Data: clear" : "Data: " + lvl.get<std::string>("name"));
+			} else if (btn == LEVELS_PREV) {
+				if (levels_button_page > 0) { 
+					--levels_button_page;
+					const JsonList& lvls = config::get_levels();
+					create_levels_buttons(lvls);
+				}
+			} else if (btn == LEVELS_NEXT) {
+				const JsonList& lvls = config::get_levels();
+				if ((levels_button_page + 1) * levels_button_fits < lvls.size()) {
+					++levels_button_page;
+					create_levels_buttons(lvls);
+				}
+			}
 	}
 }

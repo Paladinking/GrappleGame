@@ -76,8 +76,9 @@ void ClimbGame::render() {
 void ClimbGame::init(WindowState* ws) {
 	State::init(ws);
 	create_inputs();
-	std::tuple<std::string, std::string, std::string> lvl1 = config::get_level(0);
+	std::tuple<std::string, std::string, std::string> lvl1 = config::get_level_and_config(0);
 	level.set_screen_size(SCREEN_WIDTH, SCREEN_HEIGHT);
+
 	level.load_from_file(std::get<0>(lvl1), std::get<1>(lvl1), std::get<2>(lvl1));
 	
 	game_viewport = {

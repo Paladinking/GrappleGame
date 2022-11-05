@@ -4,6 +4,7 @@
 #include <SDL_ttf.h>
 #include <vector>
 #include <string>
+#include <memory>
 #include "util/exceptions.h"
 #include "game.h"
 #include "input.h"
@@ -98,6 +99,8 @@ class Button : public TextBox {
 		 */
 		Button(const int x, const int y, const int w, const int h, const std::string& text) : TextBox(x, y, w, h, text){};
 		Button(const int x, const int y, const int w, const int h, const std::string& text, const int font_size) : TextBox(x, y, w, h, text, font_size){};
+		Button(const int x, const int y, const int w, const int h, const std::string& text, const int font_size, const std::shared_ptr<Texture> background) : TextBox(x, y, w, h, text, font_size), background(background) {};
+		Button(const int x, const int y, const int w, const int h, const std::string& text, const std::shared_ptr<Texture> background) : TextBox(x, y, w, h, text), background(background) {};
 
 		/**
 		 * Returns true if the button contains the point (mouseX, mousey).
@@ -116,6 +119,8 @@ class Button : public TextBox {
 
 	private:
 		bool hover;
+		
+		std::shared_ptr<Texture> background;
 };
 
 class Menu : public State {

@@ -126,8 +126,8 @@ constexpr int TOTAL_LEVELS = 1;
 bool levels_loaded = false;
 JsonObject levels;
 
-std::tuple<std::string, std::string, std::string> config::get_level(const int index) {
-	if (!levels_loaded) {
+const JsonList& config::get_levels() {
+	if(!levels_loaded) {
 		if (VERBOSE) std::cout << "Loading " << CONFIG_ROOT << LEVELS_FILE << std::endl;
 		//No try ... catch since failing to load levels cannot be handled.
 		levels = json::read_from_file(CONFIG_ROOT + LEVELS_FILE);
@@ -144,18 +144,35 @@ std::tuple<std::string, std::string, std::string> config::get_level(const int in
 			if (!obj.has_key_of_type<std::string>("file") || !obj.has_key_of_type<std::string>("config")) {
 				throw file_exception("Level" + std::to_string(i) + " is invalid");
 			}
+			if (!obj.has_key_of_type<std::string>("name")) {
+				obj.set<std::string>("name", "Unnamed_level_" + std::to_string(i));
+			}
 		}
+		levels_loaded = true;
 	}
-	const JsonObject& lvl = levels.get<JsonList>("LEVELS").get<JsonObject>(index);
+	return levels.get<JsonList>("LEVELS");
+}
+
+const JsonObject& config::get_level(const int index) {
+	return config::get_levels().get<JsonObject>(index);
+}
+
+const JsonObject& config::get_level_config(const std::string& key) {
+	config::get_levels(); // Make sure levels are loaded.
 	const JsonObject& cnf = levels.get<JsonObject>("LEVEL_CONFIGURATIONS");
-	const std::string& cnf_key = lvl.get<std::string>("config");
-	if (!cnf.has_key_of_type<JsonObject>(cnf_key)) {
-		throw file_exception("Level " + std::to_string(index) + " has invalid config");
+	if (!cnf.has_key_of_type<JsonObject>(key)) {
+		throw file_exception("Level config " + key + " unknown");
 	}
-	const JsonObject& lvl_config = cnf.get<JsonObject>(cnf_key);
+	const JsonObject& lvl_config = cnf.get<JsonObject>(key);
 	if (!lvl_config.has_key_of_type<std::string>("tiles") || !lvl_config.has_key_of_type<std::string>("objects")) {
-		throw file_exception("Level " + std::to_string(index) + " has invalid config");
+		throw file_exception("Level config " + key + " is invalid");
 	}
+	return lvl_config;
+}
+
+std::tuple<std::string, std::string, std::string> config::get_level_and_config(const int index) {
+	const JsonObject& lvl = config::get_level(index);
+	const JsonObject& lvl_config = config::get_level_config(lvl.get<std::string>("config"));
 	return {
 		LEVELS_ROOT + lvl.get<std::string>("file"),
 		ASSETS_ROOT + lvl_config.get<std::string>("tiles"),
@@ -183,6 +200,6 @@ std::string config::get_asset_path(const std::string& path) {
 	return ASSETS_ROOT + path;
 }
 
-std::string config::get_default_tileset() {
-	return "tiles/tiles.png";
+std::string config::get_level_path(const std::string& path) {
+	return LEVELS_ROOT + path;
 }
