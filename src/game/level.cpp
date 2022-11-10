@@ -8,15 +8,9 @@
 #include "globals.h"
 #include "config.h"
 
-void LevelData::load_from_file(const std::string& path) {
+void LevelData::load_from_file(const std::string& path, const int tile_count) {
 	FileReader reader = FileReader(path, true, true);
-	if (
-		!reader.read_next(width) ||
-		!reader.read_next(height) ||
-		!reader.read_next(img_tilesize) ||
-		!reader.read_next(img_tilewidth) ||
-		!reader.read_next(img_tilecount)
-	) {
+	if (!reader.read_next(width) || !reader.read_next(height)) {
 		throw file_exception("Invalid level file");
 	}
 	data = std::make_unique<Uint32[]>(width * height);
@@ -29,7 +23,7 @@ void LevelData::load_from_file(const std::string& path) {
 	for (size_t i = 0; i < width * height; ++i) {
 		Uint32 tile = (data[i] >> 8) & 0xFF;
 		Uint32 scale = (data[i] >> 16) & 0xFF;
-		if (tile != 0xFF && (tile >= img_tilecount || scale > 8))
+		if (tile != 0xFF && (tile >= tile_count || scale > 8))
 			throw file_exception("Invalid tile in level file");
 	}
 	
@@ -40,9 +34,6 @@ void LevelData::write_to_file(const std::string& path) {
 	if (
 		!writer.write(width) ||
 		!writer.write(height) ||
-		!writer.write(img_tilesize) ||
-		!writer.write(img_tilewidth) ||
-		!writer.write(img_tilecount) ||
 		!writer.write_many(data.get(), width * height)
 	) {
 		throw file_exception("Could not write to level file");
@@ -65,10 +56,10 @@ void Level::set_screen_size(const int sw, const int sh) {
 }
 
 void Level::load_from_file(const std::string& path, const JsonObject& obj) {
-	LevelData level_data;
-	level_data.load_from_file(path);
-	
 	LevelConfig conf = LevelConfig::load_from_json(obj);
+	LevelData level_data;
+	level_data.load_from_file(path, conf.img_tilecount);
+
 
 	std::unique_ptr<SDL_Surface, SurfaceDeleter> tiles(IMG_Load(conf.tiles_path.c_str()));
 	

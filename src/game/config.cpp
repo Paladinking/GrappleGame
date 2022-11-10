@@ -164,7 +164,12 @@ const JsonObject& config::get_level_config(const std::string& key) {
 		throw file_exception("Level config " + key + " unknown");
 	}
 	const JsonObject& lvl_config = cnf.get<JsonObject>(key);
-	if (!lvl_config.has_key_of_type<std::string>("tiles") || !lvl_config.has_key_of_type<std::string>("objects")) {
+	if (!lvl_config.has_key_of_type<std::string>("tiles") || 
+		!lvl_config.has_key_of_type<std::string>("objects") ||
+		!lvl_config.has_key_of_type<int>("tile_count") ||
+		!lvl_config.has_key_of_type<int>("tile_size") ||
+		!lvl_config.has_key_of_type<int>("tile_width")
+	){
 		throw file_exception("Level config " + key + " is invalid");
 	}
 	return lvl_config;

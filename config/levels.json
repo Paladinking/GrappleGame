@@ -2,30 +2,33 @@
 	"LEVEL_CONFIGURATIONS" : {
 		"default" : {
 			"tiles" : "tiles/tiles.png",
-			"objects" : "objects.png"
+			"tile_width" : 10,
+			"tile_count" : 80,
+			"tile_size" : 32,
+			"objects" : "spike.png",
+			"possible_objects" : ["SPIKES"]
 		}
 	},
 	"LEVELS" : [
 		{
-			"file" : "level2",
+			"name" : "Level 1",
+			"file" : "level1_new",
 			"config" : "default"
 		},
 		{
-			"file" : "levelt",
+			"name" : "Level 2",
+			"file" : "level2_new",
 			"config" : "default"
 		},
 		{
-			"file" : "level1",
-			"config" : "default"
-		},
-		{
+			"name" : "Level 3",
 			"file" : "level3",
 			"config" : "default"
 		},
 		{
-			"file" : "levels1",
+			"name" : "Level 4",
+			"file" : "level4_new",
 			"config" : "default"
 		}
-	
 	]
 }

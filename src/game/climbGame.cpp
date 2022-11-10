@@ -78,7 +78,7 @@ void ClimbGame::init(WindowState* ws) {
 	create_inputs();
 
 	std::pair<std::string, const JsonObject&> lvl1 = config::get_level_and_config(0);
-	//std::tuple<std::string, std::string, std::string> lvl1 = config::get_level_and_config(0);
+
 	level.set_screen_size(SCREEN_WIDTH, SCREEN_HEIGHT);
 
 	level.load_from_file(lvl1.first, lvl1.second);

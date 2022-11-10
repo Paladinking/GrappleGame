@@ -221,7 +221,7 @@ void LevelMakerStartup::init(WindowState* ws) {
 	text.emplace_back(
 		window_state->screen_width / 4 - 100, 
 		4 * window_state->screen_height / 8 - 40, 200, 80,
-		"Tileset: " + tileset_path, 15
+		"Tileset: default", 15
 	);
 	text.emplace_back(
 		window_state->screen_width / 4 - 100,
@@ -269,9 +269,6 @@ void LevelMakerStartup::create_default_level() {
 	loaded = -1;
 	data.height = TILE_HEIGHT * 2;
 	data.width = TILE_WIDTH;
-	data.img_tilesize = 32;
-	data.img_tilewidth = 10;
-	data.img_tilecount = 80;
 }
 
 void LevelMakerStartup::button_press(const int btn) {
@@ -315,9 +312,13 @@ void LevelMakerStartup::button_press(const int btn) {
 			if (btn >= levels_button_start) {
 				loaded = btn + levels_button_page * levels_button_fits - levels_button_start;
 				const JsonObject& lvl = config::get_level(loaded);
+				const JsonObject& conf = config::get_level_config(lvl.get<std::string>("config"));
 				try {
 					LevelData temp;
-					temp.load_from_file(config::get_level_path(lvl.get<std::string>("file")));
+					temp.load_from_file(
+						config::get_level_path(lvl.get<std::string>("file")), 
+						conf.get<int>("tile_count")
+					);
 					data = std::move(temp);
 				} catch (const base_exception& e) {
 					std::cout << e.msg << std::endl;

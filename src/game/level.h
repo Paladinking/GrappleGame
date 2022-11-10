@@ -11,12 +11,10 @@
 struct LevelData {
 	Uint32 width;
 	Uint32 height;
-	Uint32 img_tilesize;
-	Uint32 img_tilewidth;
-	Uint32 img_tilecount;
+
 	std::unique_ptr<Uint32[]> data;
 
-	void load_from_file(const std::string& path);
+	void load_from_file(const std::string& path, const int tile_count);
 	
 	void write_to_file(const std::string& path);
 };

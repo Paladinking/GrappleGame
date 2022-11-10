@@ -104,8 +104,6 @@ class LevelMakerStartup : public Menu {
 		int levels_button_start;
 		int levels_button_fits;
 		int levels_button_page;
-
-		std::string tileset_path;
 		
 		std::shared_ptr<Texture> btn_texture;
 
