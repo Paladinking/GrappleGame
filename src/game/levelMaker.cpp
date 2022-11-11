@@ -64,6 +64,16 @@ void LevelMaker::init(WindowState* ws) {
 		editor_w,
 		editor_h
 	};
+
+	while (
+		SCALE_FACTORS[min_scale_factor] * DEFAULT_TS * level_data.width < editor_w || 
+		SCALE_FACTORS[min_scale_factor] * DEFAULT_TS * level_data.height < editor_mode
+	) {
+		++min_scale_factor;
+	}
+	if (scale_factor < min_scale_factor) scale_factor = min_scale_factor;
+	
+	std::cout << min_scale_factor << std::endl;
 	
 	objects_viewport = {
 		tiles_viewport.x,
@@ -150,7 +160,7 @@ void LevelMaker::tile_press(const bool put) {
 
 void LevelMaker::zoom(const bool in) {
 	int new_scale_factor = in ? scale_factor + 1  : scale_factor - 1;
-	if (new_scale_factor < 0) new_scale_factor = 0;
+	if (new_scale_factor < min_scale_factor) new_scale_factor = min_scale_factor;
 	else if (new_scale_factor > SCALE_FACTORS_LEN - 1) new_scale_factor = SCALE_FACTORS_LEN - 1;
 
 	const double scale_div = SCALE_FACTORS[new_scale_factor] / SCALE_FACTORS[scale_factor];

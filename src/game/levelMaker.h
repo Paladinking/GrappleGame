@@ -56,12 +56,14 @@ class LevelMaker : public State {
 		bool updated = true;
 
 		int scale_factor = 0;
+		int min_scale_factor = 0;
 		double camera_x = 0.0, camera_y = 0.0;
 
 		SDL_Rect editor_viewport, tiles_viewport, objects_viewport;
 
 		// Number of tiles of one side of the texture (1-8). Uint32 so that tile_scale << 16 fits.
 		Uint32 tile_scale = 1; 
+		
 };
 
 #endif
