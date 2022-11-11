@@ -14,7 +14,7 @@ struct LevelData {
 
 	std::unique_ptr<Uint32[]> data;
 
-	void load_from_file(const std::string& path, const int tile_count);
+	void load_from_file(const std::string& path, const Uint32 tile_count);
 	
 	void write_to_file(const std::string& path);
 };

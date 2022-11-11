@@ -8,7 +8,7 @@
 #include "globals.h"
 #include "config.h"
 
-void LevelData::load_from_file(const std::string& path, const int tile_count) {
+void LevelData::load_from_file(const std::string& path, const Uint32 tile_count) {
 	FileReader reader = FileReader(path, true, true);
 	if (!reader.read_next(width) || !reader.read_next(height)) {
 		throw file_exception("Invalid level file");

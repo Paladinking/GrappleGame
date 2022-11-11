@@ -44,7 +44,7 @@ class LevelMaker : public State {
 			tile_scale_up_input, tile_scale_down_input;
 		std::unique_ptr<HoldInput> camera_pan_input, exit_input;
 
-		Uint16 selected = 0;
+		int selected = 0;
 
 		enum {
 			PLACE_TILES, PLACE_COLLISIONS
