@@ -67,7 +67,7 @@ void LevelMaker::init(WindowState* ws) {
 
 	while (
 		SCALE_FACTORS[min_scale_factor] * DEFAULT_TS * level_data.width < editor_w || 
-		SCALE_FACTORS[min_scale_factor] * DEFAULT_TS * level_data.height < editor_mode
+		SCALE_FACTORS[min_scale_factor] * DEFAULT_TS * level_data.height < editor_h
 	) {
 		++min_scale_factor;
 	}
