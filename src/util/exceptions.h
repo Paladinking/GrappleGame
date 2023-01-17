@@ -23,6 +23,14 @@ class image_load_exception : public base_exception {
 };
 
 /**
+ * logic_exception, an exception that indicates a programming error.
+ */
+class logic_exception : public base_exception {
+	public:
+		logic_exception(std::string msg) : base_exception(msg) {};
+};
+
+/**
  * SDL_exception, for when loading a part of the SDL library fails.
  */
 class SDL_exception : public base_exception {

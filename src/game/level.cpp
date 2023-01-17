@@ -20,10 +20,12 @@ void LevelData::load_from_file(const std::string& path, const Uint32 tile_count)
 	if (width != TILE_WIDTH || (height % TILE_HEIGHT) != 0) {
 		throw file_exception("Bad dimensions in level file");
 	}
+	const Uint32 total_images = tile_count + static_cast<Uint32>(LevelObject::TOTAL);
 	for (size_t i = 0; i < width * height; ++i) {
-		Uint32 tile = (data[i] >> 8) & 0xFF;
-		Uint32 scale = (data[i] >> 16) & 0xFF;
-		if (tile != 0xFF && (tile >= tile_count || scale > 8))
+		const Uint32 type = data[i] & 0xFF; 
+		const Uint32 img = (data[i] >> 8) & 0xFF;
+		const Uint32 scale = (data[i] >> 16) & 0xFF;
+		if (type >= static_cast<Uint16>(Tile::TOTAL) || img != 0xFF && (img >= total_images || scale > 8))
 			throw file_exception("Invalid tile in level file");
 	}
 	
@@ -55,6 +57,7 @@ void Level::set_screen_size(const int sw, const int sh) {
 	screen_height = sh;
 }
 
+
 void Level::load_from_file(const std::string& path, const JsonObject& obj) {
 	LevelConfig conf = LevelConfig::load_from_json(obj);
 	LevelData level_data;
@@ -62,8 +65,11 @@ void Level::load_from_file(const std::string& path, const JsonObject& obj) {
 
 
 	std::unique_ptr<SDL_Surface, SurfaceDeleter> tiles(IMG_Load(conf.tiles_path.c_str()));
-	
 	if (tiles == nullptr) {
+		throw image_load_exception(std::string(IMG_GetError()));
+	}
+	std::unique_ptr<SDL_Surface, SurfaceDeleter> objects(IMG_Load(conf.objects_path.c_str()));
+	if (objects == nullptr) {
 		throw image_load_exception(std::string(IMG_GetError()));
 	}
 
@@ -84,21 +90,15 @@ void Level::load_from_file(const std::string& path, const JsonObject& obj) {
 
 		int tile_index = (t >> 8) & 0xFF;
 		int tile_scale = (t >> 16) & 0xFF;
-		Tile tile = (t & 0xFF) == 0 ? Tile::EMPTY : Tile::BLOCKED;
+		Tile tile = static_cast<Tile>(t & 0xFF);
 
 		map[i] = tile;
-
 
 		if (tile_index == 0xFF) {
 			continue;
 		};
 
-		SDL_Rect source = {
-			(tile_index % static_cast<int>(conf.img_tilewidth)) * static_cast<int>(conf.img_tilesize), 
-			(tile_index / static_cast<int>(conf.img_tilewidth)) * static_cast<int>(conf.img_tilesize),
-			static_cast<int>(conf.img_tilesize), 
-			static_cast<int>(conf.img_tilesize)
-		};
+		SDL_Rect source = get_tile_rect(tile_index, conf);
 
 		SDL_Rect dest = {
 			(i % static_cast<int>(level_data.width)) * tile_size,
@@ -108,14 +108,15 @@ void Level::load_from_file(const std::string& path, const JsonObject& obj) {
 
 		const int surface_index = (i / level_data.width) / (screen_height / tile_size);
 
-		SDL_BlitScaled(tiles.get(), &source, surfaces[surface_index].get(), &dest);
+		SDL_Surface* surface = tile_index >= conf.img_tilecount ? objects.get() : tiles.get();
+		SDL_BlitScaled(surface, &source, surfaces[surface_index].get(), &dest);
 
 		// A scaled tile might be part of two screens
 		const int next_surface_index = (i / level_data.width + tile_scale - 1) / (screen_height / tile_size);
 		if (next_surface_index <= visible_screens - 1 && surface_index != next_surface_index) {
 			dest.y -= static_cast<int>(level_data.width) * tile_size;
 			dest.h = tile_size * tile_scale; //SDL_BlitScaled modifies dest, so h needs to be changed back.
-			int res = SDL_BlitScaled(tiles.get(), &source, surfaces[next_surface_index].get(), &dest);
+			int res = SDL_BlitScaled(surface, &source, surfaces[next_surface_index].get(), &dest);
 		}
 	}
 
@@ -179,5 +180,22 @@ void Level::render(int cameraY) {
 	int last = (cameraY + 2 * screen_height - 1) / screen_height;
 	for (int i = first; i < last; ++i) {
 		level_textures[i].render(0, i * screen_height - cameraY);
+	}
+}
+
+SDL_Rect get_tile_rect(Uint16 index, const LevelConfig& level_config) {
+	if (index < level_config.img_tilecount) {
+		return {
+			static_cast<int>((index % level_config.img_tilewidth) * level_config.img_tilesize),
+			static_cast<int>((index / level_config.img_tilewidth) * level_config.img_tilesize),
+			static_cast<int>(level_config.img_tilesize),
+			static_cast<int>(level_config.img_tilesize)
+		}; 
+	} else if (index - level_config.img_tilecount == static_cast<int>(LevelObject::SPIKE)){
+		return {
+			0, 0, static_cast<int>(level_config.img_tilesize), static_cast<int>(level_config.img_tilesize)
+		};
+	} else {
+		throw logic_exception("Rect index out of bounds");
 	}
 }

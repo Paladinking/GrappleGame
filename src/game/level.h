@@ -44,11 +44,11 @@ class Corner {
 };
 
 enum class Tile : Uint16 {
-	EMPTY, BLOCKED, SPIKES
+	EMPTY, BLOCKED, SPIKES, TOTAL
 };
 
 enum class LevelObject {
-	SPIKE = 0
+	SPIKE = 0, TOTAL = 1
 };
 
 class Level : public TileMap<Tile> {
@@ -75,4 +75,6 @@ class Level : public TileMap<Tile> {
 		void create_corners();
 
 };
+
+SDL_Rect get_tile_rect(Uint16 index, const LevelConfig& level_config);
 #endif

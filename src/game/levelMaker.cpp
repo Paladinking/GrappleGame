@@ -105,23 +105,6 @@ void LevelMaker::init(WindowState* ws) {
 	window_surface = SDL_GetWindowSurface(gWindow);
 }
 
-SDL_Rect get_tile_rect(Uint16 index, const LevelConfig& level_config) {
-	if (index < level_config.img_tilecount) {
-		return {
-			static_cast<int>((index % level_config.img_tilewidth) * level_config.img_tilesize),
-			static_cast<int>((index / level_config.img_tilewidth) * level_config.img_tilesize),
-			static_cast<int>(level_config.img_tilesize),
-			static_cast<int>(level_config.img_tilesize)
-		}; 
-	} else if (index - level_config.img_tilecount == static_cast<int>(LevelObject::SPIKE)){
-		return {
-			0, 0, static_cast<int>(level_config.img_tilesize), static_cast<int>(level_config.img_tilesize)
-		};
-	} else {
-		throw game_exception("Rect index out of bounds");
-	}
-}
-
 bool is_pressed(const SDL_Rect& viewport, const int x, const int y) {
 	return x >= viewport.x && y >= viewport.y && x < viewport.x + viewport.w && y < viewport.y + viewport.h;
 }
