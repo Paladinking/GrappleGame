@@ -74,8 +74,6 @@ void LevelMaker::init(WindowState* ws) {
 	}
 	if (scale_factor < min_scale_factor) scale_factor = min_scale_factor;
 	
-	std::cout << min_scale_factor << std::endl;
-	
 	objects_viewport = {
 		tiles_viewport.x,
 		tiles_viewport.h,
@@ -108,18 +106,54 @@ void LevelMaker::init(WindowState* ws) {
 }
 
 SDL_Rect get_tile_rect(Uint16 index, const LevelConfig& level_config) {
-	return {
-		static_cast<int>((index % level_config.img_tilewidth) * level_config.img_tilesize),
-		static_cast<int>((index / level_config.img_tilewidth) * level_config.img_tilesize),
-		static_cast<int>(level_config.img_tilesize),
-		static_cast<int>(level_config.img_tilesize)
-	};
+	if (index < level_config.img_tilecount) {
+		return {
+			static_cast<int>((index % level_config.img_tilewidth) * level_config.img_tilesize),
+			static_cast<int>((index / level_config.img_tilewidth) * level_config.img_tilesize),
+			static_cast<int>(level_config.img_tilesize),
+			static_cast<int>(level_config.img_tilesize)
+		}; 
+	} else if (index - level_config.img_tilecount == static_cast<int>(LevelObject::SPIKE)){
+		return {
+			0, 0, static_cast<int>(level_config.img_tilesize), static_cast<int>(level_config.img_tilesize)
+		};
+	} else {
+		throw game_exception("Rect index out of bounds");
+	}
 }
 
 bool is_pressed(const SDL_Rect& viewport, const int x, const int y) {
 	return x >= viewport.x && y >= viewport.y && x < viewport.x + viewport.w && y < viewport.y + viewport.h;
 }
 
+void LevelMaker::set_tile(const int index, const Uint32 scale, const Uint32 image_id, const Uint32 tile_type) {
+	level_data.data[index] = ((scale & 0xFF) << 16) | ((image_id & 0xFF) << 8) | (tile_type & 0xFF);
+}
+
+void LevelMaker::set_tile(const int index, const Uint32 scale, const Uint32 image_id) {
+	level_data.data[index] = ((scale & 0xFF) << 16) | ((image_id & 0xFF) << 8) | (level_data.data[index] & 0xFF);
+}
+
+void LevelMaker::place_spike(const int x_tile, const int y_tile) {
+	int first = x_tile + static_cast<int>(tile_scale - 1) / 2;
+	int last = x_tile + static_cast<int>(tile_scale) / 2;
+	int count = 0;
+	for (int y = 0; y < std::min(static_cast<int>(tile_scale), static_cast<int>(level_data.height) - y_tile); ++y) {
+		for (int x = x_tile; x < std::min(x_tile + static_cast<int>(tile_scale), static_cast<int>(level_data.width)); ++x) {
+			const int index = x + level_data.width * (y + y_tile);
+			if (x >= first && x <= last) {
+				set_tile(index, 0, 0xFF, 2);
+			} else {
+				set_tile(index, 0, 0xFF, 0);
+			}
+		}
+		if ((y + tile_scale) % 2 == 1) {
+			first--;
+			last++;
+		}
+	}
+	set_tile(x_tile + y_tile * level_data.width, tile_scale, selected);
+}
 
 void LevelMaker::tile_press(const bool put) {
 	updated = true;
@@ -139,21 +173,26 @@ void LevelMaker::tile_press(const bool put) {
 		const int index = x_tile + y_tile * level_data.width;
 
 		if (editor_mode == PLACE_TILES) {
-			if (selected - level_config.img_tilecount == 0) {
-				
+			if (selected - level_config.img_tilecount == static_cast<int>(LevelObject::SPIKE) && put) {
+				place_spike(x_tile, y_tile);
 			} else {
-				Uint32 new_tile = put ? (tile_scale << 16) | (static_cast<Uint16>(selected) << 8) | 1 : (0xFF << 8);
-				if (!tile_colisions) {
-					new_tile = (new_tile & 0xFFFFFF00) | level_data.data[index] & 0xFF;
-				}
-				const Uint32 val = put ? (0xFF << 8) | 1 : (0xFF << 8);
 				for (int y  = y_tile; y < std::min(y_tile + static_cast<int>(tile_scale), static_cast<int>(level_data.height)); ++y) {
 					for (int x = x_tile; x < std::min(x_tile + static_cast<int>(tile_scale), static_cast<int>(level_data.width)); ++x) {
 						int i = x + level_data.width * y;
-						level_data.data[i] = tile_colisions ? val : (val & 0xFFFFFF00) | level_data.data[i] & 0xFF;
+						if (tile_colisions) {
+							set_tile(i, 0, 0xFF, put ? 1 : 0);
+						} else {
+							set_tile(i, 0, 0xFF);
+						}
 					}
 				}
-				level_data.data[index] = new_tile;
+				const Uint32 img = put ? selected : 0xFF;
+				const Uint32 ts = put ? tile_scale : 0;
+				if (tile_colisions) {
+					set_tile(index, ts, img, put ? 1 : 0);
+				} else {
+					set_tile(index, ts, img);
+				}
 			}
 		} else {
 			level_data.data[index] = (level_data.data[index] & 0xFFFFFF00) | (put ? 1 : 0);
@@ -290,7 +329,10 @@ void LevelMaker::render() {
 						static_cast<int>(editor_viewport.y + y * ts - camera_y), 
 						static_cast<int>(ts * scale), static_cast<int>(ts * scale)
 					};
-					SDL_BlitScaled(tiles.get(), &source, window_surface, &dest);
+					SDL_BlitScaled(
+						tile_index < level_config.img_tilecount ? tiles.get() : objects.get(),
+						&source, window_surface, &dest
+					);
 				}
 			} else {
 				SDL_Rect dest = {
@@ -298,8 +340,11 @@ void LevelMaker::render() {
 					static_cast<int>(editor_viewport.y + y * ts - camera_y), 
 					static_cast<int>(ts), static_cast<int>(ts)
 				};
-				if ((level_data.data[x + level_data.width * y] & 0xFF) != 0) {
+				Uint16 tile_type = (level_data.data[x + level_data.width * y] & 0xFF);
+				if (tile_type == 1) {
 					SDL_FillRect(window_surface, &dest, SDL_MapRGB(window_surface->format, 0xFF, 0, 0));
+				} else if (tile_type == 2) {
+					SDL_FillRect(window_surface, &dest, SDL_MapRGB(window_surface->format, 0xFF, 0x7F, 0));
 				}
 			}
 		}
@@ -323,7 +368,7 @@ void LevelMaker::render() {
 	SDL_Rect dest = {
 		objects_viewport.x, objects_viewport.y, TILE_SELECTOR_SIZE, TILE_SELECTOR_SIZE
 	};
-	SDL_BlitScaled(objects.get(), NULL, window_surface, &dest);
+	SDL_BlitScaled(objects.get(), &get_tile_rect(level_config.img_tilecount, level_config), window_surface, &dest);
 	if (selected - level_config.img_tilecount == 0) {
 		SDL_BlitScaled(marker.get(), NULL, window_surface, &dest);
 	}

@@ -47,6 +47,10 @@ enum class Tile : Uint16 {
 	EMPTY, BLOCKED, SPIKES
 };
 
+enum class LevelObject {
+	SPIKE = 0
+};
+
 class Level : public TileMap<Tile> {
 	public:
 		Level(const int tile_size) : TileMap(Tile::BLOCKED) {

@@ -9,7 +9,6 @@
 #include "util/utilities.h"
 #include "level.h"
 
-
 class LevelMaker : public State {
 	public:
 		LevelMaker(LevelData&& data, const LevelConfig& level_config) : State(), level_data(std::move(data)), level_config(level_config) {}
@@ -24,11 +23,17 @@ class LevelMaker : public State {
 		
 		virtual void tick(const Uint64 delta, StateStatus& res) override;
 	private:
-	
+
 		void zoom(const bool in);
 
 		void tile_press(bool put);
-		
+
+		void set_tile(const int index, const Uint32 scale, const Uint32 image_id, const Uint32 tile_type);
+
+		void set_tile(const int index, const Uint32 scale, const Uint32 image_id);
+
+		void place_spike(const int x_tile, const int y_tile);
+
 		std::unique_ptr<SDL_Surface, SurfaceDeleter> tiles;
 		std::unique_ptr<SDL_Surface, SurfaceDeleter> objects;
 		std::unique_ptr<SDL_Surface, SurfaceDeleter> marker;
