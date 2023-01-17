@@ -183,7 +183,7 @@ std::pair<std::string, const JsonObject&> config::get_level_and_config(const int
 }
 
 
-bool static_templates_loaded;
+bool static_templates_loaded = false;
 // Always loaded templates
 JsonObject static_templates;
 const JsonObject& config::get_template(const std::string& name) {
