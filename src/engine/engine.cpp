@@ -18,7 +18,7 @@ void engine::init() {
 		throw game_exception("Could not load default font");
 	}
 	SDL_RWops* ptr = SDL_RWFromConstMem(buffer, buffer_size);
-	
+
 	TextBox::init(ptr);
 }
 

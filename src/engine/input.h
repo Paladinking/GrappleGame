@@ -139,7 +139,7 @@ class KeyHoldInput : public HoldInput {
  * Returns the name of an input based on a down-event.
  * If mouse contains an SDL_BUTTON_*something* value, the key is ignored.
  * If no name matches, "None" is returned. Passing "None" to get_*hold/press*_input 
- * will return an Empy*Hold/Press/Imput ptr.
+ * will return an EmpyHold/Press/Input ptr.
  */
 std::string get_input_name(const SDL_Keycode key, const Uint32 mouse);
 
