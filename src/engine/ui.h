@@ -126,7 +126,7 @@ class Button : public TextBox {
 class Menu : public State {
 	public:	
 		Menu();
-		
+
 		Menu(const std::string& exit_input);
 
 		/**

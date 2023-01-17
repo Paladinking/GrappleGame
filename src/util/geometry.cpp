@@ -2,7 +2,6 @@
 
 
 Triangle::Triangle(double x0, double y0, double x1, double y1, double x2, double y2) {
-	double d1 = std::abs(y0 - y1);
 	area2 = (-y1 * x2 + y0 * (-x1 + x2) + x0 * (y1 - y2) + x1 * y2);
 	if (area2 < 0) {
 		area2 *= -1;

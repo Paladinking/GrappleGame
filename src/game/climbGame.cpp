@@ -65,8 +65,7 @@ void ClimbGame::render() {
 	SDL_RenderClear(gRenderer);
 	SDL_SetRenderDrawColor(gRenderer, 0xFF, 0xFF, 0xFF, 0xFF);
 	SDL_RenderFillRect(gRenderer, NULL);
-	
-	int camera_y_tile = (static_cast<int>(camera_y)) / level.get_tilesize();
+
 	level.render(static_cast<int>(camera_y));
 	player->render(static_cast<int>(camera_y));
 	

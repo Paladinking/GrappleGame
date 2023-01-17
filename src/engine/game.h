@@ -145,7 +145,7 @@ class State {
 		 */
 		virtual void init(WindowState* window_state);
 		
-		/*
+		/**
 		 * Called when a state above this in the stack is popped.
 		 */
 		virtual void resume() {};
