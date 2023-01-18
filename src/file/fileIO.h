@@ -3,6 +3,7 @@
 #include <SDL.h>
 #include <string>
 #include <cstring>
+#include <utility>
 #include "util/exceptions.h"
 #include "compression.h"
 
@@ -11,7 +12,7 @@
  */
 class file_exception : public base_exception {
 	public:
-		file_exception(std::string msg) : base_exception(msg) {};
+		explicit file_exception(std::string msg) : base_exception(std::move(msg)) {};
 };
 
 
@@ -29,14 +30,14 @@ T swap_byteorder(T &t) {
 
 class FileReader {
 	public:
-		FileReader(std::string file_name, bool binary, bool compression) {
+		FileReader(const std::string& file_name, bool binary, bool compression) {
 			in = SDL_RWFromFile(file_name.c_str(), binary ? "rb" : "r");
-			if (in == NULL) {
+			if (in == nullptr) {
 				throw file_exception("File exception: " + std::string(SDL_GetError()));
 			}
 			if (compression) {
 				in = SDL_RWinflate(in);
-				if (in == NULL) {
+				if (in == nullptr) {
 					throw file_exception("File exception: could not initialize inflation");
 				}
 			}
@@ -44,7 +45,7 @@ class FileReader {
 			max = static_cast<long>(SDL_RWread(in, &buffer, sizeof(char), BUFFER_SIZE * sizeof(char)));
 		}
 		
-		FileReader(std::string file_name, bool binary) : FileReader(file_name, binary, false) {}
+		FileReader(const std::string& file_name, bool binary) : FileReader(file_name, binary, false) {}
 
 		~FileReader() {
 			SDL_RWclose(in);
@@ -121,7 +122,7 @@ class FileReader {
 			char* null_pos;
 			do {
 				null_pos = (char*)memchr(buffer + index, '\0', max - index);
-				if (null_pos == NULL) {
+				if (null_pos == nullptr) {
 					char* tmp = new char[buf_len + max - index];
 					memcpy(tmp, buf, buf_len);
 					memcpy(tmp + buf_len, buffer + index, max - index);
@@ -143,8 +144,8 @@ class FileReader {
 					buf = tmp;
 					index += len - 1; // Should never move outside buffer since a null-byte was found here.
 				}
-			} while (null_pos == NULL);
-			
+			} while (null_pos == nullptr);
+
 			s = buf;
 			return true;
 		}
@@ -241,7 +242,7 @@ class FileReader {
 	
 		static const long BUFFER_SIZE = 1024;
 
-		char buffer[BUFFER_SIZE];
+		char buffer[BUFFER_SIZE] {};
 		SDL_RWops *in;
 		
 		long mark_index = 0;
@@ -252,20 +253,20 @@ class FileReader {
 
 class FileWriter {
 	public:
-		FileWriter(std::string file_name, bool binary, bool compression) {
+		FileWriter(const std::string& file_name, bool binary, bool compression) {
 			out = SDL_RWFromFile(file_name.c_str(), binary ? "wb" : "w");
-			if (out == NULL) {
+			if (out == nullptr) {
 				throw file_exception("Could not open file, " + std::string(SDL_GetError()));
 			}
 			if (compression) {
 				out = SDL_RWdeflate(out);
-				if (out == NULL) {
+				if (out == nullptr) {
 					throw file_exception("Could not initialize deflation.");
 				}
 			}
 		}
 		
-		FileWriter(std::string file_name, bool binary) : FileWriter(file_name, binary, false) {}
+		FileWriter(const std::string& file_name, bool binary) : FileWriter(file_name, binary, false) {}
 		
 		~FileWriter() {
 			SDL_RWclose(out);

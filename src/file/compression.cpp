@@ -1,6 +1,5 @@
 #include <SDL.h>
 #define ZLIB_CONST
-#include <zconf.h>
 #include <zlib.h>
 #include <climits>
 

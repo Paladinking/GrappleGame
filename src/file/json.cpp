@@ -1,7 +1,7 @@
-#include <limits>
 #include <cmath>
 #include <sstream>
 #include <cerrno>
+#include <utility>
 #include "json.h"
 #include "fileIO.h"
 
@@ -9,8 +9,8 @@
 
 json_exception expected_char(char c, FileReader &in) {
 	int row, col;
-	in.get_position(row, col); \
-	return json_exception("Excpected a '" + std::string(1, c) + "' at row " + std::to_string(row) + " , col " + std::to_string(col));
+	in.get_position(row, col);
+	return json_exception("Expected a '" + std::string(1, c) + "' at row " + std::to_string(row) + " , col " + std::to_string(col));
 }
 
 json_exception unexpected_char(char c, FileReader &in) {
@@ -37,7 +37,7 @@ JsonObject read_object(FileReader &in);
 
 JsonList read_list(FileReader &in);
 
-void read_matching(FileReader &in, std::string s);
+void read_matching(FileReader &in, const std::string& s);
 
 bool read_number(FileReader &in, int &i_val, double &d_val);
 
@@ -45,7 +45,7 @@ void to_pretty_stream(std::ostream& os, const json::Type& val, int indentations)
 
 std::string read_string(FileReader &in);
 
-void read_matching(FileReader &in, std::string s) {
+void read_matching(FileReader &in, const std::string& s) {
 	char c;
 	if (!in.read_cur(c)) throw end_of_file();
 	for (const char c1 : s) {
@@ -300,7 +300,7 @@ JsonList read_list(FileReader &in) {
 std::string read_string(FileReader &in) {
 	char c;
 	validate_char(in, '"');
-	std::string res = ""; 
+	std::string res;
 	while (in.read_next(c)) {
 		if (c == '\\') {
 			if (!in.read_next(c)) throw end_of_file();
@@ -317,7 +317,7 @@ std::string read_string(FileReader &in) {
 			} else if (c == 'r') {
 				res.push_back('\r');
 			} else {
-				throw json_exception("Unsuported escape character: \\" + std::string(1, c));
+				throw json_exception("Unsupported escape character: \\" + std::string(1, c));
 			}
 		} else if (c == '"') {
 			return res;
@@ -336,7 +336,7 @@ void skip_spacing(FileReader &in) {
 	}
 }
 
-JsonObject json::read_from_file(std::string path) {
+JsonObject json::read_from_file(const std::string& path) {
 	FileReader reader(path, false);
 	skip_spacing(reader);
 	return read_object(reader);
@@ -398,10 +398,10 @@ void json::to_stream(std::ostream& os, const json::Type& val) {
 
 
 void json::write_to_file(std::string path, const JsonObject &obj) {
-	write_to_file(path, obj, true);
+	write_to_file(std::move(path), obj, true);
 }
 
-void json::write_to_file(std::string path, const JsonObject &obj, bool pretty) {
+void json::write_to_file(const std::string& path, const JsonObject &obj, bool pretty) {
 	FileWriter writer(path, false);
 	std::stringstream s;
 	if (pretty) {
@@ -434,13 +434,13 @@ void to_pretty_stream(std::ostream& os, const json::Type& val, int indentations)
 
 void JsonObject::to_pretty_stream(std::ostream& os, int indentations) const {
 	os << '{';
-	if (data.size() == 0) {
+	if (data.empty()) {
 		os << '}';
 		return;
 	}
 	os << '\n';
 	
-	for (auto &it = keys.begin(); it != keys.end(); ++it) {
+	for (auto it = keys.cbegin(); it != keys.cend(); ++it) {
 		if (it != keys.begin()) os << ",\n";
 		for (int i = 0; i < indentations + 1; i++) {
 			os << '\t';
@@ -467,7 +467,7 @@ void JsonObject::to_stream(std::ostream& os) const {
 
 void JsonList::to_pretty_stream(std::ostream& os, int indentations) const {
 	os << '[';
-	if (data.size() == 0) {
+	if (data.empty()) {
 		os << ']';
 		return;
 	}

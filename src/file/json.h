@@ -1,5 +1,6 @@
 #ifndef JSON_00_H
 #define JSON_00_H
+#include <utility>
 #include <vector>
 #include <list>
 #include <string>
@@ -13,7 +14,7 @@
  */
 class json_exception : public base_exception {
 	public:
-		json_exception(std::string msg) : base_exception(msg) {};
+		explicit json_exception(std::string msg) : base_exception(std::move(msg)) {};
 };
 
 class JsonObject;
@@ -23,16 +24,13 @@ class JsonList;
 class JsonNull {};
 
 namespace json {
-	enum JsonTypes {
-		OBJECT = 0, LIST = 1, INT = 2, DOUBLE = 3, BOOL = 4, STRING = 5, NULL_VALUE = 6
-	};
-	
+
 	typedef std::variant<JsonObject, JsonList, int, double, bool, std::string, JsonNull> Type;
 
 	/**
 	 * Reads a JsonObject from a file.
 	 */
-	JsonObject read_from_file(std::string path);
+	JsonObject read_from_file(const std::string& path);
 
 	/**
 	 * Writes a JsonObject to a file, in prettified form with indentations and newlines.
@@ -43,7 +41,7 @@ namespace json {
 	 * Writes a JsonObject to a file.
 	 * If pretty is true, indentations and newlines will be written.
 	 */
-	void write_to_file(std::string path, const JsonObject &obj, bool pretty);
+	void write_to_file(const std::string& path, const JsonObject &obj, bool pretty);
 	
 	/**
 	 *  Writes a json::Type variant to a stream, in prettified form with indentations and newlines.
@@ -82,25 +80,25 @@ class JsonObject {
 
 		/**
 		 * Gets a value of type T with key key from the object.
-		 * If no such value exists, defalt_val is returned.
+		 * If no such value exists, default_val is returned.
 		 */
 		template<class T>
-		const T &get_default(const std::string& key, const T& defalt_val) const {
-			auto& el = data.find(key);
-			if (el == data.end()) return defalt_val;
+		const T &get_default(const std::string& key, const T& default_val) const {
+			const auto& el = data.find(key);
+			if (el == data.end()) return default_val;
 			const json::Type &var = el->second;
 			if (!std::holds_alternative<T>(var)) {
-				return defalt_val;
+				return default_val;
 			}
 			return std::get<T>(var);
 		}
 		template<class T>
-		T& get_default(const std::string& key, T& defalt_val) {
-			auto& el = data.find(key);
-			if (el == data.end()) return defalt_val;
+		T& get_default(const std::string& key, T& default_val) {
+			const auto& el = data.find(key);
+			if (el == data.end()) return default_val;
 			json::Type &var = el->second;
 			if (!std::holds_alternative<T>(var)) {
-				return defalt_val;
+				return default_val;
 			}
 			return std::get<T>(var);
 		}
@@ -108,7 +106,7 @@ class JsonObject {
 		/**
 		 * Gets a json::Type with key key from the object.
 		 */
-		const json::Type& get(const std::string& key) const {
+		[[nodiscard]] const json::Type& get(const std::string& key) const {
 			return data.at(key);
 		}
 		json::Type& get(const std::string& key) {
@@ -125,12 +123,12 @@ class JsonObject {
 		}
 
 		/**
-		 * Gets a begining iterator to the underlying map. No iteration order is garanteed.
+		 * Gets a beginning iterator to the underlying map. No iteration order is guaranteed.
 		 */
 		std::unordered_map<std::string, json::Type>::iterator begin() {
 			return data.begin();
 		}
-		std::unordered_map<std::string, json::Type>::const_iterator begin() const {
+		[[nodiscard]] std::unordered_map<std::string, json::Type>::const_iterator begin() const {
 			return data.begin();
 		}
 
@@ -140,29 +138,29 @@ class JsonObject {
 		std::unordered_map<std::string, json::Type>::iterator end() {
 			return data.end();
 		}
-		std::unordered_map<std::string, json::Type>::const_iterator end() const {
+		[[nodiscard]] std::unordered_map<std::string, json::Type>::const_iterator end() const {
 			return data.end();
 		}
 
 		/**
-		 * Gets an begining iterator to the keys of this object.
+		 * Gets an beginning iterator to the keys of this object.
 		 * The order of iteration is the order of insertion.
 		 */
-		std::list<std::string>::const_iterator keys_begin() const {
+		[[nodiscard]] std::list<std::string>::const_iterator keys_begin() const {
 			return keys.begin();
 		}
 
 		/**
 		 * Gets an end iterator to the keys of this object.
 		 */
-		std::list<std::string>::const_iterator keys_end() const {
+		[[nodiscard]] std::list<std::string>::const_iterator keys_end() const {
 			return keys.end();
 		}
 
 		/**
 		 * Returns true if this object contains the key key.
 		 */
-		bool has_key(const std::string& key) const {
+		[[nodiscard]] bool has_key(const std::string& key) const {
 			return data.count(key) != 0;
 		}
 
@@ -171,8 +169,8 @@ class JsonObject {
 		 *	and the value at key has the type T.
 		 */
 		template<class T>
-		bool has_key_of_type(const std::string& key) const {
-			auto& el = data.find(key);
+		[[nodiscard]] bool has_key_of_type(const std::string& key) const {
+			const auto& el = data.find(key);
 			if (el == data.end()) return false;
 			const json::Type& val = el->second;
 			return std::get_if<T>(&val) != nullptr;
@@ -181,7 +179,7 @@ class JsonObject {
 		/**
 		 * Returns the number of elements in this object.
 		 */
-		size_t size() const {
+		[[nodiscard]] size_t size() const {
 			return data.size();
 		}
 
@@ -221,7 +219,7 @@ class JsonList {
 		 * Returns true if this list has an entry at index with type T.
 		 */
 		template<class T>
-		bool has_index_of_type(const unsigned index) const {
+		[[nodiscard]] bool has_index_of_type(const unsigned index) const {
 			if (index >= data.size()) return false;
 			const json::Type& t = data[index];
 			return std::get_if<T>(&t) != nullptr;
@@ -245,7 +243,7 @@ class JsonList {
 		json::Type& get(const unsigned index) {
 			return data[index];
 		}
-		const json::Type& get(const unsigned index) const {
+		[[nodiscard]] const json::Type& get(const unsigned index) const {
 			return data[index];
 		}
 
@@ -266,12 +264,12 @@ class JsonList {
 		}
 
 		/**
-		 * Gets an iterator to the begining of the list.
+		 * Gets an iterator to the beginning of the list.
 		 */
 		std::vector<json::Type>::iterator begin() {
 			return data.begin();
 		}
-		std::vector<json::Type>::const_iterator begin() const {
+		[[nodiscard]] std::vector<json::Type>::const_iterator begin() const {
 			return data.begin();
 		}
 
@@ -281,14 +279,14 @@ class JsonList {
 		std::vector<json::Type>::iterator end() {
 			return data.end();
 		}
-		std::vector<json::Type>::const_iterator end() const {
+		[[nodiscard]] std::vector<json::Type>::const_iterator end() const {
 			return data.end();
 		}
 
 		/**
 		 * Returns the number of entries in the list.
 		 */
-		size_t size() const {
+		[[nodiscard]] size_t size() const {
 			return data.size();
 		}
 
