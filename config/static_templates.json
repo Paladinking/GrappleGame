@@ -8,7 +8,7 @@
 		},
 		"Width" : 24,
 		"Height" : 40,
-		
+		"Hp" : 20,
 		"HookTexture" : {
 			"Path" : "hook.png",
 			"Width" : 4,

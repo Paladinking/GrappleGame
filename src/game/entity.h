@@ -16,16 +16,18 @@ class EntityTemplate {
 	
 		const int w;
 		const int h;
-		const Texture texture;
+        Texture texture;
 		
 		static EntityTemplate* from_json(const JsonObject& obj);
 };
 
 class PlayerTemplate : public EntityTemplate {
 	public:
-		PlayerTemplate(const int w, const int h, Texture&& t, Texture&& gt) : EntityTemplate(w, h, std::move(t)), grappleTexture(std::move(gt)) {};
+		PlayerTemplate(const int w, const int h, const int hp, Texture&& t, Texture&& gt)
+            : EntityTemplate(w, h, std::move(t)), hp(hp), grappleTexture(std::move(gt)) {};
 
 		const Texture grappleTexture;
+        const int hp;
 };
 
 class Entity {
@@ -41,7 +43,7 @@ class Entity {
 		/**
 		 * Initializes this entity based on a template.
 		 */
-		virtual void init(const EntityTemplate& entity_template);
+        virtual void init(EntityTemplate &entity_template);
 		
 		/**
 		 * Tick for the entity called every frame. The default implementation moves the entity by
@@ -69,12 +71,22 @@ class Entity {
 		 * Sets the position of this entity to (x, y).
 		 */
 		void set_position(double x, double y);
+
+        /**
+         * Hurts this entity for damage.
+         */
+        virtual void hurt(int damage);
 		
 		/**
 		 * Returns true if this entity is standing on ground.
 		 */
 		[[nodiscard]] bool on_ground(const Level &level) const;
-		
+
+        /**
+         * Returns true if this entity is dead
+         */
+		[[nodiscard]] virtual bool is_alive() const;
+
 		/**
 		 * Returns the velocity vector of this entity.
 		 */
@@ -101,10 +113,10 @@ class Entity {
 		Vector2D acc;
 		
 		int width = 0, height = 0;
-	
-	private:
+
+    protected:
 		// Textures are owned by the game, not the entities.
-		const Texture* texture{};
+        Texture* texture = nullptr;
 		
 	
 	
@@ -122,11 +134,15 @@ class Player : public Entity {
 		~Player() override;
 		Player() = default;
 
-		void init(const EntityTemplate& entity_template) override;
+		void init(EntityTemplate &entity_template) override;
 
 		void render(int cameraY) override;
 
 		void tick(double delta, Level &level) override;
+
+        void hurt(int damage) override;
+
+        bool is_alive() const override;
 
 		void fire_grapple(int target_x, int target_y);
 
@@ -166,6 +182,10 @@ class Player : public Entity {
 
 		double grapple_length = 0.0;
 		double grapple_max_len = 0.0;
+
+        int hp = 0;
+
+        double inv_time = 0.0;
 		
 		bool pull = false, release = false, is_on_ground = false;
 

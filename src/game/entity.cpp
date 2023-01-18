@@ -5,7 +5,6 @@
 #include "util/geometry.h"
 #include "config.h"
 
-//constexpr double MAX_GRAVITY_VEL = 700.0;
 constexpr double GRAVITY_ACCELERATION = 3000.0;
 constexpr double FRICTION_FACTOR = 700.0;
 constexpr double AIR_RES_FACTOR = 0.004;
@@ -15,6 +14,9 @@ constexpr double GRAPPLE_SPEED = 1300.0;
 constexpr double GRAPPLE_PULL = 5000.0;
 constexpr double GRAPPLE_RELEASE = 200.0;
 constexpr double JUMP_VEL = 800.0;
+
+constexpr int SPIKE_DAMAGE = 5;
+constexpr double INV_DURATION = 0.6;
 
 void texture_form_template(Texture& t, const JsonObject& text) {
 	if (
@@ -46,11 +48,13 @@ EntityTemplate* EntityTemplate::from_json(const JsonObject& obj) {
 
 	const std::string& type = obj.get<std::string>("Type");
 	if (type == "Player") {
-		if (!obj.has_key_of_type<JsonObject>("HookTexture")) throw json_exception("Bad player template");
-		Texture grappleTexture, texture;
+		if (!obj.has_key_of_type<JsonObject>("HookTexture") || !obj.has_key_of_type<int>("Hp"))
+            throw json_exception("Bad player template");
+        Texture grappleTexture, texture;
 		texture_form_template(texture, text);
 		texture_form_template(grappleTexture, obj.get<JsonObject>("HookTexture"));
-		return new PlayerTemplate(width, height, std::move(texture), std::move(grappleTexture));
+        const int hp = obj.get<int>("Hp");
+		return new PlayerTemplate(width, height, hp, std::move(texture), std::move(grappleTexture));
 	} else {
 		Texture texture;
 		texture_form_template(texture, text);
@@ -61,7 +65,7 @@ EntityTemplate* EntityTemplate::from_json(const JsonObject& obj) {
 Entity::~Entity() = default;
 
 
-void Entity::init(const EntityTemplate& entity_template) {
+void Entity::init(EntityTemplate &entity_template) {
 	width = entity_template.w;
 	height = entity_template.h;
 	texture = &entity_template.texture;
@@ -106,12 +110,15 @@ void Entity::try_move(const double dx, const double dy, int tile_size, const Lev
 {
 	double new_x = pos.x, new_y = pos.y;
 	new_x += dx;
+
 	int x_tile = static_cast<int>(std::floor((dx > 0 ? (new_x + width - 1) : new_x) / tile_size));
 	if (level.has_tile_line_v(x_tile, new_y, height, Tile::BLOCKED)) 
 	{
 		vel.x = 0;
 		new_x = dx > 0 ? (x_tile * tile_size - width) : (x_tile + 1) * tile_size;
-	}
+	} else if (level.has_tile_line_v(x_tile, new_y, height, Tile::SPIKES)) {
+        this->hurt(SPIKE_DAMAGE);
+    }
 
 	new_y += dy;
 	int y_tile = static_cast<int>(std::floor((dy > 0 ? (new_y + height - 1) : new_y) / tile_size));
@@ -119,7 +126,9 @@ void Entity::try_move(const double dx, const double dy, int tile_size, const Lev
 	{
 		vel.y = 0;
 		new_y = dy > 0 ? y_tile * tile_size - height : (y_tile + 1) * tile_size;
-	}
+	} else if (level.has_tile_line_h(y_tile, new_x, width, Tile::SPIKES)) {
+        this->hurt(SPIKE_DAMAGE);
+    }
 	pos.x = new_x;
 	pos.y = new_y;
 }
@@ -164,21 +173,29 @@ bool Entity::on_ground(const Level &level) const
 	return false;
 }
 
+void Entity::hurt(int damage) {}
+
+bool Entity::is_alive() const {
+    return true;
+}
+
 Player::~Player() = default;
 
-void Player::init(const EntityTemplate& entity_template) {
+void Player::init(EntityTemplate &entity_template) {
 	Entity::init(entity_template);
 	const PlayerTemplate& pt = static_cast<const PlayerTemplate&>(entity_template); // NOLINT(cppcoreguidelines-pro-type-static-cast-downcast)
 	vel.x = 0;
 	vel.y = 0;
+    hp = pt.hp;
 	grapple_max_len = GRAPPLE_LENGTH;
 	grapple_hook = &pt.grappleTexture;
+    inv_time = 0.0;
 }
 
 void Player::render(const int cameraY) 
 {
-	Entity::render(cameraY);
-	if (grappling_mode == UNUSED) return;
+    Entity::render(cameraY);
+    if (grappling_mode == UNUSED) return;
 	
 	Corner prev_pos = {(pos.x + width / 2), (pos.y + height / 2)}; // NOLINT(bugprone-integer-division)
 	SDL_SetRenderDrawColor(gRenderer, 0x00, 0x00, 0xFF, 0xFF);
@@ -200,6 +217,12 @@ void Player::render(const int cameraY)
 
 void Player::tick(const double delta, Level &level)
 {
+    if (inv_time > 0.0) {
+        inv_time -= delta;
+        texture->set_color_mod(128, 255, 0);
+    } else {
+        texture->set_color_mod(255, 255, 255);
+    }
 	Vector2D old_pos = {pos.x + width / 2, pos.y + height / 2}; // NOLINT(bugprone-integer-division)
 	if (is_on_ground) {
 		double factor = delta * FRICTION_FACTOR;
@@ -489,4 +512,15 @@ void Player::update_grapple(CornerList &allCorners, CornerList &corners, CornerL
 		update_grapple(allCorners, allCorners, contained, new_prev, first);
 		anchor->ignored = false;
 	}
+}
+
+void Player::hurt(int damage) {
+    if (inv_time <= 0) {
+        hp -= damage;
+        inv_time = INV_DURATION;
+    }
+}
+
+bool Player::is_alive() const {
+    return hp > 0;
 }
