@@ -1,5 +1,6 @@
 #include "game.h"
 #include <iostream>
+#include <utility>
 
 SDL_Renderer* gRenderer;
 SDL_Window* gWindow;
@@ -8,8 +9,8 @@ SDL_Window* gWindow;
  * Base Game class
  *
  */
-Game::Game(const int window_width, const int window_height, const std::string& title) 
-	: initial_width(window_width), initial_height(window_height), initial_title(title) {
+Game::Game(const int window_width, const int window_height, std::string  title)
+	: initial_width(window_width), initial_height(window_height), initial_title(std::move(title)) {
 	if (initial_width <= 0 || initial_height <= 0) throw game_exception("Invalid window dimensions");
 }
  
@@ -19,7 +20,7 @@ void Game::create() {
     {
 		throw SDL_exception("STL is not initialized!");
     }
-	if (gWindow != NULL || gRenderer != NULL) {
+	if (gWindow != nullptr || gRenderer != nullptr) {
 		throw game_exception("Previous game still alive!");
 	}
 
@@ -30,13 +31,13 @@ void Game::create() {
 		SDL_WINDOW_HIDDEN
 	);
 
-    if (gWindow == NULL )
+    if (gWindow == nullptr)
     {
 		throw SDL_exception("Window could not be created, " + std::string(SDL_GetError()));
     }
 
 	gRenderer = SDL_CreateRenderer(gWindow, -1, SDL_RENDERER_ACCELERATED);
-	if (gRenderer == NULL) 
+	if (gRenderer == nullptr)
 	{
 		SDL_DestroyWindow(gWindow);
 		throw SDL_exception("Renderer could not be created, " + std::string(SDL_GetError()));
@@ -50,7 +51,7 @@ void Game::create() {
 	SDL_GetRendererOutputSize(gRenderer, &window_state.screen_width, &window_state.screen_height);
 	destroyed = false;
 
-	window_state.keyboard_state = SDL_GetKeyboardState(NULL);
+	window_state.keyboard_state = SDL_GetKeyboardState(nullptr);
 	init();
 }
 
@@ -97,38 +98,33 @@ void Game::run() {
 	}
 }
 
-void Game::destroy_game() {
-	if (!destroyed) {
-		destroyed = true;
-		SDL_DestroyRenderer(gRenderer);
-		gRenderer = NULL;
-	
-		SDL_DestroyWindow(gWindow);
-		gWindow = NULL;
-	}
-}
-
 void Game::exit_game() {
 	running = false;
 }
 
 Game::~Game() {
-	destroy_game();
+    if (!destroyed) {
+        SDL_DestroyRenderer(gRenderer);
+        gRenderer = nullptr;
+
+        SDL_DestroyWindow(gWindow);
+        gWindow = nullptr;
+    }
 }
 
 /*
  * State class
  *
  */ 
-void State::init(WindowState* window_state) {
-	this->window_state = window_state;
+void State::init(WindowState* state) {
+	window_state = state;
 }
 
-int State::get_prefered_width() const {
+int State::get_preferred_width() const {
 	return -1;
 }
 
-int State::get_prefered_height() const {
+int State::get_preferred_height() const {
 	return -1;
 }
 
@@ -170,7 +166,7 @@ void StateGame::tick(Uint64 delta) {
 			break;
 		case StateStatus::POP:
 			states.pop();
-			if (states.size() == 0) {
+			if (states.empty()) {
 				exit_game();
 			} else {
 				update_window(states.top().get());
@@ -180,11 +176,13 @@ void StateGame::tick(Uint64 delta) {
 		case StateStatus::EXIT:
 			exit_game();
 			break;
-	}			
+        case StateStatus::NONE:
+            break;
+    }
 }
 
 void StateGame::update_window(const State* const state) {
-	int w = state->get_prefered_width(), h = state->get_prefered_height();
+	int w = state->get_preferred_width(), h = state->get_preferred_height();
 	if (w == -1) w = window_state.screen_width;
 	if (h == -1) h = window_state.screen_height;
 	if (w != window_state.screen_width || h != window_state.screen_height) {

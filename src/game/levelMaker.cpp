@@ -7,12 +7,12 @@
 #include <algorithm>
 #include <cmath>
 
-// Tile apperance (0xUUSSIITT)
+// Tile appearance (0xUUSSIITT)
 // UU = unused
-// SS = tilescale
+// SS = tile scale
 // II = image id (0xFF means no image)
 // TT = tile type (empty 0, blocked 1, spike 2)
-// eg empty tile apperance (0x0000FF00)
+// eg empty tile appearance (0x0000FF00)
 
 constexpr int TILE_SELECTOR_SIZE = 64;
 constexpr int TILE_SELECTOR_TW = 10;

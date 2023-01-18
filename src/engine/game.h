@@ -2,17 +2,18 @@
 #define GAME_00_H
 #include <memory>
 #include <stack>
+#include <utility>
 #include <SDL.h>
 #include "util/exceptions.h"
 #include "texture.h"
 #include "engine.h"
 
 /**
- * Game_exception, when creating a game fails (for example when one is already runnning).
+ * Game_exception, when creating a game fails (for example when one is already running).
  */
 class game_exception : public base_exception {
 	public:
-		game_exception(std::string msg) : base_exception(msg) {};
+		explicit game_exception(std::string msg) : base_exception(std::move(msg)) {};
 	
 };
 
@@ -40,7 +41,7 @@ struct WindowState {
  */
 class Game {
 	public:
-		Game(const int window_width, const int window_height, const std::string& title);
+		Game(int window_width, int window_height, std::string  title);
 		
 		virtual ~Game();
 		
@@ -52,7 +53,7 @@ class Game {
 		
 		/**
 		 * Starts and runs the game loop, calling tick and render every frame and handle_keydown / handle_keyup when a keypress happens.
-		 * Will return after exit_game has been called, or immedietly if the game has not been created or has been destroyed.
+		 * Will return after exit_game has been called, or immediately if the game has not been created or has been destroyed.
 		 * Closing the window will call exit_game and cause run to return.
 		 */
 		void run();
@@ -62,13 +63,8 @@ class Game {
 		 */
 		void exit_game();
 		
-		/**
-		 * Frees all resources used by the game.
-		 */
-		virtual void destroy_game();
-		
 	protected:
-		WindowState window_state;
+		WindowState window_state{};
 
 		/**
 		 * Called once per frame, after tick has been called. 
@@ -136,7 +132,7 @@ struct StateStatus {
  */
 class State {
 	public:
-		State(WindowState* window_state) : window_state(window_state) {};
+		explicit State(WindowState* window_state) : window_state(window_state) {};
 
 		State() : window_state(nullptr) {};
 
@@ -151,7 +147,7 @@ class State {
 		virtual void resume() {};
 
 		/**
-		 * Ticks the state, with a timestep delta. The parameter res is used to signal a change of state.
+		 * Ticks the state, with a time-step delta. The parameter res is used to signal a change of state.
 		 */
 		virtual void tick(const Uint64 delta, StateStatus& res) {};
 
@@ -166,24 +162,24 @@ class State {
 		virtual void handle_down(const SDL_Keycode key, const Uint8 mouse) {};
 
 		/**
-		 * Called when an up event (mouse or keyboard) happends.
+		 * Called when an up event (mouse or keyboard) happens.
 		 */
 		virtual void handle_up(const SDL_Keycode key, const Uint8 mouse) {};
 
 		/**
-		 * Called when a mousewheel event happends.
+		 * Called when a mousewheel event happens.
 		 */
 		virtual void handle_wheel(const SDL_MouseWheelEvent &e) {};
 
 		/**
 		 * Get the desired window width of this state.
 		 */
-		virtual int get_prefered_width() const;
+		[[nodiscard]] virtual int get_preferred_width() const;
 
 		/**
 		 * Get the desired window height of this state.
 		 */	
-		virtual int get_prefered_height() const;
+		[[nodiscard]] virtual int get_preferred_height() const;
 
 	protected:
 		WindowState* window_state; 
@@ -196,61 +192,61 @@ class State {
  */
 class StateGame : public Game {
 	public:
-		StateGame(State* state, const int w, const int h, const std::string& title);
+		StateGame(State* state, int w, int h, const std::string& title);
 
 	protected:
 
 		/**
 		 * Initializes the StateGame.
 		 */
-		virtual void init() override;
+        void init() override;
 
 		/**
 		 * Renders the current top state.
 		 */
-		virtual void render() override;
+        void render() override;
 
 		/**
-		 * Ticks the current top state, and potentialy changes to a new state.
+		 * Ticks the current top state, and potentially changes to a new state.
 		 * This is done if the top state signals it.
 		 */
-		virtual void tick(Uint64 delta) override;
+        void tick(Uint64 delta) override;
 
 		/**
 		 * Sends a down-event to the top state with the relevant keycode.
 		 */
-		virtual void handle_keydown(SDL_KeyboardEvent &e) override;
+        void handle_keydown(SDL_KeyboardEvent &e) override;
 
 		/**
 		 * Sends an up-event to the top state with the relevant keycode.
 		 */
-		virtual void handle_keyup(SDL_KeyboardEvent &e) override;
+        void handle_keyup(SDL_KeyboardEvent &e) override;
 
 		/**
 		 * Send a down-event to the top state with the relevant mouse button.
 		 */
-		virtual void handle_mousedown(SDL_MouseButtonEvent &e) override;
+        void handle_mousedown(SDL_MouseButtonEvent &e) override;
 
 		/**
 		 * Sends an up-event to the top state with the relevant mouse button.
 		 */
-		virtual void handle_mouseup(SDL_MouseButtonEvent &e) override;
+        void handle_mouseup(SDL_MouseButtonEvent &e) override;
 
 		/**
 		 * Sends a mousewheel-event to the top state.
 		 */
-		virtual void handle_mousewheel(SDL_MouseWheelEvent &e) override;
+        void handle_mousewheel(SDL_MouseWheelEvent &e) override;
 
 	private:
 	
 		/**
 		 * Syncs the screen size with the preferred sizes of state.
 		 */
-		void update_window(const State* const state);
+		void update_window(const State* state);
 		// State stack
 		std::stack<std::unique_ptr<State>> states;
 	
 };
 
 
-#endif //Include guard
+#endif //GAME_00_H

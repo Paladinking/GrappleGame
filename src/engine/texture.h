@@ -3,14 +3,14 @@
 
 #include <SDL.h>
 #include <SDL_image.h>
-#include <String>
+#include <string>
 
 /**
  * Wrapper class for an SDL_Texture, also containing width and height.
  */
 class Texture {
 	public:
-		Texture() {};
+		Texture() = default;
 		
 		Texture(SDL_Texture* const t, const int w, const int h) : texture(t), width(w), height(h) {};
 
@@ -21,21 +21,21 @@ class Texture {
 		Texture(const Texture& o) = delete;
 		Texture& operator=(const Texture&) = delete;
 
-		Texture(Texture&& o);
+		Texture(Texture&& o) noexcept;
 		
-		Texture& operator=(Texture&&);
+		Texture& operator=(Texture&&) noexcept;
 		
 		~Texture();
 		
 		/**
 		 * Reads a texture from a file, trowing a image_load_exception if something goes wrong.
 		 */
-		void load_from_file(std::string path);
+		void load_from_file(const std::string& path);
 		
 		/**
 		 * Reads a texture form a file and stretches it to (w, h), throwing a image_load_exception if something goes wrong.
 		 */
-		void load_from_file(std::string path, const int w, const int h);
+		void load_from_file(const std::string& path, int w, int h);
 	
 		/**
 		 * Frees all resources associated with this texture.
@@ -45,28 +45,28 @@ class Texture {
 		/**
 		 * Renders this texture at position (x, y) using the global gRenderer.
 		 */
-		void render(const int x, const int y) const;
+		void render(int x, int y) const;
 		
 		/**
 		 * Renders the rectangle (x, y, w, h) of this texture at position (dest_x, dest_y),
 		 * using the global gRenderer.
 		 */
-		void render(const int dest_x, const int dest_y, const int x, const int y, const int w, const int h) const;
+		void render(int dest_x, int dest_y, int x, int y, int w, int h) const;
 		
 		/**
 		 * Returns the width of this texture.
 		 */
-		int getWidth() const;
+		[[nodiscard]] int get_width() const;
 		
 		/**
 		 * Returns the height of this texture.
 		 */
-		int getHeight() const;
+		[[nodiscard]] int get_height() const;
 		
 		/**
 		 * Sets the width and height.
 		 */
-		void set_dimensions(const int w, const int h);
+		void set_dimensions(int w, int h);
 		
 		/** 
 		 * Sets the color modulation.
@@ -74,7 +74,7 @@ class Texture {
 		void set_color_mod(Uint8 r, Uint8 g, Uint8 b);
 		
 	private:
-		SDL_Texture* texture = NULL;
+		SDL_Texture* texture = nullptr;
 		int width = 0;
 		int height = 0;
 };

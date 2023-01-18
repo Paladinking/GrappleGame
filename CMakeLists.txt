@@ -68,6 +68,7 @@ add_library(
 	${GAME_DIR}/menu.cpp	
 )
 
+add_compile_definitions(ROOT_BUILD)
 add_executable(main src/main.cpp)
 
 target_link_options(main PUBLIC /SUBSYSTEM:CONSOLE)

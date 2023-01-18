@@ -2,38 +2,38 @@
 #include "texture.h"
 #include "engine.h"
 
-void Texture::load_from_file(std::string path) {
+void Texture::load_from_file(const std::string& path) {
 	free();
 	
 	SDL_Texture* new_texture = IMG_LoadTexture(gRenderer, path.c_str());
 	
-	if (new_texture == NULL) {
+	if (new_texture == nullptr) {
 		throw image_load_exception(std::string(IMG_GetError()));
 	}
 	// Use QueryTexture to set width and height.
-	SDL_QueryTexture(new_texture, NULL, NULL, &width, &height);
+	SDL_QueryTexture(new_texture, nullptr, nullptr, &width, &height);
 	texture = new_texture;
 }
 
-void Texture::load_from_file(std::string path, const int w, const int h) {
+void Texture::load_from_file(const std::string& path, const int w, const int h) {
 	free();
 	SDL_Surface* surface = IMG_Load(path.c_str());
-	if (surface == NULL) {
+	if (surface == nullptr) {
 		throw image_load_exception(std::string(IMG_GetError()));
 	}
 	SDL_PixelFormat* format = surface->format;
 	SDL_Surface* stretched = SDL_CreateRGBSurfaceWithFormat(0, w, h, format->BitsPerPixel, format->format);
-	if (stretched == NULL) {
+	if (stretched == nullptr) {
 		SDL_FreeSurface(surface);
 		throw image_load_exception(std::string(IMG_GetError()));
 	}
-	SDL_BlitScaled(surface, NULL, stretched, NULL);
+	SDL_BlitScaled(surface, nullptr, stretched, nullptr);
 	SDL_FreeSurface(surface);
 	
 	texture = SDL_CreateTextureFromSurface(gRenderer, stretched);
 	SDL_FreeSurface(stretched);
 	
-	if (texture == NULL) {
+	if (texture == nullptr) {
 		throw image_load_exception(std::string(IMG_GetError()));
 	}
 	
@@ -43,9 +43,9 @@ void Texture::load_from_file(std::string path, const int w, const int h) {
 
 
 void Texture::free() {
-	if (texture != NULL) {
+	if (texture != nullptr) {
 		SDL_DestroyTexture(texture);
-		texture = NULL;
+		texture = nullptr;
 		width = 0;
 		height = 0;
 	}
@@ -53,7 +53,7 @@ void Texture::free() {
 
 void Texture::render(const int x, const int y) const {
 	SDL_Rect rect = {x, y, width, height};
-	SDL_RenderCopy(gRenderer, texture, NULL, &rect);
+	SDL_RenderCopy(gRenderer, texture, nullptr, &rect);
 }
 
 void Texture::render(const int dest_x, const int dest_y, const int x, const int y, const int w, const int h) const {
@@ -62,11 +62,11 @@ void Texture::render(const int dest_x, const int dest_y, const int x, const int 
 	SDL_RenderCopy(gRenderer, texture, &source, &target);
 }
 
-int Texture::getHeight() const {
+int Texture::get_height() const {
 	return height;
 }
 
-int Texture::getWidth() const {
+int Texture::get_width() const {
 	return width;
 }
 
@@ -83,19 +83,19 @@ Texture::~Texture() {
 	free();
 }
 
-Texture::Texture(Texture&& o) {
+Texture::Texture(Texture&& o) noexcept {
 	free();
 	texture = o.texture;
 	width = o.width;
 	height = o.height;
-	o.texture = NULL;
+	o.texture = nullptr;
 }
 
-Texture& Texture::operator=(Texture&& o) {
+Texture& Texture::operator=(Texture&& o) noexcept {
 	free();
 	texture = o.texture;
 	width = o.width;
 	height = o.height;
-	o.texture = NULL;
+	o.texture = nullptr;
 	return *this;
 }

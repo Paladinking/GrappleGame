@@ -7,7 +7,7 @@ extern SDL_Renderer* gRenderer;
 extern SDL_Window* gWindow;
 
 /**
- * Struct used for putting an SDL_Surface in a smartpointer.
+ * Struct used for putting an SDL_Surface in a smart-pointer.
  */
 struct SurfaceDeleter {
 	void operator()(SDL_Surface* s) {SDL_FreeSurface(s);}

@@ -3,6 +3,7 @@
 #include "util/exceptions.h"
 #include <memory>
 #include <string>
+#include <utility>
 #include <SDL.h>
 
 /**
@@ -10,7 +11,7 @@
  */
 class binding_exception : public base_exception {
 	public:
-		binding_exception(std::string msg) : base_exception(msg) {};
+		explicit binding_exception(std::string msg) : base_exception(std::move(msg)) {};
 	
 };
 
@@ -22,7 +23,9 @@ class PressInput {
 		/**
 		 * Returns true if this input was the target of a key or mouse event.
 		 */
-		virtual bool is_targeted(const SDL_Keycode key, const Uint32 mouseButton) = 0;
+		virtual bool is_targeted(SDL_Keycode key, Uint32 mouseButton) = 0;
+
+        virtual ~PressInput() = default;
 };
 
 /**
@@ -30,12 +33,12 @@ class PressInput {
  */
 class MousePressInput : public PressInput {
 	public:
-		MousePressInput(const Uint32 mouse_button) : mouse_button(mouse_button) {}
+		explicit MousePressInput(const Uint32 mouse_button) : mouse_button(mouse_button) {}
 		
 		/**
 		 * Returns true if the mouse targets equals the one for this input.
 		 */
-		virtual bool is_targeted(const SDL_Keycode key, const Uint32 mouse) override {
+		bool is_targeted(const SDL_Keycode key, const Uint32 mouse) override {
 			return mouse == mouse_button;
 		}
 
@@ -51,7 +54,7 @@ class EmptyPressInput : public PressInput {
 		/**
 		 * Always returns false.
 		 */
-		virtual bool is_targeted(const SDL_Keycode key, const Uint32 mouse) override {
+		bool is_targeted(const SDL_Keycode key, const Uint32 mouse) override {
 			return false;
 		}
 };
@@ -61,12 +64,12 @@ class EmptyPressInput : public PressInput {
  */
 class KeyPressInput : public PressInput {
 	public:
-		KeyPressInput(const SDL_Keycode key_code) : key_code(key_code) {}
+		explicit KeyPressInput(const SDL_Keycode key_code) : key_code(key_code) {}
 		
 		/**
 		 * Returns true if the key target equals the one for this input.
 		 */
-		virtual bool is_targeted(const SDL_Keycode key, const Uint32 mouseButton) override {
+		bool is_targeted(const SDL_Keycode key, const Uint32 mouseButton) override {
 			return key_code == key;
 		}
 	
@@ -82,7 +85,9 @@ class HoldInput {
 		/**
 		 * Returns true if this input is currently pressed.
 		 */
-		virtual bool is_pressed(const Uint8* keys, const Uint32  mouseButton) = 0;
+		virtual bool is_pressed(const Uint8* keys, Uint32  mouseButton) = 0;
+
+        virtual ~HoldInput() = default;
 };
 
 /**
@@ -90,12 +95,12 @@ class HoldInput {
  */
 class MouseHoldInput : public HoldInput {
 	public:
-		MouseHoldInput(const Uint32 mouse_mask) : mouse_mask(mouse_mask) {}
+		explicit MouseHoldInput(const Uint32 mouse_mask) : mouse_mask(mouse_mask) {}
 
 		/**
 		 * Returns true if the mouseButton of this input is pressed.
 		 */
-		virtual bool is_pressed(const Uint8* keys, const Uint32 mouseButton) override {
+		bool is_pressed(const Uint8* keys, const Uint32 mouseButton) override {
 			return (mouse_mask & mouseButton) != 0;
 		}
 
@@ -112,7 +117,7 @@ class EmptyHoldInput : public HoldInput {
 		/**
 		 * Always returns false.
 		 */ 
-		virtual bool is_pressed(const Uint8* keys, const Uint32 mouseButton) override {
+		bool is_pressed(const Uint8* keys, const Uint32 mouseButton) override {
 			return false;
 		}
 };
@@ -122,12 +127,12 @@ class EmptyHoldInput : public HoldInput {
  */
 class KeyHoldInput : public HoldInput {
 	public:
-		KeyHoldInput(const SDL_Scancode key) : key(key) {}
+		explicit KeyHoldInput(const SDL_Scancode key) : key(key) {}
 
 		/**
 		 * Returns true if the key matching this input is pressed.
 		 */
-		virtual bool is_pressed(const Uint8* keys, const Uint32 mouseButton) override {
+		bool is_pressed(const Uint8* keys, const Uint32 mouseButton) override {
 			return keys[key];
 		}
 
@@ -139,9 +144,9 @@ class KeyHoldInput : public HoldInput {
  * Returns the name of an input based on a down-event.
  * If mouse contains an SDL_BUTTON_*something* value, the key is ignored.
  * If no name matches, "None" is returned. Passing "None" to get_*hold/press*_input 
- * will return an EmpyHold/Press/Input ptr.
+ * will return an EmptyHold/Press/Input ptr.
  */
-std::string get_input_name(const SDL_Keycode key, const Uint32 mouse);
+std::string get_input_name(SDL_Keycode key, Uint32 mouse);
 
 /**
  * Returns a pointer to a PressInput with the name name.

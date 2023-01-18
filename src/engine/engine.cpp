@@ -2,7 +2,6 @@
 #include "engine.h"
 #include <iostream>
 #include "ui.h"
-#include "file/compression.h"
 #include <zlib.h>
 
 extern const int DEFAULT_FONT_LENGTH;
@@ -17,10 +16,10 @@ void engine::init() {
 	if (status != Z_OK) {
 		throw game_exception("Could not load default font");
 	}
-	SDL_RWops* ptr = SDL_RWFromConstMem(buffer, buffer_size);
+	SDL_RWops* ptr = SDL_RWFromConstMem(buffer, static_cast<int>(buffer_size));
 
 	TextBox::init(ptr);
-}
+}   
 
 const int DEFAULT_FONT_LENGTH = 8706;
 

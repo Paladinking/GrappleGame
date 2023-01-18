@@ -12,8 +12,8 @@ std::string get_input_name(const SDL_Keycode key, const Uint32 mouse) {
 	}
 	
 	const char* name = SDL_GetKeyName(key);
-	if (name != "") {
-		return std::string(name);
+	if (strcmp(name, "") != 0) {
+		return {name};
 	}
 	return "None";
 }

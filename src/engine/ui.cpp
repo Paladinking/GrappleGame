@@ -1,18 +1,20 @@
 #include "ui.h"
 
+#include <utility>
+
 TTF_Font* TextBox::font;
 
 void TextBox::init(SDL_RWops* font_data) {
 	TextBox::font = TTF_OpenFontRW(font_data, 1, 20);
-	if (TextBox::font == NULL) {
+	if (TextBox::font == nullptr) {
 		throw game_exception(std::string(TTF_GetError()));
 	}
 }
 
-TextBox::TextBox(const int x, const int y, const int w, const int h, const std::string& text) : TextBox(x, y, w, h, text, 20) {};
+TextBox::TextBox(const int x, const int y, const int w, const int h, const std::string& text) : TextBox(x, y, w, h, text, 20) {}
 
 TextBox::TextBox(
-	const int x, const int y, const int w, const int h, const std::string& text, const int font_size) : x(x), y(y), w(w), h(h), text(text), font_size(font_size), texture(nullptr, 0, 0) {
+	const int x, const int y, const int w, const int h, std::string  text, const int font_size) : x(x), y(y), w(w), h(h), text(std::move(text)), font_size(font_size), texture(nullptr, 0, 0) {
 	generate_texture();
 }
 
@@ -20,7 +22,7 @@ TextBox::TextBox(
 void TextBox::generate_texture() {
 	TTF_SetFontSize(font, font_size);
 	SDL_Surface* text_surface = TTF_RenderUTF8_Blended(font, text.c_str(), color);
-	if (text_surface == NULL) {
+	if (text_surface == nullptr) {
 		throw image_load_exception(std::string(TTF_GetError()));
 	}
 	int width = text_surface->w;
@@ -28,7 +30,7 @@ void TextBox::generate_texture() {
 	SDL_Texture* text_texture = SDL_CreateTextureFromSurface(gRenderer, text_surface);
 	SDL_FreeSurface(text_surface);
 
-	if (text_texture == NULL) {
+	if (text_texture == nullptr) {
 		throw image_load_exception(std::string(SDL_GetError()));
 	}
 	texture = Texture(text_texture, width, height);
@@ -38,13 +40,13 @@ void TextBox::generate_texture() {
 	text_offset_y = (h - height) / 2;
 }
 
-void TextBox::set_position(const int x, const int y) {
-	this->x = x;
-	this->y = y;
+void TextBox::set_position(const int new_x, const int new_y) {
+	x = new_x;
+	y = new_y;
 }
 
-void TextBox::set_text(const std::string& text) {
-	this->text = text;
+void TextBox::set_text(const std::string& new_text) {
+	text = new_text;
 	generate_texture();
 }
 
@@ -57,8 +59,8 @@ const SDL_Color& TextBox::get_text_color() const {
 	return color;
 }
 
-void TextBox::set_font_size(const int font_size) {
-	this->font_size = font_size;
+void TextBox::set_font_size(const int new_font_size) {
+	font_size = new_font_size;
 	generate_texture();
 }
 
@@ -67,11 +69,11 @@ const std::string& TextBox::get_text() {
 }
 
 
-void TextBox::set_dimensions(const int w, const int h) {
-	text_offset_x = (w - this->w) / 2 + text_offset_x;
-	text_offset_y = (h - this->h) / 2 + text_offset_y;
-	this->w = w;
-	this->h = h;
+void TextBox::set_dimensions(const int new_w, const int new_h) {
+	text_offset_x = (new_w - w) / 2 + text_offset_x;
+	text_offset_y = (new_h - h) / 2 + text_offset_y;
+	w = new_w;
+	h = new_h;
 }
 
 void TextBox::render(const int x_offset, const int y_offset) {
@@ -82,8 +84,8 @@ bool Button::is_pressed(const int mouseX, const int mouseY) const {
 	return mouseX >= x && mouseX < x + w && mouseY >= y && mouseY < y + h;
 }
 
-void Button::set_hover(const bool hover) {
-	this->hover = hover;
+void Button::set_hover(const bool new_hover) {
+	hover = new_hover;
 }
 
 void Button::render(const int x_offset, const int y_offset) {

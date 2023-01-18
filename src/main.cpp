@@ -5,23 +5,21 @@
 #include <SDL_ttf.h>
 #include "util/exceptions.h"
 #include "engine/game.h"
-#include "game/climbGame.h"
-#include "game/levelMaker.h"
 #include "game/menu.h"
 #include "game/config.h"
 
 /**
  * Frees still used global resources and quits SDL and SDL_image.
- * Called atexit.
+ * Called by atexit().
  **/
 void cleanup()
 {
-	if (gRenderer != NULL) 
+	if (gRenderer != nullptr)
 	{
 		std::cout << "Destroying renderer" << std::endl;
 		SDL_DestroyRenderer(gRenderer);
 	}
-	if (gWindow != NULL) 
+	if (gWindow != nullptr)
 	{
 		std::cout << "Destroying window" << std::endl;
 		SDL_DestroyWindow(gWindow);
@@ -47,7 +45,6 @@ void run_game(Game &game, int& exit_status) {
 		std::cout << e.what() << std::endl;
 		exit_status = -2;
 	}
-	game.destroy_game();
 }
 
 /**
