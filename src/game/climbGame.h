@@ -15,29 +15,27 @@ class ClimbGame : public State {
 	public:
 		ClimbGame() : State(), level(TILE_SIZE) {}
 
-		virtual void tick(const Uint64 delta, StateStatus& res) override;
+		void tick(Uint64 delta, StateStatus& res) override;
 
-		virtual void init(WindowState* window_state) override;
+		void init(WindowState* window_state) override;
 
-		virtual void render() override;
+		void render() override;
 
-		virtual void handle_up(const SDL_Keycode key, const Uint8 mouse) override;
+		void handle_up(SDL_Keycode key, Uint8 mouse) override;
 
-		virtual void handle_down(const SDL_Keycode key, const Uint8 mouse) override;
+		void handle_down(SDL_Keycode key, Uint8 mouse) override;
 
 	private:
 
-		void handle_input(double delta, StateStatus& res);
-
-		void render_tilemap();
+		void handle_input(StateStatus &res);
 
 		void create_inputs();
 		
-		SDL_Rect game_viewport;
+		SDL_Rect game_viewport = {};
 
-		double camera_y, camera_y_min, camera_y_max;
+		double camera_y = 0.0, camera_y_min = 0.0, camera_y_max = 0.0;
 
-		int visible_tiles_x, visible_tiles_y;
+		int visible_tiles_x = 0, visible_tiles_y = 0;
 
 		Level level;
 

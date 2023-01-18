@@ -16,16 +16,16 @@ class MainMenu : public Menu {
 		/**
 		 * Initializes the MainMenu, creating all buttons.
 		 */
-		virtual void init(WindowState* window_state) override;
+		void init(WindowState* window_state) override;
 
 		/**
 		 * Fixes the viewport.
 		 */
-		virtual void resume() override;
+		void resume() override;
 
 	protected:
 
-		virtual void button_press(const int btn) override;
+		void button_press(int btn) override;
 
 	private:
 		static const int BUTTON_WIDTH = 180, BUTTON_HEIGHT = 90;
@@ -41,40 +41,40 @@ class OptionsMenu : public Menu {
 	public:
 		OptionsMenu() : Menu() {};
 
-		virtual void init(WindowState* window_state) override;
+		void init(WindowState* window_state) override;
 
 	protected:
 
 		static const int MARGIN_X = 40, MARGIN_Y = 30;
 		static const int BUTTON_WIDTH = 100, BUTTON_HEIGHT = 50;
 
-		virtual void handle_down(const SDL_Keycode key, const Uint8 mouse) override;
+		void handle_down(SDL_Keycode key, Uint8 mouse) override;
 
-		virtual void handle_up(const SDL_Keycode key,const Uint8 mouse) override;
+		void handle_up(SDL_Keycode key, Uint8 mouse) override;
 
-		virtual void button_press(const int btn) override;
+        void button_press(int btn) override;
 
-		virtual void render() override;
+        void render() override;
 
-		virtual void handle_wheel(const SDL_MouseWheelEvent &e) override;
+        void handle_wheel(const SDL_MouseWheelEvent &e) override;
 
-		virtual void menu_exit() override;
+        void menu_exit() override;
 
 	private:
-		bool waiting_for_input;
+		bool waiting_for_input = false;
 
 		TextBox input_promt;
 
 		//(Key to grouping, key to binding)
 		std::vector<std::pair<const std::string, std::string>> button_data;
 
-		int last_input_button;
+		int last_input_button = 0;
 
-		int btn;
+		int btn = -1;
 
-		int full_height, camera_y;
+		int full_height = 0, camera_y = 0;
 
-		void color_matching(const int index, const std::string& cur, const std::string& old);
+		void color_matching(int index, const std::string& cur, const std::string& old);
 
 };
 
@@ -82,11 +82,11 @@ class LevelMakerStartup : public Menu {
 	public:
 		LevelMakerStartup() : Menu() {};
 
-		virtual void init(WindowState* window_state) override;
+        void init(WindowState* window_state) override;
 
 	protected:
 
-		virtual void button_press(const int btn) override;
+        void button_press(int btn) override;
 
 	private:
 		enum ButtonId {
@@ -97,13 +97,11 @@ class LevelMakerStartup : public Menu {
 		
 		void create_levels_buttons(const JsonList& levels);
 
-		void sync_text();
-
 		int loaded = -1;
 		
-		int levels_button_start;
-		int levels_button_fits;
-		int levels_button_page;
+		int levels_button_start = 0;
+		int levels_button_fits = 0;
+		int levels_button_page = 0;
 		
 		std::shared_ptr<Texture> btn_texture;
 

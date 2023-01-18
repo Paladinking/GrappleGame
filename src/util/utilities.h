@@ -19,7 +19,7 @@ class Vector2D {
 		/**
 		 * Gets the length of this vector.
 		 */
-		double length() const
+		[[nodiscard]] double length() const
 		{
 			return std::sqrt(x * x + y * y);
 		}
@@ -28,7 +28,7 @@ class Vector2D {
 		/**
 		 * Gets the squared length of this vector.
 		 */
-		double length_squared() const
+		[[nodiscard]] double length_squared() const
 		{
 			return x * x + y * y;
 		}
@@ -36,7 +36,7 @@ class Vector2D {
 		/**
 		 * Gets the distance from this vector to other.
 		 */
-		double distance(const Vector2D &other) const 
+		[[nodiscard]] double distance(const Vector2D &other) const
 		{
 			return std::sqrt((other.x - x) * (other.x - x) + (other.y - y) * (other.y - y));
 		}
@@ -44,7 +44,7 @@ class Vector2D {
 		/**
 		 * Gets the squared distance from this vector to other.
 		 */
-		double distance_squared(const Vector2D &other) const
+		[[nodiscard]] double distance_squared(const Vector2D &other) const
 		{
 			return (other.x - x) * (other.x - x) + (other.y - y) * (other.y - y);
 		}
@@ -77,7 +77,7 @@ class Vector2D {
 		}
 		
 		/**
-		 * Nomalizes this vector.
+		 * Normalizes this vector.
 		 */
 		void normalize() 
 		{
@@ -92,7 +92,7 @@ class Vector2D {
 		/**
 		 * Returns the dot-product of this vector and other.
 		 */
-		double dot(Vector2D &other)
+		double dot(Vector2D &other) const
 		{
 			return x * other.x + y * other.y;
 		}
@@ -100,7 +100,7 @@ class Vector2D {
 		/**
 		 * Reduces the length of this vector by amount, stopping at 0.
 		 */
-		void decreace(double amount) {
+		void decrease(double amount) {
 			double len = length();
 			double diff = len - amount;
 			if (diff <= 0) {
@@ -124,12 +124,12 @@ class Vector2D {
 };
 
 /**
- * A tilemap for collisions.
+ * A tile map for collisions.
  */
 template<class T>
 class TileMap {
 	public:
-		TileMap(const T out_of_bounds) : out_of_bounds(out_of_bounds) {}
+		explicit TileMap(const T out_of_bounds) : out_of_bounds(out_of_bounds) {}
 
 		TileMap(const int tile_size, const int width, const int height, const T out_of_bounds) : tile_size(tile_size), width(width), height(height), out_of_bounds(out_of_bounds) {}
 
@@ -210,28 +210,28 @@ class TileMap {
 		}
 		
 		/**
-		 * Returns the height of the tilemap.
+		 * Returns the height of the tile map.
 		 */
-		int get_width() const {
+		[[nodiscard]] int get_width() const {
 			return width;
 		}
 		 
 		/**
-		 * Returns the width of the tilemap.
+		 * Returns the width of the tile map.
 		 */
-		int get_height() const {
+		[[nodiscard]] int get_height() const {
 			return height;
 		}
 		
 		/**
 		 * Returns the tile_size.
 		 */
-		 int get_tilesize() const {
+		 [[nodiscard]] int get_tile_size() const {
 			 return tile_size;
 		 }
 		 
-		 void set_tilesize(const int tilesize) {
-			 tile_size = tilesize;
+		 void set_tile_size(const int new_tile_size) {
+			 tile_size = new_tile_size;
 		 }
 		 
 	protected:

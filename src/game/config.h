@@ -70,11 +70,11 @@ namespace config {
 	
 	const JsonList& get_levels();
 
-	const JsonObject& get_level(const int index);
+	const JsonObject& get_level(int index);
 
 	const JsonObject& get_level_config(const std::string& key);
 	
-	std::pair<std::string, const JsonObject&> get_level_and_config(const int index);
+	std::pair<std::string, const JsonObject&> get_level_and_config(int index);
 
 	void write_options();
 	

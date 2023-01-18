@@ -7,8 +7,6 @@
 constexpr double MAX_MOVEMENT_VEL = 350.0;
 constexpr double MOVEMENT_ACCELERATION = 2200.0;
 
-constexpr int PLAYER_FULL_WIDTH = 24;
-constexpr int PLAYER_FULL_HEIGHT = 40;
 constexpr int PLAYER_START_X = 320;
 constexpr int PLAYER_START_Y = 320;
 
@@ -17,10 +15,10 @@ constexpr double CAMERA_SPEED = 1000.0;
 
 void ClimbGame::tick(const Uint64 delta, StateStatus& res) {
 	if (delta == 0) return;
-	double dDelta = delta / 1000.0;
+	double dDelta = static_cast<double>(delta) / 1000.0;
 
-	handle_input(dDelta, res);
-	for (auto e : entities) {
+    handle_input(res);
+	for (const auto& e : entities) {
 		e->tick(dDelta, level);
 	}
 	const Vector2D &pos = player->get_position();
@@ -36,7 +34,7 @@ void ClimbGame::tick(const Uint64 delta, StateStatus& res) {
 	}
 }
 
-void ClimbGame::handle_input(double delta, StateStatus& res) {
+void ClimbGame::handle_input(StateStatus &res) {
 	const Vector2D &vel = player->get_velocity(); 
 	if (left_input->is_pressed(window_state->keyboard_state, window_state->mouse_mask) && vel.x > -MAX_MOVEMENT_VEL) {
 		player->add_acceleration(-MOVEMENT_ACCELERATION, 0);
@@ -64,7 +62,7 @@ void ClimbGame::render() {
 	SDL_SetRenderDrawColor(gRenderer, 0xAA, 0xAA, 0xAA, 0xFF);
 	SDL_RenderClear(gRenderer);
 	SDL_SetRenderDrawColor(gRenderer, 0xFF, 0xFF, 0xFF, 0xFF);
-	SDL_RenderFillRect(gRenderer, NULL);
+	SDL_RenderFillRect(gRenderer, nullptr);
 
 	level.render(static_cast<int>(camera_y));
 	player->render(static_cast<int>(camera_y));
@@ -89,7 +87,7 @@ void ClimbGame::init(WindowState* ws) {
 		SCREEN_HEIGHT
 	};
 	
-	const int tile_size = level.get_tilesize();
+	const int tile_size = level.get_tile_size();
 
 	visible_tiles_x = SCREEN_WIDTH / tile_size;
 	visible_tiles_y = SCREEN_HEIGHT / tile_size;

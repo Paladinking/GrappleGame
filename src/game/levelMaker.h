@@ -11,28 +11,28 @@
 
 class LevelMaker : public State {
 	public:
-		LevelMaker(LevelData&& data, const LevelConfig& level_config) : State(), level_data(std::move(data)), level_config(level_config) {}
+		LevelMaker(LevelData&& data, LevelConfig level_config) : State(), level_data(std::move(data)), level_config(std::move(level_config)) {}
 
-		virtual void handle_down(const SDL_Keycode key, const Uint8 mouse) override;
+		void handle_down(SDL_Keycode key, Uint8 mouse) override;
 
-		virtual void init(WindowState* window_state) override;
+		void init(WindowState* window_state) override;
 	
-		virtual void handle_wheel(const SDL_MouseWheelEvent &e) override;
+		void handle_wheel(const SDL_MouseWheelEvent &e) override;
 
-		virtual void render() override;
+		void render() override;
 		
-		virtual void tick(const Uint64 delta, StateStatus& res) override;
+		void tick(Uint64 delta, StateStatus& res) override;
 	private:
 
-		void zoom(const bool in);
+		void zoom(bool in);
 
 		void tile_press(bool put);
 
-		void set_tile(const int index, const Uint32 scale, const Uint32 image_id, const Uint32 tile_type);
+		void set_tile(int index, Uint32 scale, Uint32 image_id, Uint32 tile_type) const;
 
-		void set_tile(const int index, const Uint32 scale, const Uint32 image_id);
+		void set_tile(int index, Uint32 scale, Uint32 image_id) const;
 
-		void place_spike(const int x_tile, const int y_tile);
+		void place_spike(int x_tile, int y_tile);
 
 		std::unique_ptr<SDL_Surface, SurfaceDeleter> tiles;
 		std::unique_ptr<SDL_Surface, SurfaceDeleter> objects;
@@ -45,7 +45,7 @@ class LevelMaker : public State {
 			zoom_in_input, zoom_out_input, 
 			put_tile_input, clear_tile_input,
 			left_input, right_input, up_input, down_input,
-			save_input, tiles_input, colisions_input, tile_colisions_input,
+			save_input, tiles_input, collisions_input, tile_collisions_input,
 			tile_scale_up_input, tile_scale_down_input;
 		std::unique_ptr<HoldInput> camera_pan_input, exit_input;
 
@@ -57,14 +57,14 @@ class LevelMaker : public State {
 
 		LevelData level_data;
 		LevelConfig level_config;
-		bool tile_colisions = true;
+		bool tile_collisions = true;
 		bool updated = true;
 
 		int scale_factor = 0;
 		int min_scale_factor = 0;
 		double camera_x = 0.0, camera_y = 0.0;
 
-		SDL_Rect editor_viewport, tiles_viewport, objects_viewport;
+		SDL_Rect editor_viewport{}, tiles_viewport{}, objects_viewport{};
 
 		// Number of tiles of one side of the texture (1-8). Uint32 so that tile_scale << 16 fits.
 		Uint32 tile_scale = 1; 

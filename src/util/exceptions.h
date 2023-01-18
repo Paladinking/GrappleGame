@@ -2,6 +2,7 @@
 #define EXCEPTIONS_00_H
 #include <exception>
 #include <string>
+#include <utility>
 
 /**
  * Base exception class containing a message.
@@ -10,7 +11,7 @@ class base_exception : std::exception {
 	public:
 		std::string msg;
 		
-		base_exception(std::string msg) : msg(msg) {}; 
+		explicit base_exception(std::string msg) : msg(std::move(msg)) {};
 };
 
 /**
@@ -18,7 +19,7 @@ class base_exception : std::exception {
  */
 class image_load_exception : public base_exception {
 	public:
-		image_load_exception(std::string msg) : base_exception(msg) {};
+		explicit image_load_exception(std::string msg) : base_exception(std::move(msg)) {};
 	
 };
 
@@ -27,7 +28,7 @@ class image_load_exception : public base_exception {
  */
 class logic_exception : public base_exception {
 	public:
-		logic_exception(std::string msg) : base_exception(msg) {};
+		explicit logic_exception(std::string msg) : base_exception(std::move(msg)) {};
 };
 
 /**
@@ -35,7 +36,7 @@ class logic_exception : public base_exception {
  */
 class SDL_exception : public base_exception {
 	public:
-		SDL_exception(std::string msg) : base_exception(msg) {};
+		explicit SDL_exception(std::string msg) : base_exception(std::move(msg)) {};
 	
 };
 

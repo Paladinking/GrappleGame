@@ -1,5 +1,6 @@
 #include <SDL.h>
 #include <SDL_image.h>
+#include <memory>
 #include <string>
 #include "level.h"
 #include "engine/engine.h"
@@ -31,7 +32,7 @@ void LevelData::load_from_file(const std::string& path, const Uint32 tile_count)
 	
 }
 
-void LevelData::write_to_file(const std::string& path) {
+void LevelData::write_to_file(const std::string& path) const {
 	FileWriter writer = FileWriter(path, true, true);
 	if (
 		!writer.write(width) ||
@@ -88,15 +89,15 @@ void Level::load_from_file(const std::string& path, const JsonObject& obj) {
 	for (int i = 0; static_cast<unsigned>(i) < level_data.width * level_data.height; ++i) {
 		Uint32 t = level_data.data[i]; //FIX??
 
-		int tile_index = (t >> 8) & 0xFF;
-		int tile_scale = (t >> 16) & 0xFF;
+		int tile_index = static_cast<int>(t >> 8) & 0xFF;
+		int tile_scale = static_cast<int>(t >> 16) & 0xFF;
 		Tile tile = static_cast<Tile>(t & 0xFF);
 
 		map[i] = tile;
 
 		if (tile_index == 0xFF) {
 			continue;
-		};
+		}
 
 		SDL_Rect source = get_tile_rect(tile_index, conf);
 
@@ -116,7 +117,7 @@ void Level::load_from_file(const std::string& path, const JsonObject& obj) {
 		if (next_surface_index <= visible_screens - 1 && surface_index != next_surface_index) {
 			dest.y -= static_cast<int>(level_data.width) * tile_size;
 			dest.h = tile_size * tile_scale; //SDL_BlitScaled modifies dest, so h needs to be changed back.
-			int res = SDL_BlitScaled(surface, &source, surfaces[next_surface_index].get(), &dest);
+			SDL_BlitScaled(surface, &source, surfaces[next_surface_index].get(), &dest);
 		}
 	}
 
@@ -137,10 +138,10 @@ void Level::create_corners() {
 	for (int x = 0; x < width; ++x) {
 		for (int y = 0; y < height; ++y) {
 			if (get_tile(x, y) != Tile::BLOCKED) continue;
-			bool top_left = true, top_right = true, botton_left = true, bottom_right = true;
+			bool top_left = true, top_right = true, bottom_left = true, bottom_right = true;
 			if (get_tile(x - 1, y) == Tile::BLOCKED) {
 				top_left = false;
-				botton_left = false;
+                bottom_left = false;
 			}
 			if (get_tile(x + 1, y) == Tile::BLOCKED) {
 				top_right = false;
@@ -151,21 +152,21 @@ void Level::create_corners() {
 				top_right = false;
 			}
 			if (get_tile(x, y + 1) == Tile::BLOCKED) {
-				botton_left = false;
+                bottom_left = false;
 				bottom_right = false;
 			}
 			double x_pos = static_cast<double>(x), y_pos = static_cast<double>(y);
 			if (top_left) {
-				corners.push_back(std::shared_ptr<Corner>(new Corner(x_pos * tile_size, y_pos * tile_size)));
+				corners.push_back(std::make_shared<Corner>(x_pos * tile_size, y_pos * tile_size));
 			}
 			if (top_right) {
-				corners.push_back(std::shared_ptr<Corner>(new Corner((x_pos + 1) * tile_size, y_pos * tile_size)));
+				corners.push_back(std::make_shared<Corner>((x_pos + 1) * tile_size, y_pos * tile_size));
 			}
-			if (botton_left) {
-				corners.push_back(std::shared_ptr<Corner>(new Corner(x_pos * tile_size, (y_pos + 1) * tile_size)));
+			if (bottom_left) {
+				corners.push_back(std::make_shared<Corner>(x_pos * tile_size, (y_pos + 1) * tile_size));
 			}
 			if (bottom_right) {
-				corners.push_back(std::shared_ptr<Corner>(new Corner((x_pos + 1) * tile_size, (y_pos + 1) * tile_size)));
+				corners.push_back(std::make_shared<Corner>((x_pos + 1) * tile_size, (y_pos + 1) * tile_size));
 			}
 		}
 	}

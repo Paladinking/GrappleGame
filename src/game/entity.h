@@ -4,7 +4,6 @@
 #include <vector>
 #include <memory>
 #include <utility>
-#include <stdio.h>
 #include "util/utilities.h"
 #include "engine/texture.h"
 #include "level.h"
@@ -48,64 +47,64 @@ class Entity {
 		 * Tick for the entity called every frame. The default implementation moves the entity by
 		 * the velocity.
 		 */
-		virtual void tick(const double delta, Level &level);
+		virtual void tick(double delta, Level &level);
 		
 		
 		/**
 		 * Renders the texture of this entity, considering the camera location.
 		 */
-		virtual void render(const int cameraY);
+		virtual void render(int cameraY);
 		
 		/**
 		 * Adds (dx, dy) to the acceleration of this entity.
 		 */
-		void add_acceleration(const double dx, const double dy);
+		void add_acceleration(double dx, double dy);
 		
 		/**
 		 * Adds (dx, dy) to the velocity of this entity.
 		 */
-		void add_velocity(const double dx, const double dy);
+		void add_velocity(double dx, double dy);
 		
 		/**
 		 * Sets the position of this entity to (x, y).
 		 */
-		void set_position(const double x, const double y);
+		void set_position(double x, double y);
 		
 		/**
 		 * Returns true if this entity is standing on ground.
 		 */
-		bool on_ground(const Level &level) const;
+		[[nodiscard]] bool on_ground(const Level &level) const;
 		
 		/**
 		 * Returns the velocity vector of this entity.
 		 */
-		const Vector2D &get_velocity() const;
+		[[nodiscard]] const Vector2D &get_velocity() const;
 		
 		/**
 		 * Returns the position of this entity, read only.
 		 */
-		const Vector2D &get_position() const;
+		[[nodiscard]] const Vector2D &get_position() const;
 
 	protected:
 		/**
 		 * Protected constructor for subclasses.
 		 */
-		Entity() {};
+		Entity() = default;
 		/**
 		* Tries to move the entity by (dx, dy), stopping if a wall is in the way. 
-		* Requires that -tilesize < dx < tilesize and -tilesize < dy < tilesize
+		* Requires that -tile_size < dx < tile_size and -tile_size < dy < tile_size
 		*/
-		void try_move(const double dx, const double dy, const int tilesize, const Level &level);
+		void try_move(double dx, double dy, int tile_size, const Level &level);
 		
 		Vector2D pos;
 		Vector2D vel;
 		Vector2D acc;
 		
-		int width, height;
+		int width = 0, height = 0;
 	
 	private:
 		// Textures are owned by the game, not the entities.
-		const Texture* texture;
+		const Texture* texture{};
 		
 	
 	
@@ -120,16 +119,16 @@ class GrapplePoint {
 
 class Player : public Entity {
 	public:
-		virtual ~Player();
-		Player() {};
+		~Player() override;
+		Player() = default;
 
-		virtual void init(const EntityTemplate& entity_template) override;
+		void init(const EntityTemplate& entity_template) override;
 
-		virtual void render(const int cameraY) override;
+		void render(int cameraY) override;
 
-		virtual void tick(const double delta, Level &level) override;
+		void tick(double delta, Level &level) override;
 
-		void fire_grapple(const int target_x, const int target_y);
+		void fire_grapple(int target_x, int target_y);
 
 		void return_grapple();
 
@@ -143,7 +142,7 @@ class Player : public Entity {
 		
 		typedef std::vector<std::shared_ptr<Corner>> CornerList;
 		
-		void place_grapple(const double x, const double y, const double dx, const double dy, const int tilesize, CornerList &corners);
+		void place_grapple(double x, double y, double dx, double dy, int tile_size, CornerList &corners);
 		
 		/**
 		 * Updates the grapple_points vector after either the first or last element has moved.
@@ -161,14 +160,14 @@ class Player : public Entity {
 			UNUSED, TRAVELING, PLACED, PULLING, RETURNING
 		};
 		
-		const Texture* grapple_hook;
+		const Texture* grapple_hook = nullptr;
 		
 		GrapplingMode grappling_mode = UNUSED;
 
-		double grapple_length;
-		double grapple_max_len;
+		double grapple_length = 0.0;
+		double grapple_max_len = 0.0;
 		
-		bool pull, release, is_on_ground;
+		bool pull = false, release = false, is_on_ground = false;
 
 		Vector2D grapple_vel;
 		

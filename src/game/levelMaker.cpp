@@ -1,18 +1,15 @@
 #include "levelMaker.h"
-#include "file/Json.h"
 #include "util/exceptions.h"
 #include "config.h"
-#include "globals.h"
 #include "nativefiledialog/nfdcpp.h"
 #include <algorithm>
-#include <cmath>
 
 // Tile appearance (0xUUSSIITT)
 // UU = unused
 // SS = tile scale
 // II = image id (0xFF means no image)
 // TT = tile type (empty 0, blocked 1, spike 2)
-// eg empty tile appearance (0x0000FF00)
+// e.g. empty tile appearance (0x0000FF00)
 
 constexpr int TILE_SELECTOR_SIZE = 64;
 constexpr int TILE_SELECTOR_TW = 10;
@@ -42,8 +39,8 @@ void LevelMaker::init(WindowState* ws) {
 	
 	save_input = get_press_input(controls.get<std::string>("save_level"), "None");
 	tiles_input = get_press_input(controls.get<std::string>("tiles_mode"), "None");
-	colisions_input = get_press_input(controls.get<std::string>("collision_mode"), "None");
-	tile_colisions_input = get_press_input(controls.get<std::string>("tile_collisions"), "None");
+    collisions_input = get_press_input(controls.get<std::string>("collision_mode"), "None");
+    tile_collisions_input = get_press_input(controls.get<std::string>("tile_collisions"), "None");
 	tile_scale_up_input = get_press_input(controls.get<std::string>("tile_scale_up"), "None");
 	tile_scale_down_input = get_press_input(controls.get<std::string>("tile_scale_down"), "None");
 	camera_pan_input = get_hold_input(controls.get<std::string>("camera_pan"), "None");
@@ -83,7 +80,7 @@ void LevelMaker::init(WindowState* ws) {
 	
 	{
 		SDL_Surface* t = IMG_Load(level_config.objects_path.c_str());
-		if (t == NULL) {
+		if (t == nullptr) {
 			throw image_load_exception(std::string(IMG_GetError()));
 		}
 		objects.reset(t);
@@ -91,13 +88,13 @@ void LevelMaker::init(WindowState* ws) {
 
 
 	SDL_Surface* t = IMG_Load(level_config.tiles_path.c_str());
-	if (t == NULL) {
+	if (t == nullptr) {
 		throw image_load_exception(std::string(IMG_GetError()));
 	}
 	tiles.reset(t);
 
 	SDL_Surface* m = IMG_Load(config::get_asset_path("marker.png").c_str());
-	if (m == NULL) {
+	if (m == nullptr) {
 		throw image_load_exception(std::string(IMG_GetError()));
 	}
 	marker.reset(m);
@@ -109,11 +106,11 @@ bool is_pressed(const SDL_Rect& viewport, const int x, const int y) {
 	return x >= viewport.x && y >= viewport.y && x < viewport.x + viewport.w && y < viewport.y + viewport.h;
 }
 
-void LevelMaker::set_tile(const int index, const Uint32 scale, const Uint32 image_id, const Uint32 tile_type) {
+void LevelMaker::set_tile(const int index, const Uint32 scale, const Uint32 image_id, const Uint32 tile_type) const {
 	level_data.data[index] = ((scale & 0xFF) << 16) | ((image_id & 0xFF) << 8) | (tile_type & 0xFF);
 }
 
-void LevelMaker::set_tile(const int index, const Uint32 scale, const Uint32 image_id) {
+void LevelMaker::set_tile(const int index, const Uint32 scale, const Uint32 image_id) const {
 	level_data.data[index] = ((scale & 0xFF) << 16) | ((image_id & 0xFF) << 8) | (level_data.data[index] & 0xFF);
 }
 
@@ -123,7 +120,7 @@ void LevelMaker::place_spike(const int x_tile, const int y_tile) {
 	int count = 0;
 	for (int y = 0; y < std::min(static_cast<int>(tile_scale), static_cast<int>(level_data.height) - y_tile); ++y) {
 		for (int x = x_tile; x < std::min(x_tile + static_cast<int>(tile_scale), static_cast<int>(level_data.width)); ++x) {
-			const int index = x + level_data.width * (y + y_tile);
+			const int index = x + static_cast<int>(level_data.width) * (y + y_tile);
 			if (x >= first && x <= last) {
 				set_tile(index, 0, 0xFF, 2);
 			} else {
@@ -135,7 +132,7 @@ void LevelMaker::place_spike(const int x_tile, const int y_tile) {
 			last++;
 		}
 	}
-	set_tile(x_tile + y_tile * level_data.width, tile_scale, selected);
+	set_tile(x_tile + y_tile * static_cast<int>(level_data.width), tile_scale, selected);
 }
 
 void LevelMaker::tile_press(const bool put) {
@@ -149,11 +146,11 @@ void LevelMaker::tile_press(const bool put) {
 			selected = index;
 		}
 	} else if (is_pressed(editor_viewport, mouseX, mouseY)) {
-		const double ts = DEFAULT_TS * SCALE_FACTORS[scale_factor];
-		const int x_tile = static_cast<int>((mouseX + camera_x - editor_viewport.x) / ts);
-		const int y_tile = static_cast<int>((mouseY + camera_y - editor_viewport.y) / ts);
+		const double real_tile_scale = DEFAULT_TS * SCALE_FACTORS[scale_factor];
+		const int x_tile = static_cast<int>((mouseX + camera_x - editor_viewport.x) / real_tile_scale);
+		const int y_tile = static_cast<int>((mouseY + camera_y - editor_viewport.y) / real_tile_scale);
 
-		const int index = x_tile + y_tile * level_data.width;
+		const int index = x_tile + y_tile * static_cast<int>(level_data.width);
 
 		if (editor_mode == PLACE_TILES) {
 			if (selected - level_config.img_tilecount == static_cast<int>(LevelObject::SPIKE) && put) {
@@ -161,8 +158,8 @@ void LevelMaker::tile_press(const bool put) {
 			} else {
 				for (int y  = y_tile; y < std::min(y_tile + static_cast<int>(tile_scale), static_cast<int>(level_data.height)); ++y) {
 					for (int x = x_tile; x < std::min(x_tile + static_cast<int>(tile_scale), static_cast<int>(level_data.width)); ++x) {
-						int i = x + level_data.width * y;
-						if (tile_colisions) {
+						int i = x + static_cast<int>(level_data.width) * y;
+						if (tile_collisions) {
 							set_tile(i, 0, 0xFF, put ? 1 : 0);
 						} else {
 							set_tile(i, 0, 0xFF);
@@ -171,7 +168,7 @@ void LevelMaker::tile_press(const bool put) {
 				}
 				const Uint32 img = put ? selected : 0xFF;
 				const Uint32 ts = put ? tile_scale : 0;
-				if (tile_colisions) {
+				if (tile_collisions) {
 					set_tile(index, ts, img, put ? 1 : 0);
 				} else {
 					set_tile(index, ts, img);
@@ -204,7 +201,7 @@ void LevelMaker::zoom(const bool in) {
 
 void LevelMaker::handle_wheel(const SDL_MouseWheelEvent &e) {
 	zoom(e.preciseY > 0);
-};
+}
 		
 void LevelMaker::handle_down(const SDL_Keycode key, const Uint8 mouse) {
 	if (put_tile_input->is_targeted(key, mouse)) {
@@ -241,12 +238,12 @@ void LevelMaker::handle_down(const SDL_Keycode key, const Uint8 mouse) {
 	if (tiles_input->is_targeted(key, mouse)) {
 		editor_mode = PLACE_TILES;
 		updated = true;
-	} else if (colisions_input->is_targeted(key, mouse)) {
+	} else if (collisions_input->is_targeted(key, mouse)) {
 		editor_mode = PLACE_COLLISIONS;
 		updated = true;
 	}
-	if (tile_colisions_input->is_targeted(key, mouse)) {
-		tile_colisions = !tile_colisions;
+	if (tile_collisions_input->is_targeted(key, mouse)) {
+        tile_collisions = !tile_collisions;
 	}
 	if (tile_scale_up_input->is_targeted(key, mouse) && tile_scale < MAX_TILE_SCALE) {
 		tile_scale++;
@@ -266,7 +263,7 @@ void LevelMaker::tick(const Uint64 delta, StateStatus& res) {
 		camera_y -= mouse_dy;
 		updated = true;
 	} else {
-		SDL_GetRelativeMouseState(NULL, NULL);
+		SDL_GetRelativeMouseState(nullptr, nullptr);
 	}
 }
 
@@ -333,7 +330,7 @@ void LevelMaker::render() {
 		}
 	}
 
-	SDL_SetClipRect(window_surface, NULL);
+	SDL_SetClipRect(window_surface, nullptr);
 	SDL_FillRect(window_surface, &tiles_viewport, SDL_MapRGB(window_surface->format, 0xFF, 0xAA, 0));
 	for (int i = 0; i < level_config.img_tilecount; ++i) {
 		SDL_Rect tile_rect = get_tile_rect(i, level_config);
@@ -344,16 +341,17 @@ void LevelMaker::render() {
 		};
 		SDL_BlitScaled(tiles.get(), &tile_rect, window_surface, &dest);
 		if (i == selected) {
-			SDL_BlitScaled(marker.get(), NULL, window_surface, &dest);
+			SDL_BlitScaled(marker.get(), nullptr, window_surface, &dest);
 		}
 	}
 	
 	SDL_Rect dest = {
 		objects_viewport.x, objects_viewport.y, TILE_SELECTOR_SIZE, TILE_SELECTOR_SIZE
 	};
-	SDL_BlitScaled(objects.get(), &get_tile_rect(level_config.img_tilecount, level_config), window_surface, &dest);
+    SDL_Rect src = get_tile_rect(level_config.img_tilecount, level_config);
+	SDL_BlitScaled(objects.get(), &src, window_surface, &dest);
 	if (selected - level_config.img_tilecount == 0) {
-		SDL_BlitScaled(marker.get(), NULL, window_surface, &dest);
+		SDL_BlitScaled(marker.get(), nullptr, window_surface, &dest);
 	}
 	updated = false;
 	

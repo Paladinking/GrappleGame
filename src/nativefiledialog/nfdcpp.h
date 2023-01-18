@@ -1,7 +1,6 @@
-#ifndef _NFDCPP_H
-#define _NFDCPP_H
+#ifndef NFD_CPP_00_H
+#define NFD_CPP_00_H
 #include "nfd.h"
-#include <stdlib.h>
 #include <utility>
 #include <string>
 #include <vector>

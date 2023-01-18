@@ -4,6 +4,7 @@
 #include "levelMaker.h"
 #include "config.h"
 #include <iostream>
+#include <memory>
 
 const std::string MainMenu::BUTTON_NAMES[] = {"Start Game", "Level Maker", "Options"};
 
@@ -28,7 +29,7 @@ void MainMenu::init(WindowState* window_state) {
 }
 
 void MainMenu::resume() {
-	SDL_RenderSetViewport(gRenderer, NULL);
+	SDL_RenderSetViewport(gRenderer, nullptr);
 }
 
 void MainMenu::button_press(const int btn) {
@@ -42,6 +43,8 @@ void MainMenu::button_press(const int btn) {
 		case OPTIONS:
 			next_res = {StateStatus::PUSH, new OptionsMenu()};
 			break;
+        default:
+            break;
 	}
 }
 
@@ -53,12 +56,12 @@ void OptionsMenu::init(WindowState* ws) {
 	camera_y = 0;
 	int h_offset = MARGIN_Y;
 	int group_start = 0;
-	for (auto& it = bindings.keys_begin(); it != bindings.keys_end(); ++it) {
+	for (auto it = bindings.keys_begin(); it != bindings.keys_end(); ++it) {
 		text.emplace_back((window_state->screen_width - 120) / 2, h_offset, 120, 60, *it, 25);
 		const JsonObject& group = bindings.get<JsonObject>(*it);
 		h_offset += 60 + MARGIN_Y;
 		int index = 0;
-		for (auto& k = group.keys_begin(); k != group.keys_end(); ++k) {
+		for (auto k = group.keys_begin(); k != group.keys_end(); ++k) {
 			const std::string& key = *k;
 			const std::string& val = group.get<std::string>(key);
 			int x = 0;
@@ -164,8 +167,8 @@ void OptionsMenu::color_matching(const int index, const std::string& cur, const 
 	}
 }
 
-void OptionsMenu::button_press(const int btn) {
-	if (btn > last_input_button) {
+void OptionsMenu::button_press(const int new_btn) {
+	if (new_btn > last_input_button) {
 		config::reset_bindings();
 		const JsonObject& binds = config::get_bindings();
 		for (int i = 0; i < last_input_button; ++i) { 
@@ -176,7 +179,7 @@ void OptionsMenu::button_press(const int btn) {
 		}
 	} else {
 		waiting_for_input = true;
-		this->btn = btn;
+		btn = new_btn;
 	}
 }
 
@@ -201,7 +204,7 @@ void OptionsMenu::render() {
 	}
 	if (waiting_for_input) {
 		SDL_SetRenderDrawColor(gRenderer, 0x00, 0x00, 0x00, 0x50);
-		SDL_RenderFillRect(gRenderer, NULL);
+		SDL_RenderFillRect(gRenderer, nullptr);
 		input_promt.render(0, 0);
 	}
 	SDL_RenderPresent(gRenderer);
@@ -233,7 +236,7 @@ void LevelMakerStartup::init(WindowState* ws) {
 		200, 80, "Data: clear", 15
 	);
 	
-	btn_texture.reset(new Texture());
+	btn_texture = std::make_shared<Texture>();
 	btn_texture->load_from_file(config::get_asset_path("button.png"));
 	const JsonList& levels = config::get_levels();
 	levels_button_fits = (window_state->screen_width - 100) / 300;

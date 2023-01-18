@@ -14,9 +14,9 @@ struct LevelData {
 
 	std::unique_ptr<Uint32[]> data;
 
-	void load_from_file(const std::string& path, const Uint32 tile_count);
+	void load_from_file(const std::string& path, Uint32 tile_count);
 	
-	void write_to_file(const std::string& path);
+	void write_to_file(const std::string& path) const;
 };
 
 /**
@@ -34,12 +34,12 @@ struct LevelConfig {
 
 class Corner {
 	public:
-		double x, y;
+		double x = 0, y = 0;
 		bool ignored = false;
 
 		Corner(double x, double y) : x(x), y(y) {}
 
-		Corner() {}
+		Corner() = default;
 
 };
 
@@ -53,7 +53,7 @@ enum class LevelObject {
 
 class Level : public TileMap<Tile> {
 	public:
-		Level(const int tile_size) : TileMap(Tile::BLOCKED) {
+		explicit Level(const int tile_size) : TileMap(Tile::BLOCKED) {
 			this->tile_size = tile_size;
 		}
 
@@ -63,10 +63,10 @@ class Level : public TileMap<Tile> {
 
 		std::vector<std::shared_ptr<Corner>>& get_corners();
 
-		void set_screen_size(const int screen_width, const int screen_height);
+		void set_screen_size(int screen_width, int screen_height);
 
 	private:
-		int screen_width, screen_height;
+		int screen_width = 0, screen_height = 0;
 
 		std::vector<Texture> level_textures;
 
