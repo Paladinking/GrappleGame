@@ -4,7 +4,7 @@
 #include "file/json.h"
 #include "config.h"
 
-constexpr double MAX_MOVEMENT_VEL = 350.0;
+constexpr double MAX_MOVEMENT_VEL = 280.0;
 constexpr double MOVEMENT_ACCELERATION = 2200.0;
 
 constexpr int PLAYER_START_X = 320;

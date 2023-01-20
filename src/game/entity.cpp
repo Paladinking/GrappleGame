@@ -14,6 +14,7 @@ constexpr double GRAPPLE_SPEED = 1300.0;
 constexpr double GRAPPLE_PULL = 5000.0;
 constexpr double GRAPPLE_RELEASE = 200.0;
 constexpr double JUMP_VEL = 800.0;
+constexpr double ABSOLUTE_FRICTION_THRESHOLD = 5.0;
 
 constexpr int SPIKE_DAMAGE = 5;
 constexpr double INV_DURATION = 0.6;
@@ -226,11 +227,13 @@ void Player::tick(const double delta, Level &level)
 	Vector2D old_pos = {pos.x + width / 2, pos.y + height / 2}; // NOLINT(bugprone-integer-division)
 	if (is_on_ground) {
 		double factor = delta * FRICTION_FACTOR;
-		if (vel.x > 0) {
+		if (vel.x > ABSOLUTE_FRICTION_THRESHOLD) {
 			acc.x += factor > vel.x ? -vel.x : -FRICTION_FACTOR;
-		} else {
+		} else if (vel.x < -ABSOLUTE_FRICTION_THRESHOLD) {
 			acc.x += factor > -vel.x ? -vel.x : FRICTION_FACTOR;
-		}
+		} else {
+            vel.x = 0.0;
+        }
 	}
 	acc.y += GRAVITY_ACCELERATION;
 	acc.x -= vel.x * std::abs(vel.x) * AIR_RES_FACTOR;
