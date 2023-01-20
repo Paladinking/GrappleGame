@@ -15,6 +15,11 @@ struct SurfaceDeleter {
 
 namespace engine {
 	void init();
+
+    /**
+    * Returns a random number between min (inclusive) and max (exclusive).
+    */
+    int random(int min, int max);
 };
 
 #endif

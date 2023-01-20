@@ -1,13 +1,15 @@
 #include <SDL.h>
 #include "engine.h"
 #include <iostream>
+#include <random>
+#include <chrono>
 #include "ui.h"
 #include <zlib.h>
 
 extern const int DEFAULT_FONT_LENGTH;
 extern const Uint8 DEFAULT_FONT[];
 
-
+std::minstd_rand generator(static_cast<unsigned>(std::chrono::system_clock::now().time_since_epoch().count()));
 
 void engine::init() {
 	unsigned long buffer_size = 16384;
@@ -19,7 +21,12 @@ void engine::init() {
 	SDL_RWops* ptr = SDL_RWFromConstMem(buffer, static_cast<int>(buffer_size));
 
 	TextBox::init(ptr);
-}   
+}
+
+int random(const int min, const int max) {
+    if (min >= max) return min;
+    return (static_cast<int>(generator()) % (max - min)) + min;
+}
 
 const int DEFAULT_FONT_LENGTH = 8706;
 
