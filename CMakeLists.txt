@@ -29,7 +29,7 @@ set(NFD_DIR ${PROJECT_SOURCE_DIR}/src/nativefiledialog)
 
 add_compile_options(/MD)
 
-add_library(nfd STATIC 
+add_library(nfd OBJECT 
 	${NFD_DIR}/nfd_win.cpp 
 	${NFD_DIR}/nfd_common.c
 	${NFD_DIR}/nfdcpp.cpp
@@ -85,6 +85,12 @@ target_link_libraries(main SDL2_image::SDL2_image)
 target_link_libraries(main SDL2_ttf::SDL2_ttf)
 target_link_libraries(main ZLIB::ZLIB)
 
+cmake_path(GET ZLIB_LIBRARIES PARENT_PATH ZLIB_ROOT)
+cmake_path(GET ZLIB_ROOT PARENT_PATH ZLIB_ROOT)
+cmake_path(APPEND ZLIB_ROOT ${ZLIB_ROOT} bin)
+message(STATUS ${ZLIB_ROOT})
+
+find_file(ZLIB_DLL zlib.dll HINTS ${ZLIB_ROOT} REQUIRED)
 
 add_custom_command (TARGET main POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_if_different
@@ -97,5 +103,32 @@ add_custom_command (TARGET main POST_BUILD
 add_custom_command (TARGET main POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_if_different
     $<TARGET_FILE:SDL2_ttf::SDL2_ttf> $<TARGET_FILE_DIR:main>
+)
+
+add_custom_command (TARGET main POST_BUILD
+	COMMAND ${CMAKE_COMMAND} -E copy_if_different
+    ${ZLIB_DLL} $<TARGET_FILE_DIR:main>
+)
+
+install (
+	TARGETS main 
+	RUNTIME DESTINATION ${CMAKE_INSTALL_PREFIX}
+)
+
+install (
+	FILES 
+	$<TARGET_FILE:SDL2::SDL2> 
+	$<TARGET_FILE:SDL2_ttf::SDL2_ttf> 
+	$<TARGET_FILE:SDL2_image::SDL2_image>
+	${ZLIB_DLL}
+	config.json
+	DESTINATION ${CMAKE_INSTALL_PREFIX}
+)
+
+install (
+	DIRECTORY 
+	assets config
+	DESTINATION ${CMAKE_INSTALL_PREFIX}
+	PATTERN "font" EXCLUDE
 )
 
